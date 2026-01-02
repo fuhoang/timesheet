@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Laravel 12 React</title>
     @viteReactRefresh
-    @vite('resources/js/app.jsx')
+    @vite('resources/js/main.jsx')
 </head>
 <body>
     <div id="app"></div>

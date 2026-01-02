@@ -1,8 +1,14 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+// import Login from './pages/Login';
+// import Dashboard from './pages/Dashboard';
+// import NotFound from './pages/NotFound';
 
-function App() {
-    return <h1>Laravel 12 + React</h1>;
+export default function App() {
+    return (
+        <Routes>
+            <Route path="/" element={<Home />} />
+        </Routes>
+    );
 }
-
-createRoot(document.getElementById('app')).render(<App />);
