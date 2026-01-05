@@ -11,14 +11,9 @@ export default function AuthLayout({ children }) {
         <div>
             <header style={{ padding: 16, borderBottom: '1px solid #ccc' }}>
                 Logged in as {user.name}
-                <button onClick={logout} style={{ marginLeft: 16 }}>
-                    Logout
-                </button>
+                <button onClick={logout} style={{ marginLeft: 16 }}>Logout</button>
             </header>
-
-            <main style={{ padding: 24 }}>
-                {children}
-            </main>
+            <main style={{ padding: 24 }}>{children}</main>
         </div>
     );
 }

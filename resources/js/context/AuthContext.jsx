@@ -1,115 +1,47 @@
-import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useState
-} from 'react';
-
-import axios from '../lib/axios';
-
-/*
-|--------------------------------------------------------------------------
-| Create Context
-|--------------------------------------------------------------------------
-*/
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import * as authApi from '../api/auth';
 
 const AuthContext = createContext(null);
-
-/*
-|--------------------------------------------------------------------------
-| Provider
-|--------------------------------------------------------------------------
-*/
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Load authenticated user from backend
-    |--------------------------------------------------------------------------
-    */
-    const fetchUser = async () => {
+    const loadUser = async () => {
         try {
-            const response = await axios.get('/api/user');
-            setUser(response.data);
-        } catch (error) {
+            const data = await authApi.getUser();
+            setUser(data);
+        } catch {
             setUser(null);
         } finally {
             setLoading(false);
         }
     };
 
-    /*
-    |--------------------------------------------------------------------------
-    | Login
-    |--------------------------------------------------------------------------
-    */
-    const login = async ({ email, password }) => {
-        await axios.get('/sanctum/csrf-cookie');
-
-        await axios.post('/login', {
-            email,
-            password,
-        });
-
-        await fetchUser();
-    };
-
-    /*
-    |--------------------------------------------------------------------------
-    | Register
-    |--------------------------------------------------------------------------
-    */
     const register = async (data) => {
-        await axios.get('/sanctum/csrf-cookie');
-
-        await axios.post('/register', data);
-
-        await fetchUser();
+        await authApi.register(data);
+        await loadUser();
     };
 
-    /*
-    |--------------------------------------------------------------------------
-    | Logout
-    |--------------------------------------------------------------------------
-    */
+    const login = async (credentials) => {
+        await authApi.login(credentials);
+        await loadUser();
+    };
+
     const logout = async () => {
-        await axios.post('/logout');
+        await authApi.logout();
         setUser(null);
     };
 
-    /*
-    |--------------------------------------------------------------------------
-    | Initial Load (Persist Auth on Refresh)
-    |--------------------------------------------------------------------------
-    */
     useEffect(() => {
-        fetchUser();
+        loadUser();
     }, []);
 
     return (
-        <AuthContext.Provider
-            value={{
-                user,
-                loading,
-                login,
-                register,
-                logout,
-            }}
-        >
+        <AuthContext.Provider value={{ user, loading, register, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
 }
 
-/*
-|--------------------------------------------------------------------------
-| Hook
-|--------------------------------------------------------------------------
-*/
-
-export function useAuth() {
-    return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);

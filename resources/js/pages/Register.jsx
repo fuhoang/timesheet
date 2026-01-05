@@ -7,32 +7,43 @@ export default function Register() {
     const { register } = useAuth();
     const navigate = useNavigate();
 
-    const [form, setForm] = useState({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-    });
+    const [form, setForm] = useState({ name: '', email: '', password: '', password_confirmation: '' });
+    const [errors, setErrors] = useState({});
+
+    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
     const submit = async (e) => {
         e.preventDefault();
-        await register(form);
-        navigate('/');
+        setErrors({});
+        try {
+            await register(form);
+            navigate('/');
+        } catch (err) {
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+            }
+        }
     };
 
     return (
         <GuestLayout>
             <h1>Register</h1>
             <form onSubmit={submit}>
-                {Object.keys(form).map(key => (
-                    <input
-                        key={key}
-                        type={key.includes('password') ? 'password' : 'text'}
-                        placeholder={key.replace('_', ' ')}
-                        value={form[key]}
-                        onChange={e => setForm({ ...form, [key]: e.target.value })}
-                    />
-                ))}
+                <div>
+                    <input name="name" placeholder="Name" value={form.name} onChange={handleChange} />
+                    {errors.name && <p style={{ color: 'red' }}>{errors.name[0]}</p>}
+                </div>
+                <div>
+                    <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} />
+                    {errors.email && <p style={{ color: 'red' }}>{errors.email[0]}</p>}
+                </div>
+                <div>
+                    <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} />
+                    {errors.password && <p style={{ color: 'red' }}>{errors.password[0]}</p>}
+                </div>
+                <div>
+                    <input name="password_confirmation" type="password" placeholder="Confirm Password" value={form.password_confirmation} onChange={handleChange} />
+                </div>
                 <button type="submit">Register</button>
             </form>
         </GuestLayout>
