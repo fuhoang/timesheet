@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Timesheet extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'work_date',
+        'total_minutes',
+    ];
+
+    protected $casts = [
+        'work_date' => 'date',
+    ];
+
+    /* ---------------- Relationships ---------------- */
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function entries()
+    {
+        return $this->hasMany(TimeEntry::class);
+    }
+}
