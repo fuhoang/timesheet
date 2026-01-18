@@ -10,6 +10,7 @@ class Timesheet extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'work_date',
         'total_minutes',
     ];
