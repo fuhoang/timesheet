@@ -23,6 +23,10 @@ export default function Dashboard() {
 
     return (
         <div>
+            <div className="bg-blue-600 text-white p-6 rounded-xl">
+                Tailwind v4 is working
+            </div>
+
             <h1>Dashboard</h1>
 
             {timesheet && (
