@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthLayout from './layouts/AuthLayout';
+import DashboardLayout from './layouts/DashboardLayout';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -12,21 +13,25 @@ export default function App() {
     return (
         <AuthProvider>
             <Routes>
-                {/* Public routes */}
+
+                {/* Public */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
-                {/* Protected routes */}
+                {/* Protected */}
                 <Route
                     path="/"
                     element={
                         <ProtectedRoute>
                             <AuthLayout>
-                                <Dashboard />
+                                <DashboardLayout>
+                                    <Dashboard />
+                                </DashboardLayout>
                             </AuthLayout>
                         </ProtectedRoute>
                     }
                 />
+
             </Routes>
         </AuthProvider>
     );
