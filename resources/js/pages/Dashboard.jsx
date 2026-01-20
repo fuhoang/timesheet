@@ -6,7 +6,7 @@ import ProjectSelect from '../components/ProjectSelect';
 export default function Dashboard() {
     const [projects, setProjects] = useState([]);
     const [timesheet, setTimesheet] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [selectedProject, setSelectedProject] = useState(null);
 
     useEffect(() => {
         load();
@@ -21,19 +21,9 @@ export default function Dashboard() {
 
             setProjects(projectsRes.data);
             setTimesheet(timesheetRes.data);
-        } catch (e) {
-            console.error('Dashboard load failed', e);
-        } finally {
-            setLoading(false);
+        } catch (err) {
+            console.error(err);
         }
-    }
-
-    if (loading) {
-        return (
-            <div className="p-6 text-gray-500">
-                Loading dashboard...
-            </div>
-        );
     }
 
     return (
@@ -62,10 +52,13 @@ export default function Dashboard() {
                     Timer
                 </h2>
 
-                <ProjectSelect projects={projects} />
-
+                <ProjectSelect
+                    projects={projects}
+                    value={selectedProject}
+                    onChange={setSelectedProject}
+                />
                 <div className="mt-4">
-                    <Timer onChange={load} />
+                    <Timer projectId={selectedProject} onChange={load} />
                 </div>
             </div>
 
