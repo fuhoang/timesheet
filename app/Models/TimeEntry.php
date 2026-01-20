@@ -10,6 +10,10 @@ class TimeEntry extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
+        'timesheet_id',
+        'project_id',
+        'task_id',
         'started_at',
         'ended_at',
         'duration_minutes',
