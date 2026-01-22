@@ -7,45 +7,121 @@ export default function Register() {
     const { register } = useAuth();
     const navigate = useNavigate();
 
-    const [form, setForm] = useState({ name: '', email: '', password: '', password_confirmation: '' });
+    const [form, setForm] = useState({
+        name: '',
+        email: '',
+        password: '',
+        password_confirmation: '',
+    });
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
 
-    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+    const handleChange = (e) =>
+        setForm({ ...form, [e.target.name]: e.target.value });
 
     const submit = async (e) => {
         e.preventDefault();
         setErrors({});
+        setLoading(true);
+
         try {
             await register(form);
             navigate('/');
         } catch (err) {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
+            } else {
+                alert('Registration failed');
             }
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <GuestLayout>
-            <h1>Register</h1>
-            <form onSubmit={submit}>
-                <div>
-                    <input name="name" placeholder="Name" value={form.name} onChange={handleChange} />
-                    {errors.name && <p style={{ color: 'red' }}>{errors.name[0]}</p>}
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md">
+                    <h1 className="text-3xl font-bold text-center mb-6">Register</h1>
+
+                    <form onSubmit={submit} className="space-y-5">
+
+                        {/* Name */}
+                        <div>
+                            <label className="block text-gray-700 mb-2">Name</label>
+                            <input
+                                name="name"
+                                type="text"
+                                placeholder="Your name"
+                                value={form.name}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none ${errors.name ? 'border-red-500' : ''}`}
+                                required
+                            />
+                            {errors.name && <p className="text-red-600 mt-1">{errors.name[0]}</p>}
+                        </div>
+
+                        {/* Email */}
+                        <div>
+                            <label className="block text-gray-700 mb-2">Email</label>
+                            <input
+                                name="email"
+                                type="email"
+                                placeholder="you@example.com"
+                                value={form.email}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none ${errors.email ? 'border-red-500' : ''}`}
+                                required
+                            />
+                            {errors.email && <p className="text-red-600 mt-1">{errors.email[0]}</p>}
+                        </div>
+
+                        {/* Password */}
+                        <div>
+                            <label className="block text-gray-700 mb-2">Password</label>
+                            <input
+                                name="password"
+                                type="password"
+                                placeholder="••••••••"
+                                value={form.password}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none ${errors.password ? 'border-red-500' : ''}`}
+                                required
+                            />
+                            {errors.password && <p className="text-red-600 mt-1">{errors.password[0]}</p>}
+                        </div>
+
+                        {/* Password confirmation */}
+                        <div>
+                            <label className="block text-gray-700 mb-2">Confirm Password</label>
+                            <input
+                                name="password_confirmation"
+                                type="password"
+                                placeholder="••••••••"
+                                value={form.password_confirmation}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                required
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        >
+                            {loading ? 'Registering...' : 'Register'}
+                        </button>
+                    </form>
+
+                    <p className="mt-6 text-center text-gray-500">
+                        Already have an account?{' '}
+                        <a href="/login" className="text-blue-600 hover:underline">
+                            Login
+                        </a>
+                    </p>
                 </div>
-                <div>
-                    <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} />
-                    {errors.email && <p style={{ color: 'red' }}>{errors.email[0]}</p>}
-                </div>
-                <div>
-                    <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} />
-                    {errors.password && <p style={{ color: 'red' }}>{errors.password[0]}</p>}
-                </div>
-                <div>
-                    <input name="password_confirmation" type="password" placeholder="Confirm Password" value={form.password_confirmation} onChange={handleChange} />
-                </div>
-                <button type="submit">Register</button>
-            </form>
+            </div>
         </GuestLayout>
     );
 }
