@@ -30,4 +30,6 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     // time entries
     Route::post('/time-entries/start', [TimeEntryController::class, 'start']);
     Route::post('/time-entries/stop', [TimeEntryController::class, 'stop']);
+
+    Route::get('/time-entries/running', [TimeEntryController::class, 'running']);
 });
