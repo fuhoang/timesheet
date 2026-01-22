@@ -68,6 +68,16 @@ class TimeEntryController extends Controller
 
         return response()->json($entry);
     }
+    public function running(Request $request)
+    {
+        $rsp = $request->user()
+            ->timeEntries()
+            ->whereNull('ended_at')
+            ->with('project')
+            ->first();
+        
+        return response()->json($rsp);
+    }
 
 
 }
