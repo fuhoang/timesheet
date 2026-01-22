@@ -27,18 +27,18 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-5xl mx-auto space-y-8">
 
             {/* Header */}
             <div className="bg-white p-6 rounded-2xl shadow border">
-                <h1 className="text-2xl font-semibold">
+                <h1 className="text-2xl font-semibold text-gray-900">
                     Today
                 </h1>
 
                 {timesheet ? (
                     <p className="mt-2 text-gray-600">
                         Total time:{' '}
-                        <span className="font-medium text-gray-900">
+                        <span className="font-semibold text-gray-900">
                             {formatMinutes(timesheet.total_minutes)}
                         </span>
                     </p>
@@ -50,75 +50,87 @@ export default function Dashboard() {
             </div>
 
             {/* Timer */}
-            <div className="bg-white p-6 rounded-2xl shadow border">
-                <h2 className="text-lg font-semibold mb-4">
+            <div className="bg-white p-6 rounded-2xl shadow border space-y-4">
+                <h2 className="text-lg font-semibold text-gray-800">
                     Timer
                 </h2>
 
-            
                 <ProjectSelect
                     projects={projects}
                     value={selectedProject}
                     onChange={(id) => setSelectedProject(Number(id))}
                 />
-    
 
-                <div className="mt-4">
-                    <Timer
-                        projectId={selectedProject}
-                        onChange={load}
-                    />
-                </div>
+                <Timer
+                    projectId={selectedProject}
+                    onChange={load}
+                />
             </div>
 
+            {/* Entries */}
             {/* Today’s Entries */}
             {timesheet?.entries?.length > 0 && (
-                <div className="bg-white rounded-2xl shadow border divide-y">
-                    <div className="p-4 font-semibold text-gray-700">
+                <div className="bg-white rounded-2xl shadow border overflow-hidden">
+                    <div className="px-6 py-4 font-semibold text-gray-800 border-b">
                         Today’s entries
                     </div>
 
-                    {timesheet.entries.map(entry => (
-                        <div
-                            key={entry.id}
-                            className="p-4 flex justify-between items-center"
-                        >
-                            <div>
-                                <div className="font-medium text-gray-900">
-                                    {entry.project?.name ?? 'No project'}
-                                </div>
+                    <div className="divide-y">
+                        {timesheet.entries.map(entry => {
+                            const running = !entry.ended_at;
 
-                                {entry.description && (
-                                    <div className="text-sm text-gray-500">
-                                        {entry.description}
+                            return (
+                                <div
+                                    key={entry.id}
+                                    className={`px-6 py-4 flex items-center justify-between ${
+                                        running ? 'bg-green-50' : ''
+                                    }`}
+                                >
+                                    {/* Left */}
+                                    <div className="space-y-1">
+                                        <div className="font-medium text-gray-900">
+                                            {entry.project?.name ?? 'No project'}
+                                        </div>
+
+                                        {entry.description && (
+                                            <div className="text-sm text-gray-500">
+                                                {entry.description}
+                                            </div>
+                                        )}
+
+                                        <div className="text-xs text-gray-400">
+                                            {formatTime(entry.started_at)} –{' '}
+                                            {entry.ended_at
+                                                ? formatTime(entry.ended_at)
+                                                : 'Now'}
+                                        </div>
                                     </div>
-                                )}
-                            </div>
 
-                            <div className="text-right text-sm text-gray-600">
-                                <div>
-                                    {formatTime(entry.started_at)} –{' '}
-                                    {entry.ended_at
-                                        ? formatTime(entry.ended_at)
-                                        : 'Running'}
+                                    {/* Right */}
+                                    <div className="text-right">
+                                        {entry.duration_minutes ? (
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+                                                {formatMinutes(entry.duration_minutes)}
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                                                Running
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
-
-                                <div className="font-medium text-gray-900">
-                                    {entry.duration_minutes
-                                        ? formatMinutes(entry.duration_minutes)
-                                        : '—'}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                            );
+                        })}
+                    </div>
                 </div>
             )}
+
         </div>
     );
 }
 
 /* -------------------------
-   Helpers (production-safe)
+   Helpers
 -------------------------- */
 
 function formatMinutes(minutes = 0) {
@@ -128,7 +140,9 @@ function formatMinutes(minutes = 0) {
 }
 
 function formatTime(datetime) {
-    return new Date(datetime).toLocaleTimeString([], {
+    if (!datetime) return '';
+
+    return new Date(datetime.replace(' ', 'T')).toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
     });
