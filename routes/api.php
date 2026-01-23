@@ -32,4 +32,7 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::post('/time-entries/stop', [TimeEntryController::class, 'stop']);
 
     Route::get('/time-entries/running', [TimeEntryController::class, 'running']);
+
+    Route::apiResource('projects', \App\Http\Controllers\Api\Admin\ProjectController::class);
+
 });
