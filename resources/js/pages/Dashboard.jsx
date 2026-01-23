@@ -3,12 +3,7 @@ import axios from '../lib/axios';
 import Timer from '../components/Timer';
 import ProjectSelect from '../components/ProjectSelect';
 
-import { useAuth } from '../context/AuthContext';
-
-
 export default function Dashboard() {
-
-    const { user } = useAuth();
     const [projects, setProjects] = useState([]);
     const [timesheet, setTimesheet] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
@@ -33,13 +28,6 @@ export default function Dashboard() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-8">
-
-
-            <div className="bg-yellow-50 border p-3 rounded text-sm mb-4">
-                Logged in as: <strong>{user?.email}</strong><br />
-                Role: <strong>{user?.is_admin ? 'Admin' : 'User'}</strong>
-            </div>
-
             {/* Header */}
             <div className="bg-white p-6 rounded-2xl shadow border">
                 <h1 className="text-2xl font-semibold text-gray-900">
