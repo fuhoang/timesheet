@@ -21,7 +21,7 @@ export default function Timer({ projectId, onChange }) {
 
             // Safety check: ensure res.data exists and has started_at
             if (res.data && res.data.started_at) {
-                setRunningEntry(res.data);
+                setRunningEntry(res.data || null);
 
                 const started = new Date(res.data.started_at.replace(' ', 'T'));
                 const now = new Date();

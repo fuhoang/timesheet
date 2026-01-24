@@ -54,7 +54,7 @@ class TimeEntryController extends Controller
 
         $entry = $timesheet->entries()
             ->whereNull('ended_at')
-            ->firstOrFail();
+            ->first();
 
         $entry->ended_at = now();
 
@@ -70,13 +70,17 @@ class TimeEntryController extends Controller
     }
     public function running(Request $request)
     {
-        $rsp = $request->user()
-            ->timeEntries()
-            ->whereNull('ended_at')
-            ->with('project')
-            ->first();
-        
-        return response()->json($rsp);
+        $user = $request->user();
+
+        // Ensure today's timesheet exists
+        $timesheet = $user->timesheets()->firstOrCreate([
+            'work_date' => now()->toDateString(),
+        ]);
+
+        // Get running entry (or null)
+        $entry = $timesheet->entries()->whereNull('ended_at')->with('project')->first();
+
+        return response()->json($entry);
     }
 
 
