@@ -8,6 +8,12 @@ export default function AdminProjects() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
+    // Edit modal state
+    const [editingProject, setEditingProject] = useState(null);
+    const [editName, setEditName] = useState('');
+    const [editDescription, setEditDescription] = useState('');
+    const [updating, setUpdating] = useState(false);
+
     useEffect(() => {
         loadProjects();
     }, []);
@@ -23,19 +29,13 @@ export default function AdminProjects() {
         }
     }
 
+    // Create project
     async function createProject(e) {
         e.preventDefault();
-
         if (!name.trim()) return;
-
         setSaving(true);
-
         try {
-            await axios.post('/api/projects', {
-                name,
-                description,
-            });
-
+            await axios.post('/api/projects', { name, description });
             setName('');
             setDescription('');
             loadProjects();
@@ -46,14 +46,39 @@ export default function AdminProjects() {
         }
     }
 
+    // Delete project
     async function deleteProject(id) {
         if (!confirm('Delete this project?')) return;
-
         try {
             await axios.delete(`/api/projects/${id}`);
             setProjects(projects.filter(p => p.id !== id));
         } catch (err) {
             console.error(err);
+        }
+    }
+
+    // Open edit modal
+    function openEdit(project) {
+        setEditingProject(project);
+        setEditName(project.name);
+        setEditDescription(project.description || '');
+    }
+
+    // Save edits
+    async function saveEdit() {
+        if (!editName.trim()) return;
+        setUpdating(true);
+        try {
+            await axios.put(`/api/projects/${editingProject.id}`, {
+                name: editName,
+                description: editDescription,
+            });
+            setEditingProject(null);
+            loadProjects();
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setUpdating(false);
         }
     }
 
@@ -87,7 +112,6 @@ export default function AdminProjects() {
                         value={name}
                         onChange={e => setName(e.target.value)}
                     />
-
                     <input
                         type="text"
                         placeholder="Description (optional)"
@@ -95,7 +119,6 @@ export default function AdminProjects() {
                         value={description}
                         onChange={e => setDescription(e.target.value)}
                     />
-
                     <button
                         disabled={saving}
                         className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 disabled:opacity-60"
@@ -107,19 +130,14 @@ export default function AdminProjects() {
 
             {/* Projects table */}
             <div className="bg-white rounded-2xl shadow border overflow-hidden">
-
                 <div className="p-4 font-semibold border-b">
                     Projects
                 </div>
 
                 {loading ? (
-                    <div className="p-6 text-gray-500">
-                        Loading projects…
-                    </div>
+                    <div className="p-6 text-gray-500">Loading projects…</div>
                 ) : projects.length === 0 ? (
-                    <div className="p-6 text-gray-500">
-                        No projects yet.
-                    </div>
+                    <div className="p-6 text-gray-500">No projects yet.</div>
                 ) : (
                     <table className="w-full text-sm">
                         <thead className="bg-gray-50 border-b">
@@ -129,19 +147,18 @@ export default function AdminProjects() {
                                 <th className="text-right px-4 py-3">Actions</th>
                             </tr>
                         </thead>
-
                         <tbody className="divide-y">
                             {projects.map(project => (
                                 <tr key={project.id}>
-                                    <td className="px-4 py-3 font-medium">
-                                        {project.name}
-                                    </td>
-
-                                    <td className="px-4 py-3 text-gray-600">
-                                        {project.description || '—'}
-                                    </td>
-
-                                    <td className="px-4 py-3 text-right">
+                                    <td className="px-4 py-3 font-medium">{project.name}</td>
+                                    <td className="px-4 py-3 text-gray-600">{project.description || '—'}</td>
+                                    <td className="px-4 py-3 text-right space-x-2">
+                                        <button
+                                            onClick={() => openEdit(project)}
+                                            className="text-indigo-600 hover:underline"
+                                        >
+                                            Edit
+                                        </button>
                                         <button
                                             onClick={() => deleteProject(project.id)}
                                             className="text-red-600 hover:underline"
@@ -155,6 +172,46 @@ export default function AdminProjects() {
                     </table>
                 )}
             </div>
+
+            {/* Edit Modal */}
+            {editingProject && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                    <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
+                        <h3 className="text-lg font-semibold mb-4">Edit Project</h3>
+
+                        <div className="space-y-3">
+                            <input
+                                type="text"
+                                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring"
+                                value={editName}
+                                onChange={e => setEditName(e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring"
+                                value={editDescription}
+                                onChange={e => setEditDescription(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="mt-4 flex justify-end space-x-2">
+                            <button
+                                onClick={() => setEditingProject(null)}
+                                className="px-4 py-2 rounded-lg border hover:bg-gray-100"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={saveEdit}
+                                disabled={updating}
+                                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                            >
+                                {updating ? 'Saving…' : 'Save'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

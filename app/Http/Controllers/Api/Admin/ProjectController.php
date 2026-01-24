@@ -36,10 +36,14 @@ class ProjectController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $project->update($data);
+        $project->update([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+        ]);
 
-        return $project;
+        return response()->json($project);
     }
+
 
     public function destroy(Project $project)
     {
