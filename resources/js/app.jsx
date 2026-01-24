@@ -12,7 +12,7 @@ import Dashboard from './pages/Dashboard';
 
 import AdminRoute from './components/AdminRoute';
 import AdminLayout from './layouts/AdminLayout';
-import AdminProjects from './pages/admin/Projects';
+import AdminProjects from './pages/admin/AdminProjects';
 
 
 export default function App() {

@@ -20,7 +20,13 @@ class ProjectController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        return Project::create($data);
+        $project = Project::create([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'user_id' => $request->user()->id, // ✅ FIX
+        ]);
+
+        return response()->json($project, 201);
     }
 
     public function update(Request $request, Project $project)

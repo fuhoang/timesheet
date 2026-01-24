@@ -13,6 +13,7 @@ class Project extends Model
         'name',
         'description',
         'is_active',
+        'user_id',
     ];
 
     /* ---------------- Relationships ---------------- */
