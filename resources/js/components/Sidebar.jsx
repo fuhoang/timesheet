@@ -1,7 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
 
 export default function Sidebar() {
+
+    const { user } = useAuth();
+
     const linkClass = ({ isActive }) =>
         `block px-4 py-2 rounded-lg transition ${
             isActive
@@ -27,6 +32,23 @@ export default function Sidebar() {
                 <NavLink to="/reports" className={linkClass}>
                     Reports
                 </NavLink>
+
+
+                {/* Admin links */}
+                {user?.is_admin === 1 && (
+                    <>
+                        <div className="mt-6 px-4 text-xs uppercase text-gray-400">
+                            Admin
+                        </div>
+
+                        <NavLink
+                            to="/admin/projects"
+                            className={linkClass}
+                        >
+                            Projects
+                        </NavLink>
+                    </>
+                )}
             </nav>
         </aside>
     );
