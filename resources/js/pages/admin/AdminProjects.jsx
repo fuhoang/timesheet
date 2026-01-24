@@ -7,12 +7,14 @@ export default function AdminProjects() {
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [toast, setToast] = useState(null);
 
-    // Edit modal state
     const [editingProject, setEditingProject] = useState(null);
     const [editName, setEditName] = useState('');
     const [editDescription, setEditDescription] = useState('');
     const [updating, setUpdating] = useState(false);
+    const [editErrors, setEditErrors] = useState({});
 
     useEffect(() => {
         loadProjects();
@@ -24,50 +26,61 @@ export default function AdminProjects() {
             setProjects(res.data);
         } catch (err) {
             console.error(err);
+            showToast('Failed to load projects', 'error');
         } finally {
             setLoading(false);
         }
     }
 
-    // Create project
+    function showToast(message, type = 'success') {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    }
+
     async function createProject(e) {
         e.preventDefault();
         if (!name.trim()) return;
         setSaving(true);
+        setErrors({});
         try {
             await axios.post('/api/projects', { name, description });
             setName('');
             setDescription('');
             loadProjects();
+            showToast('Project created successfully');
         } catch (err) {
-            console.error(err);
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+            } else {
+                showToast('Failed to create project', 'error');
+            }
         } finally {
             setSaving(false);
         }
     }
 
-    // Delete project
     async function deleteProject(id) {
         if (!confirm('Delete this project?')) return;
         try {
             await axios.delete(`/api/projects/${id}`);
             setProjects(projects.filter(p => p.id !== id));
+            showToast('Project deleted');
         } catch (err) {
-            console.error(err);
+            showToast('Failed to delete project', 'error');
         }
     }
 
-    // Open edit modal
     function openEdit(project) {
         setEditingProject(project);
         setEditName(project.name);
         setEditDescription(project.description || '');
+        setEditErrors({});
     }
 
-    // Save edits
     async function saveEdit() {
         if (!editName.trim()) return;
         setUpdating(true);
+        setEditErrors({});
         try {
             await axios.put(`/api/projects/${editingProject.id}`, {
                 name: editName,
@@ -75,15 +88,30 @@ export default function AdminProjects() {
             });
             setEditingProject(null);
             loadProjects();
+            showToast('Project updated successfully');
         } catch (err) {
-            console.error(err);
+            if (err.response?.status === 422) {
+                setEditErrors(err.response.data.errors || {});
+            } else {
+                showToast('Failed to update project', 'error');
+            }
         } finally {
             setUpdating(false);
         }
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
+
+            {/* Toast */}
+            {toast && (
+                <div
+                    className={`fixed top-4 right-4 px-4 py-2 rounded-lg text-white shadow-lg z-50
+                    ${toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'}`}
+                >
+                    {toast.message}
+                </div>
+            )}
 
             {/* Header */}
             <div className="bg-white p-6 rounded-2xl shadow border">
@@ -105,20 +133,32 @@ export default function AdminProjects() {
                     onSubmit={createProject}
                     className="grid grid-cols-1 md:grid-cols-3 gap-4"
                 >
-                    <input
-                        type="text"
-                        placeholder="Project name"
-                        className="border rounded-lg px-3 py-2 focus:outline-none focus:ring"
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Description (optional)"
-                        className="border rounded-lg px-3 py-2 focus:outline-none focus:ring"
-                        value={description}
-                        onChange={e => setDescription(e.target.value)}
-                    />
+                    <div className="flex flex-col">
+                        <input
+                            type="text"
+                            placeholder="Project name"
+                            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring"
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                        />
+                        {errors.name && (
+                            <p className="text-red-600 text-sm mt-1">{errors.name[0]}</p>
+                        )}
+                    </div>
+
+                    <div className="flex flex-col">
+                        <input
+                            type="text"
+                            placeholder="Description (optional)"
+                            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring"
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
+                        />
+                        {errors.description && (
+                            <p className="text-red-600 text-sm mt-1">{errors.description[0]}</p>
+                        )}
+                    </div>
+
                     <button
                         disabled={saving}
                         className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 disabled:opacity-60"
@@ -180,18 +220,28 @@ export default function AdminProjects() {
                         <h3 className="text-lg font-semibold mb-4">Edit Project</h3>
 
                         <div className="space-y-3">
-                            <input
-                                type="text"
-                                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring"
-                                value={editName}
-                                onChange={e => setEditName(e.target.value)}
-                            />
-                            <input
-                                type="text"
-                                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring"
-                                value={editDescription}
-                                onChange={e => setEditDescription(e.target.value)}
-                            />
+                            <div className="flex flex-col">
+                                <input
+                                    type="text"
+                                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring"
+                                    value={editName}
+                                    onChange={e => setEditName(e.target.value)}
+                                />
+                                {editErrors.name && (
+                                    <p className="text-red-600 text-sm mt-1">{editErrors.name[0]}</p>
+                                )}
+                            </div>
+                            <div className="flex flex-col">
+                                <input
+                                    type="text"
+                                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring"
+                                    value={editDescription}
+                                    onChange={e => setEditDescription(e.target.value)}
+                                />
+                                {editErrors.description && (
+                                    <p className="text-red-600 text-sm mt-1">{editErrors.description[0]}</p>
+                                )}
+                            </div>
                         </div>
 
                         <div className="mt-4 flex justify-end space-x-2">
