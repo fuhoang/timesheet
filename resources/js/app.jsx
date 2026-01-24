@@ -3,14 +3,15 @@ import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 
 import ProtectedRoute from './components/ProtectedRoute';
-import AdminRoute from './components/AdminRoute';
-
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+
+import AdminRoute from './components/AdminRoute';
+import AdminLayout from './layouts/AdminLayout';
 import AdminProjects from './pages/admin/Projects';
 
 
@@ -43,11 +44,9 @@ export default function App() {
                     element={
                         <ProtectedRoute>
                             <AdminRoute>
-                                <AuthLayout>
-                                    <DashboardLayout>
-                                        <AdminProjects />
-                                    </DashboardLayout>
-                                </AuthLayout>
+                                 <AdminLayout>
+                                    <AdminProjects />
+                                 </AdminLayout>
                             </AdminRoute>
                         </ProtectedRoute>
                     }
