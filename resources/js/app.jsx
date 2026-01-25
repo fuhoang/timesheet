@@ -4,17 +4,18 @@ import { Routes, Route } from 'react-router-dom';
 import { ProjectProvider } from './context/ProjectContext';
 import { AuthProvider } from './context/AuthContext';
 
+import AdminRoute from './components/AdminRoute';
 import ProtectedRoute from './components/ProtectedRoute';
+
+import AdminLayout from './layouts/AdminLayout';
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 
+import AdminProjects from './pages/admin/AdminProjects';
+import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-
-import AdminRoute from './components/AdminRoute';
-import AdminLayout from './layouts/AdminLayout';
-import AdminProjects from './pages/admin/AdminProjects';
+import Timesheets from './pages/Timesheets';
 
 
 export default function App() {
@@ -38,6 +39,23 @@ export default function App() {
                             </ProtectedRoute>
                         }
                     />
+
+                    {/* Timesheet */}
+                    <Route
+                        path="/timesheets"
+                        element={
+                            <ProtectedRoute>
+                                <AuthLayout>
+                                    <DashboardLayout>
+                                        <Timesheets />
+                                    </DashboardLayout>
+                                </AuthLayout>
+                            </ProtectedRoute>
+                        }
+                    />
+
+
+
                     {/* Admin */}
                     <Route
                         path="/admin/projects"
