@@ -25,52 +25,50 @@ class TimesheetController extends Controller
 
         return $timesheet->load('entries.project', 'entries.task');
     }
-
-
-
     public function week(Request $request)
     {
         $user = $request->user();
 
-        $date = $request->date
-            ? Carbon::parse($request->date)
+        // week param OR today
+        $baseDate = $request->week
+            ? \Carbon\Carbon::parse($request->week)
             : now();
 
-        $start = $date->copy()->startOfWeek(); // Monday
-        $end   = $date->copy()->endOfWeek();   // Sunday
+        $start = $baseDate->copy()->startOfWeek();
+        $end   = $baseDate->copy()->endOfWeek();
 
-        $entries = $user->timeEntries()
-            ->with('project')
-            ->whereBetween('started_at', [$start, $end])
-            ->orderBy('started_at')
-            ->get();
+        $timesheets = \App\Models\Timesheet::where('user_id', $user->id)
+            ->whereBetween('work_date', [$start, $end])
+            ->with('entries.project')
+            ->get()
+            ->keyBy(fn ($t) => $t->work_date->toDateString());
 
         $days = [];
+        $weeklyTotal = 0;
 
-        foreach ($entries as $entry) {
-            $day = $entry->started_at->format('Y-m-d');
+        for ($i = 0; $i < 7; $i++) {
+            $date = $start->copy()->addDays($i)->toDateString();
 
-            if (!isset($days[$day])) {
-                $days[$day] = [
-                    'date' => $day,
-                    'entries' => [],
-                    'total_minutes' => 0,
-                ];
-            }
+            $sheet = $timesheets[$date] ?? null;
 
-            if ($entry->ended_at) {
-                $minutes = $entry->ended_at->diffInMinutes($entry->started_at);
-                $days[$day]['total_minutes'] += $minutes;
-            }
+            $total = $sheet?->entries->sum('duration_minutes') ?? 0;
 
-            $days[$day]['entries'][] = $entry;
+            $weeklyTotal += $total;
+
+            $days[] = [
+                'date' => $date,
+                'label' => \Carbon\Carbon::parse($date)->format('D d M'),
+                'total_minutes' => $total,
+                'entries' => $sheet?->entries ?? [],
+            ];
         }
 
         return response()->json([
-            'start' => $start->toDateString(),
-            'end' => $end->toDateString(),
-            'days' => array_values($days),
-            'total_minutes' => collect($days)->sum('total_minutes'),
+            'week_start' => $start->toDateString(),
+            'week_end' => $end->toDateString(),
+            'weekly_total_minutes' => $weeklyTotal,
+            'days' => $days,
         ]);
     }
+
 }
