@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from '../lib/axios';
 
-export default function Timer({ projectId, onChange }) {
+export default function Timer({ projectId, onChange, disabled }) {
     const [runningEntry, setRunningEntry] = useState(null);
     const [seconds, setSeconds] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -122,7 +122,7 @@ export default function Timer({ projectId, onChange }) {
                         <span className="text-green-600 font-medium">Running</span>
                         <button
                             onClick={stop}
-                            disabled={loading}
+                            disabled={loading || disabled}
                             className="px-6 py-3 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50"
                         >
                             Stop
@@ -131,7 +131,7 @@ export default function Timer({ projectId, onChange }) {
                 ) : (
                     <button
                         onClick={start}
-                        disabled={loading || !projectId}
+                        disabled={loading || disabled || !projectId}
                         className="px-6 py-3 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 disabled:opacity-50"
                     >
                         Start

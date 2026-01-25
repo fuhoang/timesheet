@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Timesheet;
 use Illuminate\Http\Request;
 
 class TimeEntryController extends Controller
@@ -11,6 +12,17 @@ class TimeEntryController extends Controller
 
     public function start(Request $request)
     {
+
+        $timesheet = Timesheet::where('user_id', $request->user()->id)
+            ->whereDate('work_date', now())
+            ->first();
+
+        if ($timesheet?->submitted) {
+            return response()->json([
+                'message' => 'This week has been submitted and is locked.'
+            ], 403);
+        }
+
         $data = $request->validate([
             'project_id' => 'required|exists:projects,id',
             'task_id' => 'nullable|exists:tasks,id',
@@ -47,6 +59,17 @@ class TimeEntryController extends Controller
 
     public function stop(Request $request)
     {
+
+        $timesheet = Timesheet::where('user_id', $request->user()->id)
+            ->whereDate('work_date', now())
+            ->first();
+
+        if ($timesheet?->submitted) {
+            return response()->json([
+                'message' => 'This week has been submitted and is locked.'
+            ], 403);
+        }
+
         $timesheet = $request->user()
             ->timesheets()
             ->where('work_date', now()->toDateString())

@@ -27,6 +27,8 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     // timesheets
     Route::get('/timesheets/today', [TimesheetController::class, 'today']);
     Route::get('/timesheets/week', [TimesheetController::class, 'week']);
+    Route::post('/timesheets/submit-week', [TimesheetController::class, 'submitWeek']);
+
 
 
     // time entries

@@ -13,6 +13,7 @@ export default function Dashboard() {
 
     const { projects } = useProjects();
     // const [projects, setProjects] = useState([]);
+    
     const [timesheet, setTimesheet] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -20,6 +21,8 @@ export default function Dashboard() {
     // Version counter to trigger reload when projects are updated
     const [projectVersion, setProjectVersion] = useState(0);
 
+    // const isLocked = timesheet?.submitted;
+    console.log(timesheet);
     useEffect(() => {
         load();
     }, [projectVersion]);
@@ -93,6 +96,8 @@ export default function Dashboard() {
                 {selectedProject && (
                     <Timer
                         projectId={selectedProject}
+                        // disabled={isLocked}
+                        disabled={timesheet?.submitted}
                         onChange={load}
                     />
                 )}

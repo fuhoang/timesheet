@@ -23,16 +23,23 @@ class TimesheetController extends Controller
             ]
         );
 
-        return $timesheet->load('entries.project', 'entries.task');
+        $timesheet->load('entries.project', 'entries.task');
+
+        return response()->json([
+            'id' => $timesheet->id,
+            'work_date' => $timesheet->work_date,
+            'total_minutes' => $timesheet->entries->sum('duration_minutes'),
+            'submitted' => $timesheet->submitted_at !== null,
+            'entries' => $timesheet->entries,
+        ]);
     }
     public function week(Request $request)
     {
         $user = $request->user();
 
-        // week param OR today
-        $baseDate = $request->week
-            ? \Carbon\Carbon::parse($request->week)
-            : now();
+        // offset in weeks from current week (0 = this week, -1 = previous week, 1 = next week)
+        $offset = (int) $request->query('offset', 0);
+        $baseDate = now()->addWeeks($offset);
 
         $start = $baseDate->copy()->startOfWeek();
         $end   = $baseDate->copy()->endOfWeek();
@@ -42,6 +49,8 @@ class TimesheetController extends Controller
             ->with('entries.project')
             ->get()
             ->keyBy(fn ($t) => $t->work_date->toDateString());
+
+        $submitted = $timesheets->first()?->submitted_at !== null;
 
         $days = [];
         $weeklyTotal = 0;
@@ -67,8 +76,28 @@ class TimesheetController extends Controller
             'week_start' => $start->toDateString(),
             'week_end' => $end->toDateString(),
             'weekly_total_minutes' => $weeklyTotal,
+            'submitted' => $submitted,
             'days' => $days,
         ]);
+    }
+
+
+
+    public function submitWeek(Request $request)
+    {
+        $user = $request->user();
+
+        $start = Carbon::parse($request->week_start)->startOfWeek();
+        $end   = Carbon::parse($request->week_start)->endOfWeek();
+
+        Timesheet::where('user_id', $user->id)
+            ->whereBetween('work_date', [$start, $end])
+            ->update([
+                'submitted' => true,
+                'submitted_at' => now(),
+            ]);
+
+        return response()->json(['status' => 'submitted']);
     }
 
 }

@@ -13,6 +13,9 @@ class Timesheet extends Model
         'user_id',
         'work_date',
         'total_minutes',
+        'submitted',
+        'submitted_at',
+
     ];
 
     protected $casts = [
