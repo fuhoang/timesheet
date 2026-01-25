@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../../lib/axios';
+import { useProjects } from '../../context/ProjectContext';
+
 
 export default function AdminProjects() {
-    const [projects, setProjects] = useState([]);
+    // const [projects, setProjects] = useState([]);
+
+    const { projects, reloadProjects } = useProjects();
+
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(true);
@@ -23,7 +28,7 @@ export default function AdminProjects() {
     async function loadProjects() {
         try {
             const res = await axios.get('/api/projects');
-            setProjects(res.data);
+            reloadProjects();
         } catch (err) {
             console.error(err);
             showToast('Failed to load projects', 'error');
@@ -63,7 +68,8 @@ export default function AdminProjects() {
         if (!confirm('Delete this project?')) return;
         try {
             await axios.delete(`/api/projects/${id}`);
-            setProjects(projects.filter(p => p.id !== id));
+            // setProjects(projects.filter(p => p.id !== id));
+            reloadProjects();
             showToast('Project deleted');
         } catch (err) {
             showToast('Failed to delete project', 'error');

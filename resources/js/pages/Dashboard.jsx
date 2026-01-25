@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react';
+
 import axios from '../lib/axios';
 import Timer from '../components/Timer';
 import ProjectSelect from '../components/ProjectSelect';
+
 import { useAuth } from '../context/AuthContext';
+import { useProjects } from '../context/ProjectContext';
 
 export default function Dashboard() {
+    
     const { user } = useAuth(); // get logged-in user info
-    const [projects, setProjects] = useState([]);
+
+    const { projects } = useProjects();
+    // const [projects, setProjects] = useState([]);
     const [timesheet, setTimesheet] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -29,12 +35,12 @@ export default function Dashboard() {
         setLoading(true);
         try {
             // Admin can see all projects
-            const [projectsRes, timesheetRes] = await Promise.all([
-                axios.get('/api/projects'),
+            const [timesheetRes] = await Promise.all([
+                // axios.get('/api/projects'),
                 axios.get('/api/timesheets/today'),
             ]);
 
-            setProjects(projectsRes.data);
+            // setProjects(projectsRes.data);
             setTimesheet(timesheetRes.data);
         } catch (err) {
             console.error(err);

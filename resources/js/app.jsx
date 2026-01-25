@@ -1,5 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+
+import { ProjectProvider } from './context/ProjectContext';
 import { AuthProvider } from './context/AuthContext';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -18,41 +20,39 @@ import AdminProjects from './pages/admin/AdminProjects';
 export default function App() {
     return (
         <AuthProvider>
-            <Routes>
-
-                {/* Public */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-
-                {/* Protected */}
-                <Route
-                    path="/"
-                    element={
-                        <ProtectedRoute>
-                            <AuthLayout>
-                                <DashboardLayout>
-                                    <Dashboard />
-                                </DashboardLayout>
-                            </AuthLayout>
-                        </ProtectedRoute>
-                    }
-                />
-
-                {/* Admin */}
-                <Route
-                    path="/admin/projects"
-                    element={
-                        <ProtectedRoute>
-                            <AdminRoute>
-                                 <AdminLayout>
-                                    <AdminProjects />
-                                 </AdminLayout>
-                            </AdminRoute>
-                        </ProtectedRoute>
-                    }
-                />
-
-            </Routes>
+            <ProjectProvider>
+                <Routes>
+                    {/* Public */}
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    {/* Protected */}
+                    <Route
+                        path="/"
+                        element={
+                            <ProtectedRoute>
+                                <AuthLayout>
+                                    <DashboardLayout>
+                                        <Dashboard />
+                                    </DashboardLayout>
+                                </AuthLayout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    {/* Admin */}
+                    <Route
+                        path="/admin/projects"
+                        element={
+                            <ProtectedRoute>
+                                <AdminRoute>
+                                    <AdminLayout>
+                                        <AdminProjects />
+                                    </AdminLayout>
+                                </AdminRoute>
+                            </ProtectedRoute>
+                        }
+                    />
+                </Routes>
+            </ProjectProvider>
         </AuthProvider>
     );
 }
