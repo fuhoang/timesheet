@@ -3,25 +3,21 @@ import axios from '../lib/axios';
 
 export default function Timesheets() {
     const [week, setWeek] = useState(null);
-    const [currentWeek, setCurrentWeek] = useState(null);
+    const [offset, setOffset] = useState(0);
     const [loading, setLoading] = useState(true);
+
+    const today = new Date().toISOString().slice(0, 10);
 
     useEffect(() => {
         loadWeek();
-    }, []);
+    }, [offset]);
 
-    useEffect(() => {
-        if (currentWeek) {
-            loadWeek(currentWeek);
-        }
-    }, [currentWeek]);
+    async function loadWeek() {
+        setLoading(true);
 
-    async function loadWeek(date = null) {
         try {
-            setLoading(true);
-
             const res = await axios.get('/api/timesheets/week', {
-                params: date ? { week: date } : {},
+                params: { offset }
             });
 
             setWeek(res.data);
@@ -32,19 +28,7 @@ export default function Timesheets() {
         }
     }
 
-    function prevWeek() {
-        const d = new Date(week.week_start);
-        d.setDate(d.getDate() - 7);
-        setCurrentWeek(d.toISOString().slice(0, 10));
-    }
-
-    function nextWeek() {
-        const d = new Date(week.week_start);
-        d.setDate(d.getDate() + 7);
-        setCurrentWeek(d.toISOString().slice(0, 10));
-    }
-
-    if (loading || !week) {
+    if (loading) {
         return (
             <div className="p-6 text-gray-500">
                 Loading weekly timesheet…
@@ -56,92 +40,137 @@ export default function Timesheets() {
         <div className="max-w-5xl mx-auto space-y-6">
 
             {/* Header */}
-            <div className="bg-white p-6 rounded-2xl shadow border">
-                <div className="flex items-center justify-between">
+            <div className="bg-white p-6 rounded-2xl shadow border flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-semibold">Weekly timesheet</h1>
+                    <p className="text-sm text-gray-600 mt-1">
+                        {week.week_start} → {week.week_end}
+                    </p>
+                </div>
 
+                <div className="flex gap-2">
                     <button
-                        onClick={prevWeek}
-                        className="px-3 py-1 rounded-lg border hover:bg-gray-100"
+                        onClick={() => setOffset(o => o - 1)}
+                        className="px-3 py-2 border rounded-lg hover:bg-gray-100"
                     >
-                        ← Previous
+                        ← Prev
                     </button>
 
-                    <div className="text-center">
-                        <h1 className="text-xl font-semibold">
-                            Weekly Timesheet
-                        </h1>
-                        <p className="text-gray-600 text-sm">
-                            {week.week_start} → {week.week_end}
-                        </p>
-                        <p className="font-medium mt-1">
-                            Total: {formatMinutes(week.weekly_total_minutes)}
-                        </p>
-                    </div>
+                    <button
+                        onClick={() => setOffset(0)}
+                        className="px-3 py-2 border rounded-lg hover:bg-gray-100"
+                    >
+                        This week
+                    </button>
 
                     <button
-                        onClick={nextWeek}
-                        className="px-3 py-1 rounded-lg border hover:bg-gray-100"
+                        onClick={() => setOffset(o => o + 1)}
+                        className="px-3 py-2 border rounded-lg hover:bg-gray-100"
                     >
                         Next →
                     </button>
-
                 </div>
             </div>
 
             {/* Days */}
-            {week.days.map(day => (
-                <div
-                    key={day.date}
-                    className="bg-white rounded-2xl shadow border overflow-hidden"
-                >
-                    <div className="px-6 py-4 border-b flex justify-between">
-                        <div className="font-medium">
-                            {day.label}
-                        </div>
+            <div className="space-y-4">
+                {week.days.map(day => {
+                    const isToday = day.date === today;
 
-                        <div className="text-sm font-semibold">
-                            {formatMinutes(day.total_minutes)}
-                        </div>
-                    </div>
+                    return (
+                        <div
+                            key={day.date}
+                            className={`rounded-2xl shadow border overflow-hidden
+                                ${isToday
+                                    ? 'bg-blue-50 border-blue-400'
+                                    : 'bg-white'
+                                }
+                            `}
+                        >
+                            {/* Day header */}
+                            <div
+                                className={`px-6 py-4 border-b flex justify-between items-center
+                                    ${isToday ? 'border-blue-300' : ''}
+                                `}
+                            >
+                                <div className="font-medium flex items-center gap-2">
+                                    {day.label}
 
-                    {day.entries.length === 0 ? (
-                        <div className="px-6 py-4 text-sm text-gray-500">
-                            No entries
-                        </div>
-                    ) : (
-                        <div className="divide-y">
-                            {day.entries.map(entry => (
-                                <div
-                                    key={entry.id}
-                                    className="px-6 py-4 flex justify-between text-sm"
-                                >
-                                    <div>
-                                        <div className="font-medium">
-                                            {entry.project?.name ?? 'No project'}
-                                        </div>
-
-                                        {entry.description && (
-                                            <div className="text-gray-500">
-                                                {entry.description}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="font-medium">
-                                        {formatMinutes(entry.duration_minutes)}
-                                    </div>
+                                    {isToday && (
+                                        <span className="text-xs px-2 py-0.5 rounded-full bg-blue-600 text-white">
+                                            Today
+                                        </span>
+                                    )}
                                 </div>
-                            ))}
+
+                                <div className="text-sm font-semibold">
+                                    {formatMinutes(day.total_minutes)}
+                                </div>
+                            </div>
+
+                            {/* Entries */}
+                            {day.entries.length === 0 ? (
+                                <div className="px-6 py-4 text-sm text-gray-400">
+                                    No entries
+                                </div>
+                            ) : (
+                                <div className="divide-y">
+                                    {day.entries.map(entry => (
+                                        <div
+                                            key={entry.id}
+                                            className="px-6 py-4 flex justify-between text-sm"
+                                        >
+                                            <div>
+                                                <div className="font-medium">
+                                                    {entry.project?.name ?? 'No project'}
+                                                </div>
+
+                                                {entry.description && (
+                                                    <div className="text-gray-500">
+                                                        {entry.description}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="text-right">
+                                                <div>
+                                                    {formatTime(entry.started_at)} –{' '}
+                                                    {entry.ended_at
+                                                        ? formatTime(entry.ended_at)
+                                                        : 'Running'}
+                                                </div>
+
+                                                <div className="font-semibold">
+                                                    {formatMinutes(entry.duration_minutes)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-            ))}
+                    );
+                })}
+            </div>
         </div>
     );
 }
+
+/* --------------------
+   Helpers
+-------------------- */
 
 function formatMinutes(minutes = 0) {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return `${h}h ${m}m`;
+}
+
+function formatTime(datetime) {
+    if (!datetime) return '';
+
+    return new Date(datetime.replace(' ', 'T')).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 }
