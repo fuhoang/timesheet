@@ -21,9 +21,7 @@ export default function Timesheets() {
     if (loading) {
         return <div className="text-gray-500">Loading week…</div>;
     }
-
-    console.log(week);
-
+    
     return (
         <div className="max-w-5xl mx-auto space-y-6">
 
