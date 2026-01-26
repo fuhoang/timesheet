@@ -95,16 +95,54 @@ class TimeEntryController extends Controller
     {
         $user = $request->user();
 
-        // Ensure today's timesheet exists
+        // get today's timesheet
         $timesheet = $user->timesheets()->firstOrCreate([
             'work_date' => now()->toDateString(),
         ]);
 
-        // Get running entry (or null)
-        $entry = $timesheet->entries()->whereNull('ended_at')->with('project')->first();
+        // find running entry (may belong to yesterday)
+        $entry = $user->timeEntries()
+            ->whereNull('ended_at')
+            ->with('project', 'timesheet')
+            ->first();
+
+        if (!$entry) {
+            return response()->json(null);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAFETY FALLBACK — auto-stop at midnight
+        |--------------------------------------------------------------------------
+        |
+        | If the timer started before today, it crossed midnight.
+        | We must force-close it at 23:59:59 of the start day.
+        |
+        */
+
+        if ($entry->started_at->lt(today())) {
+
+            $end = $entry->started_at->copy()->endOfDay();
+
+            $minutes = $entry->started_at->diffInMinutes($end);
+
+            $entry->update([
+                'ended_at' => $end,
+                'duration_minutes' => $minutes,
+            ]);
+
+            // update timesheet total
+            $entry->timesheet->update([
+                'total_minutes' =>
+                    $entry->timesheet
+                        ->entries()
+                        ->sum('duration_minutes'),
+            ]);
+
+            return response()->json(null);
+        }
 
         return response()->json($entry);
     }
-
 
 }
