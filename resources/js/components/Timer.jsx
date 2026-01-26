@@ -15,6 +15,15 @@ export default function Timer({ projectId, onChange, disabled }) {
         return () => clearInterval(intervalRef.current);
     }, []);
 
+    useEffect(() => {
+        if (disabled && runningEntry) {
+            clearInterval(intervalRef.current);
+            setRunningEntry(null);
+            setSeconds(0);
+        }
+    }, [disabled]);
+
+
     async function loadRunning() {
         try {
             const res = await axios.get('/api/time-entries/running');

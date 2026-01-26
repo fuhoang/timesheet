@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\TimeEntry;
 use App\Models\Timesheet;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -89,6 +90,25 @@ class TimesheetController extends Controller
 
         $start = Carbon::parse($request->week_start)->startOfWeek();
         $end   = Carbon::parse($request->week_start)->endOfWeek();
+
+        /* ----------------------------------------
+            1. AUTO-STOP RUNNING TIMER
+        ---------------------------------------- */
+
+        $running = TimeEntry::where('user_id', $user->id)
+            ->whereNull('ended_at')
+            ->first();
+
+        if ($running) {
+            $now = now();
+
+            $minutes = $running->started_at->diffInMinutes($now);
+
+            $running->update([
+                'ended_at' => $now,
+                'duration_minutes' => $minutes,
+            ]);
+        }
 
         Timesheet::where('user_id', $user->id)
             ->whereBetween('work_date', [$start, $end])
