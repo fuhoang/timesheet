@@ -1,149 +1,105 @@
 import React, { useEffect, useState } from 'react';
-
-import axios from '../lib/axios';
+import { useProjects } from '../context/ProjectContext';
+import { useApi } from '../context/ApiContext';
 import Timer from '../components/Timer';
 import ProjectSelect from '../components/ProjectSelect';
 
-import { useAuth } from '../context/AuthContext';
-import { useProjects } from '../context/ProjectContext';
-
 export default function Dashboard() {
-    
-    const { user } = useAuth(); // get logged-in user info
-    const [loading, setLoading] = useState(true);
+    const { projects, loading: projectsLoading, loadProjects } = useProjects();
+    const { api } = useApi();
 
-    const { projects } = useProjects();
-    
-    const [timesheet, setTimesheet] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
-  
-    // Version counter to trigger reload when projects are updated
-    const [projectVersion, setProjectVersion] = useState(0);
+    const [timesheet, setTimesheet] = useState(null);
+    const [loadingTimesheet, setLoadingTimesheet] = useState(true);
 
-    // const isLocked = timesheet?.submitted;
-    // console.log(timesheet);
-  
-    // Auto-select first project if none selected
     useEffect(() => {
-        if (projects.length > 0 && selectedProject === null) {
+        if (!selectedProject && projects.length > 0) {
             setSelectedProject(projects[0].id);
         }
     }, [projects]);
 
     useEffect(() => {
-        load();
-    }, [projectVersion]);
+        loadTimesheet();
+    }, [selectedProject]);
 
-    async function load() {
-        setLoading(true);
+    async function loadTimesheet() {
+        setLoadingTimesheet(true);
         try {
-            // Admin can see all projects
-            const [timesheetRes] = await Promise.all([
-                // axios.get('/api/projects'),
-                axios.get('/api/timesheets/today'),
-            ]);
-
-            // setProjects(projectsRes.data);
-            setTimesheet(timesheetRes.data);
+            const data = await api({
+                method: 'get',
+                url: '/api/timesheets/today',
+            });
+            setTimesheet(data);
         } catch (err) {
-            console.error(err);
+            console.error('Failed to load timesheet', err);
+            setTimesheet(null);
         } finally {
-            setLoading(false);
+            setLoadingTimesheet(false);
         }
-    }
-
-    // Call this after creating/deleting a project in AdminProjects
-    function refreshProjects() {
-        setProjectVersion(v => v + 1);
     }
 
     return (
         <div className="max-w-5xl mx-auto space-y-8">
-
             {/* Header */}
             <div className="bg-white p-6 rounded-2xl shadow border">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                    Today
-                </h1>
-
-                {loading ? (
+                <h1 className="text-2xl font-semibold text-gray-900">Today</h1>
+                {loadingTimesheet ? (
                     <p className="mt-2 text-gray-400 text-sm">Loading timesheet…</p>
-                ) : timesheet ? (
+                ) : (
                     <p className="mt-2 text-gray-600">
                         Total time:{' '}
                         <span className="font-semibold text-gray-900">
-                            {formatMinutes(timesheet.total_minutes)}
+                            {formatMinutes(timesheet?.total_minutes)}
                         </span>
                     </p>
-                ) : (
-                    <p className="mt-2 text-gray-400 text-sm">No timesheet yet</p>
                 )}
             </div>
 
             {/* Timer */}
             <div className="bg-white p-6 rounded-2xl shadow border space-y-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                    Timer
-                </h2>
+                <h2 className="text-lg font-semibold text-gray-800">Timer</h2>
 
-                <ProjectSelect
-                    projects={projects}
-                    value={selectedProject}
-                    onChange={(id) => setSelectedProject(Number(id))}
-                />
-
-                {/* Only show Timer if a project is selected */}
-                {selectedProject && (
-                    <Timer
-                        projectId={selectedProject}
-                        // disabled={isLocked}
-                        disabled={timesheet?.submitted}
-                        onChange={load}
+                {projectsLoading ? (
+                    <div className="text-gray-400 text-sm">Loading projects…</div>
+                ) : (
+                    <ProjectSelect
+                        projects={projects}
+                        value={selectedProject}
+                        onChange={(id) => setSelectedProject(Number(id))}
                     />
                 )}
+
+                <Timer
+                    projectId={selectedProject}
+                    disabled={timesheet?.submitted}
+                    onChange={loadTimesheet}
+                />
             </div>
 
-            {/* Today’s Entries */}
+            {/* Entries */}
             {timesheet?.entries?.length > 0 && (
                 <div className="bg-white rounded-2xl shadow border overflow-hidden">
-                    <div className="px-6 py-4 font-semibold text-gray-800 border-b">
-                        Today’s entries
-                    </div>
-
+                    <div className="px-6 py-4 font-semibold text-gray-800 border-b">Today’s entries</div>
                     <div className="divide-y">
                         {timesheet.entries.map(entry => {
                             const running = !entry.ended_at;
-
                             return (
                                 <div
                                     key={entry.id}
-                                    className={`px-6 py-4 flex items-center justify-between ${
-                                        running ? 'bg-green-50' : ''
-                                    }`}
+                                    className={`px-6 py-4 flex items-center justify-between ${running ? 'bg-green-50' : ''}`}
                                 >
-                                    {/* Left */}
                                     <div className="space-y-1">
-                                        <div className="font-medium text-gray-900">
-                                            {entry.project?.name ?? 'No project'}
-                                        </div>
-
+                                        <div className="font-medium text-gray-900">{entry.project?.name ?? 'No project'}</div>
                                         {entry.description && (
-                                            <div className="text-sm text-gray-500">
-                                                {entry.description}
-                                            </div>
+                                            <div className="text-sm text-gray-500">{entry.description}</div>
                                         )}
-
                                         <div className="text-xs text-gray-400">
-                                            {formatTime(entry.started_at)} –{' '}
-                                            {entry.ended_at
-                                                ? formatTime(entry.ended_at)
-                                                : 'Now'}
+                                            {formatTime(entry.started_at)} – {entry.ended_at ? formatTime(entry.ended_at) : 'Now'}
                                         </div>
                                     </div>
 
-                                    {/* Right */}
                                     <div className="text-right">
-                                        {entry.ended_at ? (
+                                        {entry.duration_minutes ? (
                                             <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
                                                 {formatMinutes(entry.duration_minutes)}
                                             </span>
@@ -159,7 +115,6 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
-
         </div>
     );
 }
@@ -175,8 +130,5 @@ function formatMinutes(minutes = 0) {
 
 function formatTime(datetime) {
     if (!datetime) return '';
-    return new Date(datetime.replace(' ', 'T')).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+    return new Date(datetime.replace(' ', 'T')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }

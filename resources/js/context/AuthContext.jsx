@@ -26,7 +26,13 @@ export function AuthProvider({ children }) {
     const login = async (credentials) => {
         await authApi.login(credentials);
         await loadUser();
+
+        // trigger projects reload
+        if (typeof window !== 'undefined' && window.projectReload) {
+            window.projectReload();
+        }
     };
+
 
     const logout = async () => {
         await authApi.logout();

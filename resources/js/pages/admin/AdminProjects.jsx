@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../../lib/axios';
+import { useApi } from '../../context/ApiContext';
 import { useProjects } from '../../context/ProjectContext';
 
 
 export default function AdminProjects() {
-    // const [projects, setProjects] = useState([]);
-
-    const { projects, reloadProjects } = useProjects();
+    const { api } = useApi();
+    const { projects, loading, reloadProjects } = useProjects();
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState({});
     const [toast, setToast] = useState(null);
@@ -20,22 +18,6 @@ export default function AdminProjects() {
     const [editDescription, setEditDescription] = useState('');
     const [updating, setUpdating] = useState(false);
     const [editErrors, setEditErrors] = useState({});
-
-    useEffect(() => {
-        loadProjects();
-    }, []);
-
-    async function loadProjects() {
-        try {
-            const res = await axios.get('/api/projects');
-            reloadProjects();
-        } catch (err) {
-            console.error(err);
-            showToast('Failed to load projects', 'error');
-        } finally {
-            setLoading(false);
-        }
-    }
 
     function showToast(message, type = 'success') {
         setToast({ message, type });
@@ -48,28 +30,50 @@ export default function AdminProjects() {
         setSaving(true);
         setErrors({});
         try {
-            await axios.post('/api/projects', { name, description });
+            
+            await api({
+                method: 'post',
+                url: '/api/projects',
+                data: { name, description }
+            }); 
             setName('');
             setDescription('');
-            loadProjects();
+            await reloadProjects();
             showToast('Project created successfully');
+
         } catch (err) {
-            if (err.response?.status === 422) {
-                setErrors(err.response.data.errors || {});
-            } else {
-                showToast('Failed to create project', 'error');
+            const status = err.response?.status;
+
+            // auto retry once after auth boot
+            if (status === 401 && retry && user) {
+                return api(config, { ...options, retry: false });
             }
+
+            const normalizedError = {
+                status,
+                message:
+                    err.response?.data?.message ||
+                    err.message ||
+                    'Request failed',
+                errors: err.response?.data?.errors || null,
+            };
+
+            setError(normalizedError);
+            throw normalizedError;
         } finally {
-            setSaving(false);
+                setSaving(false);
+            }
         }
-    }
 
     async function deleteProject(id) {
         if (!confirm('Delete this project?')) return;
         try {
-            await axios.delete(`/api/projects/${id}`);
-            // setProjects(projects.filter(p => p.id !== id));
-            reloadProjects();
+            await api({
+                method: 'delete',
+                url: `/api/projects/${id}`,
+            });
+
+            await reloadProjects();
             showToast('Project deleted');
         } catch (err) {
             showToast('Failed to delete project', 'error');
@@ -88,12 +92,17 @@ export default function AdminProjects() {
         setUpdating(true);
         setEditErrors({});
         try {
-            await axios.put(`/api/projects/${editingProject.id}`, {
-                name: editName,
-                description: editDescription,
+            await api({
+                method: 'patch',
+                url: `/api/projects/${editingProject.id}`,
+                data: {
+                    name: editName,
+                    description: editDescription,
+                },
             });
+
             setEditingProject(null);
-            loadProjects();
+            await reloadProjects();
             showToast('Project updated successfully');
         } catch (err) {
             if (err.response?.status === 422) {

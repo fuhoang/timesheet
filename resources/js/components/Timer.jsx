@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import axios from '../lib/axios';
+import { useApi } from '../context/ApiContext';
 
 export default function Timer({ projectId, onChange, disabled }) {
+
+    const { api } = useApi();
     const [runningEntry, setRunningEntry] = useState(null);
     const [seconds, setSeconds] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -26,13 +28,17 @@ export default function Timer({ projectId, onChange, disabled }) {
 
     async function loadRunning() {
         try {
-            const res = await axios.get('/api/time-entries/running');
 
-            // Safety check: ensure res.data exists and has started_at
-            if (res.data && res.data.started_at) {
-                setRunningEntry(res.data || null);
+            const res = await api({
+                method: 'get',
+                url: '/api/time-entries/running',
+            });
 
-                const started = new Date(res.data.started_at.replace(' ', 'T'));
+            // Safety check: ensure res exists and has started_at
+            if (res && res.started_at) {
+                setRunningEntry(res || null);
+
+                const started = new Date(res.started_at.replace(' ', 'T'));
                 const now = new Date();
                 const diff = Math.floor((now - started) / 1000);
 
@@ -75,11 +81,16 @@ export default function Timer({ projectId, onChange, disabled }) {
         setLoading(true);
 
         try {
-            const res = await axios.post('/api/time-entries/start', {
-                project_id: projectId,
+
+            const res = await api({
+                method: 'post',
+                url: '/api/time-entries/start',
+                data: {
+                    project_id: projectId,
+                },
             });
 
-            setRunningEntry(res.data);
+            setRunningEntry(res);
             setSeconds(0);
             startTicking();
 
@@ -98,7 +109,12 @@ export default function Timer({ projectId, onChange, disabled }) {
         setLoading(true);
 
         try {
-            const res = await axios.post('/api/time-entries/stop');
+            // const res = await axios.post('/api/time-entries/stop');
+
+            const res = await api({
+                method: 'post',
+                url: '/api/time-entries/stop',
+            });
 
             stopTicking();
             setRunningEntry(null);

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../lib/axios';
+import { useApi } from '../context/ApiContext';
 
 export default function Timesheets() {
+    const { api } = useApi();
     const [week, setWeek] = useState(null);
     const [offset, setOffset] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -17,11 +18,14 @@ export default function Timesheets() {
         setLoading(true);
 
         try {
-            const res = await axios.get('/api/timesheets/week', {
-                params: { offset } // send offset instead of week
+
+            const res = await api({
+                method: 'get',
+                url: 'api/timesheets/week',
+                params: { offset },
             });
 
-            setWeek(res.data);
+            setWeek(res);
         } catch (err) {
             console.error(err);
         } finally {
@@ -35,7 +39,13 @@ export default function Timesheets() {
 
         try {
             setSubmitting(true);
-            await axios.post('/api/timesheets/submit-week', { week_start: week.week_start });
+            await api({
+                method: 'post',
+                url: '/api/timesheets/submit-week',
+                data: {
+                    week_start: week.week_start,
+                },
+            });
             loadWeek();
         } catch (err) {
             console.error(err);
@@ -59,9 +69,6 @@ export default function Timesheets() {
                 <div>
                     <h1 className="text-2xl font-semibold">Weekly timesheet</h1>
                     <p className="text-sm text-gray-600 mt-1">{week.week_start} → {week.week_end}</p>
-
-                    
-
                     {!week.submitted && (
                         <button
                             onClick={submitWeek}
