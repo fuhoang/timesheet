@@ -10,29 +10,29 @@ import { useProjects } from '../context/ProjectContext';
 export default function Dashboard() {
     
     const { user } = useAuth(); // get logged-in user info
+    const [loading, setLoading] = useState(true);
 
     const { projects } = useProjects();
-    // const [projects, setProjects] = useState([]);
     
     const [timesheet, setTimesheet] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
-    const [loading, setLoading] = useState(true);
-
+  
     // Version counter to trigger reload when projects are updated
     const [projectVersion, setProjectVersion] = useState(0);
 
     // const isLocked = timesheet?.submitted;
-    console.log(timesheet);
-    useEffect(() => {
-        load();
-    }, [projectVersion]);
-
+    // console.log(timesheet);
+  
     // Auto-select first project if none selected
     useEffect(() => {
         if (projects.length > 0 && selectedProject === null) {
             setSelectedProject(projects[0].id);
         }
     }, [projects]);
+
+    useEffect(() => {
+        load();
+    }, [projectVersion]);
 
     async function load() {
         setLoading(true);
