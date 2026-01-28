@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useApi } from '../context/ApiContext';
+import { PageSkeleton } from '../components/skeletons/PageSkeleton';
+
 
 export default function Timesheets() {
     const { api } = useApi();
@@ -55,8 +57,12 @@ export default function Timesheets() {
         }
     }
 
+    // if (loading) {
+    //     return <div className="p-6 text-gray-500">Loading weekly timesheet…</div>;
+    // }
+
     if (loading) {
-        return <div className="p-6 text-gray-500">Loading weekly timesheet…</div>;
+        return <PageSkeleton />;
     }
 
     console.log(week);

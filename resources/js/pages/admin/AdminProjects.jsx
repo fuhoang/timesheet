@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useApi } from '../../context/ApiContext';
 import { useProjects } from '../../context/ProjectContext';
+import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
 
 
 export default function AdminProjects() {
@@ -190,7 +191,9 @@ export default function AdminProjects() {
                 </div>
 
                 {loading ? (
-                    <div className="p-6 text-gray-500">Loading projects…</div>
+
+                    <TableSkeleton rows={6} />
+               
                 ) : projects.length === 0 ? (
                     <div className="p-6 text-gray-500">No projects yet.</div>
                 ) : (

@@ -3,6 +3,8 @@ import { useProjects } from '../context/ProjectContext';
 import { useApi } from '../context/ApiContext';
 import Timer from '../components/Timer';
 import ProjectSelect from '../components/ProjectSelect';
+import { DropdownSkeleton } from '../components/skeletons/DropdownSkeleton';
+
 
 export default function Dashboard() {
     const { projects, loading: projectsLoading, loadProjects } = useProjects();
@@ -36,6 +38,11 @@ export default function Dashboard() {
         } finally {
             setLoadingTimesheet(false);
         }
+    }
+
+
+    if (projectsLoading) {
+        return <DropdownSkeleton />;
     }
 
     return (
