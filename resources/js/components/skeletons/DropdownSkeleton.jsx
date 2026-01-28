@@ -3,6 +3,8 @@ import Skeleton from '../ui/Skeleton';
 
 export function DropdownSkeleton() {
     return (
-        <Skeleton className="h-10 w-full" />
+        <div className="animate-pulse">
+            <Skeleton className="h-10 bg-gray-200 rounded-lg" />
+        </div>
     );
 }

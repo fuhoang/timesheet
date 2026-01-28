@@ -109,8 +109,6 @@ export default function Timer({ projectId, onChange, disabled }) {
         setLoading(true);
 
         try {
-            // const res = await axios.post('/api/time-entries/stop');
-
             const res = await api({
                 method: 'post',
                 url: '/api/time-entries/stop',

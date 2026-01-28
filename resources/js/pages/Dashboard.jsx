@@ -4,6 +4,7 @@ import { useApi } from '../context/ApiContext';
 import Timer from '../components/Timer';
 import ProjectSelect from '../components/ProjectSelect';
 import { DropdownSkeleton } from '../components/skeletons/DropdownSkeleton';
+import { TimerSkeleton } from '../components/skeletons/TimerSkeleton';
 
 
 export default function Dashboard() {
@@ -40,11 +41,6 @@ export default function Dashboard() {
         }
     }
 
-
-    if (projectsLoading) {
-        return <DropdownSkeleton />;
-    }
-
     return (
         <div className="max-w-5xl mx-auto space-y-8">
             {/* Header */}
@@ -67,7 +63,7 @@ export default function Dashboard() {
                 <h2 className="text-lg font-semibold text-gray-800">Timer</h2>
 
                 {projectsLoading ? (
-                    <div className="text-gray-400 text-sm">Loading projects…</div>
+                    <DropdownSkeleton />
                 ) : (
                     <ProjectSelect
                         projects={projects}
@@ -76,11 +72,16 @@ export default function Dashboard() {
                     />
                 )}
 
-                <Timer
-                    projectId={selectedProject}
-                    disabled={timesheet?.submitted}
-                    onChange={loadTimesheet}
-                />
+                {projectsLoading ? (
+                    <TimerSkeleton />
+                ) : (
+
+                    <Timer
+                        projectId={selectedProject}
+                        disabled={timesheet?.submitted}
+                        onChange={loadTimesheet}
+                    />
+                )}
             </div>
 
             {/* Entries */}

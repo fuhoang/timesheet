@@ -3,12 +3,12 @@ import Skeleton from '../ui/Skeleton';
 
 export function TableSkeleton({ rows = 5 }) {
     return (
-        <div className="space-y-3 p-4">
+        <div className="animate-pulse divide-y">
             {Array.from({ length: rows }).map((_, i) => (
-                <div key={i} className="flex gap-4">
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-4 w-16 ml-auto" />
+                <div key={i} className="flex px-4 py-4 gap-4">
+                    <Skeleton className="h-4 w-1/4 bg-gray-200 rounded" />
+                    <Skeleton className="h-4 w-1/4 bg-gray-200 rounded" />
+                    <Skeleton className="h-4 w-20 bg-gray-200 rounded ml-auto" />
                 </div>
             ))}
         </div>
