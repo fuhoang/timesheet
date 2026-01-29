@@ -12,10 +12,15 @@ class TimeEntryController extends Controller
 
     public function start(Request $request)
     {
-
         $timesheet = Timesheet::where('user_id', $request->user()->id)
             ->whereDate('work_date', now())
             ->first();
+
+        if ($timesheet->isLocked()) {
+            return response()->json([
+                'message' => 'This timesheet is locked'
+            ], 403);
+        }
 
         if ($timesheet?->submitted) {
             return response()->json([
@@ -63,6 +68,12 @@ class TimeEntryController extends Controller
         $timesheet = Timesheet::where('user_id', $request->user()->id)
             ->whereDate('work_date', now())
             ->first();
+        
+        if ($timesheet->isLocked()) {
+            return response()->json([
+                'message' => 'This timesheet is locked'
+            ], 403);
+        }
 
         if ($timesheet?->submitted) {
             return response()->json([

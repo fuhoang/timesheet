@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\TimesheetController;
 use App\Http\Controllers\Api\TimeEntryController;
+use App\Http\Controllers\Api\AdminTimesheetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,5 +39,9 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::get('/time-entries/running', [TimeEntryController::class, 'running']);
 
     Route::apiResource('projects', \App\Http\Controllers\Api\Admin\ProjectController::class);
+
+    Route::get('/timesheets', [AdminTimesheetController::class, 'index']);
+    Route::post('/timesheets/{timesheet}/approve', [AdminTimesheetController::class, 'approve']);
+    Route::post('/timesheets/{timesheet}/reject', [AdminTimesheetController::class, 'reject']);
 
 });

@@ -45,7 +45,7 @@ class TimesheetController extends Controller
         $start = $baseDate->copy()->startOfWeek();
         $end   = $baseDate->copy()->endOfWeek();
 
-        $timesheets = \App\Models\Timesheet::where('user_id', $user->id)
+        $timesheets = Timesheet::where('user_id', $user->id)
             ->whereBetween('work_date', [$start, $end])
             ->with('entries.project')
             ->get()

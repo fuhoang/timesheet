@@ -16,7 +16,7 @@ import AdminProjects from './pages/admin/AdminProjects';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Timesheets from './pages/Timesheets';
+import Timesheets from './pages/timesheets';
 
 
 export default function App() {
