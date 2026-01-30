@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::table('timesheets', function (Blueprint $table) {
             $table->timestamp('approved_at')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users');
+            $table->text('rejection_reason')->nullable();
+
         });
 
     }
