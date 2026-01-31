@@ -19,6 +19,16 @@ export default function AdminLayout({ children }) {
                         Projects
                     </Link>
                 </nav>
+
+                <nav className="px-4 space-y-2">
+                    <Link
+                        to="/admin/timesheets"
+                        className="block px-3 py-2 rounded hover:bg-gray-100"
+                    >
+                        Timesheets
+                    </Link>
+                </nav>
+
             </aside>
 
             {/* Content */}

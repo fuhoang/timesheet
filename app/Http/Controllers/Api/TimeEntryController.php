@@ -8,26 +8,11 @@ use Illuminate\Http\Request;
 
 class TimeEntryController extends Controller
 {
-    //
-
+    /**
+     * Start a time entry
+     */
     public function start(Request $request)
     {
-        $timesheet = Timesheet::where('user_id', $request->user()->id)
-            ->whereDate('work_date', now())
-            ->first();
-
-        if ($timesheet->isLocked()) {
-            return response()->json([
-                'message' => 'This timesheet is locked'
-            ], 403);
-        }
-
-        if ($timesheet?->submitted) {
-            return response()->json([
-                'message' => 'This week has been submitted and is locked.'
-            ], 403);
-        }
-
         $data = $request->validate([
             'project_id' => 'required|exists:projects,id',
             'task_id' => 'nullable|exists:tasks,id',
@@ -38,9 +23,14 @@ class TimeEntryController extends Controller
             ->timesheets()
             ->firstOrCreate([
                 'work_date' => now()->toDateString(),
+            ], [
+                'status' => 'draft',
             ]);
 
-        // prevent multiple running timers
+        // 🔐 POLICY ENFORCEMENT
+        $this->authorize('edit', $timesheet);
+
+        // Prevent multiple running timers
         $running = $timesheet->entries()
             ->whereNull('ended_at')
             ->exists();
@@ -62,56 +52,45 @@ class TimeEntryController extends Controller
         return response()->json($entry, 201);
     }
 
+    /**
+     * Stop a running time entry
+     */
     public function stop(Request $request)
     {
-
-        $timesheet = Timesheet::where('user_id', $request->user()->id)
-            ->whereDate('work_date', now())
-            ->first();
-        
-        if ($timesheet->isLocked()) {
-            return response()->json([
-                'message' => 'This timesheet is locked'
-            ], 403);
-        }
-
-        if ($timesheet?->submitted) {
-            return response()->json([
-                'message' => 'This week has been submitted and is locked.'
-            ], 403);
-        }
-
         $timesheet = $request->user()
             ->timesheets()
             ->where('work_date', now()->toDateString())
             ->firstOrFail();
 
+        // 🔐 POLICY ENFORCEMENT
+        $this->authorize('edit', $timesheet);
+
         $entry = $timesheet->entries()
             ->whereNull('ended_at')
-            ->first();
+            ->firstOrFail();
 
         $entry->ended_at = now();
+        $entry->duration_minutes =
+            $entry->started_at->diffInMinutes($entry->ended_at);
 
-        $minutes = $entry->started_at->diffInMinutes($entry->ended_at);
-        $entry->duration_minutes = $minutes;
         $entry->save();
 
-        // update daily total
-        $timesheet->total_minutes += $minutes;
-        $timesheet->save();
+        // Update daily total
+        $timesheet->update([
+            'total_minutes' =>
+                $timesheet->entries()->sum('duration_minutes'),
+        ]);
 
         return response()->json($entry);
     }
+
+    /**
+     * Get currently running entry (if any)
+     */
     public function running(Request $request)
     {
         $user = $request->user();
 
-        // get today's timesheet
-        $timesheet = $user->timesheets()->firstOrCreate([
-            'work_date' => now()->toDateString(),
-        ]);
-
-        // find running entry (may belong to yesterday)
         $entry = $user->timeEntries()
             ->whereNull('ended_at')
             ->with('project', 'timesheet')
@@ -121,28 +100,24 @@ class TimeEntryController extends Controller
             return response()->json(null);
         }
 
+        // 🔐 POLICY CHECK (read-only but still validated)
+        $this->authorize('edit', $entry->timesheet);
+
         /*
         |--------------------------------------------------------------------------
         | SAFETY FALLBACK — auto-stop at midnight
         |--------------------------------------------------------------------------
-        |
-        | If the timer started before today, it crossed midnight.
-        | We must force-close it at 23:59:59 of the start day.
-        |
         */
-
         if ($entry->started_at->lt(today())) {
 
             $end = $entry->started_at->copy()->endOfDay();
 
-            $minutes = $entry->started_at->diffInMinutes($end);
-
             $entry->update([
                 'ended_at' => $end,
-                'duration_minutes' => $minutes,
+                'duration_minutes' =>
+                    $entry->started_at->diffInMinutes($end),
             ]);
 
-            // update timesheet total
             $entry->timesheet->update([
                 'total_minutes' =>
                     $entry->timesheet
@@ -155,5 +130,4 @@ class TimeEntryController extends Controller
 
         return response()->json($entry);
     }
-
 }

@@ -18,6 +18,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Timesheets from './pages/timesheets';
 
+import AdminTimesheets from './pages/admin/AdminTimesheets/index';
+import AdminTimesheetShow from './pages/admin/AdminTimesheets/show';
+
+
 
 export default function App() {
     return (
@@ -66,6 +70,33 @@ export default function App() {
                                     <AdminRoute>
                                         <AdminLayout>
                                             <AdminProjects />
+                                        </AdminLayout>
+                                    </AdminRoute>
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Admin Timesheets */}
+                        <Route
+                            path="/admin/timesheets"
+                            element={
+                                <ProtectedRoute>
+                                    <AdminRoute>
+                                        <AdminLayout>
+                                            <AdminTimesheets />
+                                        </AdminLayout>
+                                    </AdminRoute>
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        <Route
+                            path="/admin/timesheets/:id"
+                            element={
+                                <ProtectedRoute>
+                                    <AdminRoute>
+                                        <AdminLayout>
+                                            <AdminTimesheetShow />
                                         </AdminLayout>
                                     </AdminRoute>
                                 </ProtectedRoute>

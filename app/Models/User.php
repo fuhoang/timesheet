@@ -61,4 +61,9 @@ class User extends Authenticatable
         return $this->hasMany(TimeEntry::class);
     }
 
+    public function is_admin(): bool
+    {
+        return (bool) $this->is_admin;
+    }
+
 }

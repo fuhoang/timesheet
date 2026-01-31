@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('timesheets', function (Blueprint $table) {
+            $table->string('status')->default('draft');
             $table->timestamp('approved_at')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users');
             $table->text('rejection_reason')->nullable();
