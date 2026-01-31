@@ -12,12 +12,12 @@ import AdminLayout from './layouts/AdminLayout';
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 
-import AdminProjects from './pages/admin/AdminProjects';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Timesheets from './pages/timesheets';
 
+import AdminProjects from './pages/admin/AdminProjects';
 import AdminTimesheets from './pages/admin/AdminTimesheets/index';
 import AdminTimesheetShow from './pages/admin/AdminTimesheets/show';
 

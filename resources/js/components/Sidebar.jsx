@@ -47,6 +47,13 @@ export default function Sidebar() {
                         >
                             Projects
                         </NavLink>
+
+                        <NavLink
+                            to="/admin/timesheets"
+                            className={linkClass}
+                        >
+                            Timesheets
+                        </NavLink>
                     </>
                 )}
             </nav>
