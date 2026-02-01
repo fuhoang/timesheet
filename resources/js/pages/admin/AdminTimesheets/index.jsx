@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
 import { Link } from 'react-router-dom';
+import { formatDate } from '../../../utils/date';
+
+
 
 export default function AdminTimesheets() {
     const { api } = useApi();
@@ -23,7 +26,6 @@ export default function AdminTimesheets() {
             setLoading(false);
         }
     }
-
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow border">
@@ -55,7 +57,7 @@ export default function AdminTimesheets() {
                                         {ts.user.name}
                                     </td>
                                     <td className="px-4 py-3">
-                                        {ts.work_date}
+                                        {formatDate(ts.work_date)}
                                     </td>
                                     <td className="px-4 py-3">
                                         <StatusBadge status={ts.status} />

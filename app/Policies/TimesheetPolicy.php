@@ -11,6 +11,19 @@ class TimesheetPolicy
      | USER ACTIONS
      |------------------------------------------------- */
 
+
+    /**
+     * Admin can do everything
+     */
+    public function before(User $user)
+    {
+        if ($user->is_admin) {
+            return true;
+        }
+    }
+
+
+
     /**
      * View a timesheet
      */

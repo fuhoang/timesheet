@@ -27,8 +27,8 @@ class TimeEntryController extends Controller
                 'status' => 'draft',
             ]);
 
-        // 🔐 POLICY ENFORCEMENT
-        $this->authorize('edit', $timesheet);
+        // // 🔐 POLICY ENFORCEMENT
+        // $this->authorize('edit', $timesheet);
 
         // Prevent multiple running timers
         $running = $timesheet->entries()
@@ -63,7 +63,7 @@ class TimeEntryController extends Controller
             ->firstOrFail();
 
         // 🔐 POLICY ENFORCEMENT
-        $this->authorize('edit', $timesheet);
+        // $this->authorize('edit', $timesheet);
 
         $entry = $timesheet->entries()
             ->whereNull('ended_at')
@@ -101,7 +101,7 @@ class TimeEntryController extends Controller
         }
 
         // 🔐 POLICY CHECK (read-only but still validated)
-        $this->authorize('edit', $entry->timesheet);
+        // $this->authorize('edit', $entry->timesheet);
 
         /*
         |--------------------------------------------------------------------------

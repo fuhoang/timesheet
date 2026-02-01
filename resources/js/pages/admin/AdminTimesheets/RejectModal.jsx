@@ -1,44 +1,57 @@
 import React, { useState } from 'react';
-import { useApi } from '../../../context/ApiContext';
 
-export default function RejectModal({ timesheetId, onClose, onDone }) {
-    const { api } = useApi();
+export default function RejectModal({
+    open,
+    onClose,
+    onConfirm,
+    loading = false,
+    error = null,
+}) {
     const [reason, setReason] = useState('');
-    const [saving, setSaving] = useState(false);
 
-    async function submit() {
-        setSaving(true);
-        await api({
-            method: 'post',
-            url: `/api/admin/timesheets/${timesheetId}/reject`,
-            data: { reason },
-        });
-        onDone();
+    if (!open) return null;
+
+    function submit() {
+        onConfirm(reason);
     }
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-2xl shadow w-full max-w-md">
-                <h3 className="text-lg font-semibold mb-3">Reject timesheet</h3>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+            <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
+                <h3 className="text-lg font-semibold mb-2">
+                    Reject Timesheet
+                </h3>
+
+                <p className="text-sm text-gray-600 mb-4">
+                    Provide a reason for rejection.
+                </p>
 
                 <textarea
-                    className="w-full border rounded-lg p-2"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring"
                     rows={4}
-                    placeholder="Reason for rejection"
                     value={reason}
                     onChange={e => setReason(e.target.value)}
+                    placeholder="Reason for rejection"
                 />
 
-                <div className="mt-4 flex justify-end gap-2">
-                    <button onClick={onClose} className="px-4 py-2 border rounded-lg">
+                {error && (
+                    <p className="text-red-600 text-sm mt-2">{error}</p>
+                )}
+
+                <div className="mt-4 flex justify-end space-x-2">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 rounded-lg border hover:bg-gray-100"
+                    >
                         Cancel
                     </button>
+
                     <button
                         onClick={submit}
-                        disabled={saving || !reason.trim()}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-50"
+                        disabled={loading}
+                        className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
                     >
-                        Reject
+                        {loading ? 'Rejecting…' : 'Reject'}
                     </button>
                 </div>
             </div>
