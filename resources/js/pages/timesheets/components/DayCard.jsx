@@ -16,6 +16,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
         setDescription(entry.description || '');
         setMinutes(entry.duration_minutes || 0);
     }
+
     async function saveEdit(entryId) {
         await api({
             method: 'patch',
@@ -38,7 +39,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
 
     return (
         <div
-            className={`rounded-2xl shadow border overflow-hidden
+            className={`relative rounded-2xl shadow border overflow-hidden
                 ${isToday ? 'bg-blue-50 border-blue-400' : 'bg-white'}
             `}
         >
