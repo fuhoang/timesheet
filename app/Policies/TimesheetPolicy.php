@@ -29,8 +29,7 @@ class TimesheetPolicy
      */
     public function view(User $user, Timesheet $timesheet): bool
     {
-        return $user->id === $timesheet->user_id
-            || $user->is_admin;
+        return $user->id === $timesheet->user_id;
     }
 
     /**
@@ -38,17 +37,8 @@ class TimesheetPolicy
      */
     public function update(User $user, Timesheet $timesheet): bool
     {
-        // Owner only
-        if ($user->id !== $timesheet->user_id) {
-            return false;
-        }
-
-        // Locked timesheets cannot be edited
-        if ($timesheet->isLocked()) {
-            return false;
-        }
-
-        return true;
+        return $timesheet->user_id === $user->id
+            && in_array($timesheet->status, ['draft', 'rejected']);
     }
 
     /**

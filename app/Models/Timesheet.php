@@ -108,10 +108,7 @@ class Timesheet extends Model
      */
     public function isLocked(): bool
     {
-        return in_array($this->status, [
-            'submitted',
-            'approved',
-        ], true);
+        return $this->status === 'approved';
     }
 
     /* ---------------------------------------------

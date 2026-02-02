@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Timesheet;
+use App\Models\TimeEntry;
 use Illuminate\Http\Request;
 
 class TimeEntryController extends Controller
@@ -83,6 +83,63 @@ class TimeEntryController extends Controller
 
         return response()->json($entry);
     }
+
+
+    public function update(Request $request, TimeEntry $timeEntry)
+    {
+        $timesheet = $timeEntry->timesheet;
+
+        if (!$timesheet) {
+            abort(404, 'Timesheet not found');
+        }
+
+        // 🔐 Authorize against TIMESHEET
+        $this->authorize('update', $timesheet);
+
+        // ❌ Approved timesheets are immutable
+        if ($timesheet->status === 'approved') {
+            return response()->json([
+                'message' => 'Approved timesheets cannot be edited',
+            ], 403);
+        }
+
+        $data = $request->validate([
+            'description' => 'nullable|string|max:500',
+            'project_id'  => 'required|exists:projects,id',
+            'task_id'     => 'nullable|exists:tasks,id',
+            'duration_minutes' => 'required|integer|min:0',
+        ]);
+
+        // ✅ Update entry
+        $timeEntry->update($data);
+
+        /**
+         * 🔑 CRITICAL FIX
+         * If timesheet was rejected → reset it
+         */
+        if ($timesheet->status === 'rejected') {
+            $timesheet->update([
+                'status' => 'draft',
+                'rejection_reason' => null,
+                'submitted_at' => null,
+                'approved_at' => null,
+                'approved_by' => null,
+            ]);
+        }
+
+        // 🔄 Recalculate daily total
+        $timesheet->update([
+            'total_minutes' => $timesheet->entries()->sum('duration_minutes'),
+        ]);
+
+        return response()->json([
+            'entry' => $timeEntry->fresh('project', 'task'),
+            'timesheet_status' => $timesheet->status,
+        ]);
+    }
+
+
+
 
     /**
      * Get currently running entry (if any)

@@ -21,6 +21,7 @@ class TimesheetController extends Controller
             ],
             [
                 'total_minutes' => 0,
+                'status' => 'draft',
             ]
         );
 
@@ -30,15 +31,18 @@ class TimesheetController extends Controller
             'id' => $timesheet->id,
             'work_date' => $timesheet->work_date,
             'total_minutes' => $timesheet->entries->sum('duration_minutes'),
+            'status' => $timesheet->status,
             'submitted' => $timesheet->submitted_at !== null,
+            'rejection_reason' => $timesheet->rejection_reason,
             'entries' => $timesheet->entries,
         ]);
     }
+
     public function week(Request $request)
     {
         $user = $request->user();
 
-        // offset in weeks from current week (0 = this week, -1 = previous week, 1 = next week)
+        // offset in weeks (0 = current week)
         $offset = (int) $request->query('offset', 0);
         $baseDate = now()->addWeeks($offset);
 
@@ -48,10 +52,14 @@ class TimesheetController extends Controller
         $timesheets = Timesheet::where('user_id', $user->id)
             ->whereBetween('work_date', [$start, $end])
             ->with('entries.project')
-            ->get()
-            ->keyBy(fn ($t) => $t->work_date->toDateString());
+            ->orderBy('work_date')
+            ->get();
 
-        $submitted = $timesheets->first()?->submitted_at !== null;
+        /**
+         * Determine WEEK-LEVEL STATE
+         * (admin approves/rejects at week level)
+         */
+        $weekSheet = $timesheets->first(fn ($t) => $t->submitted_at !== null);
 
         $days = [];
         $weeklyTotal = 0;
@@ -59,7 +67,9 @@ class TimesheetController extends Controller
         for ($i = 0; $i < 7; $i++) {
             $date = $start->copy()->addDays($i)->toDateString();
 
-            $sheet = $timesheets[$date] ?? null;
+            $sheet = $timesheets->firstWhere(
+                fn ($t) => $t->work_date->toDateString() === $date
+            );
 
             $total = $sheet?->entries->sum('duration_minutes') ?? 0;
 
@@ -67,7 +77,7 @@ class TimesheetController extends Controller
 
             $days[] = [
                 'date' => $date,
-                'label' => \Carbon\Carbon::parse($date)->format('D d M'),
+                'label' => Carbon::parse($date)->format('D d M'),
                 'total_minutes' => $total,
                 'entries' => $sheet?->entries ?? [],
             ];
@@ -76,13 +86,18 @@ class TimesheetController extends Controller
         return response()->json([
             'week_start' => $start->toDateString(),
             'week_end' => $end->toDateString(),
+
+            // 🔑 REQUIRED BY UI
+            'status' => $weekSheet?->status ?? 'draft',
+            'submitted' => $weekSheet !== null,
+            'submitted_at' => $weekSheet?->submitted_at,
+            'approved_at' => $weekSheet?->approved_at,
+            'rejection_reason' => $weekSheet?->rejection_reason,
+
             'weekly_total_minutes' => $weeklyTotal,
-            'submitted' => $submitted,
             'days' => $days,
         ]);
     }
-
-
 
     public function submitWeek(Request $request)
     {
@@ -92,7 +107,7 @@ class TimesheetController extends Controller
         $end   = Carbon::parse($request->week_start)->endOfWeek();
 
         /* ----------------------------------------
-            1. AUTO-STOP RUNNING TIMER
+           AUTO-STOP RUNNING TIMER
         ---------------------------------------- */
 
         $running = TimeEntry::where('user_id', $user->id)
@@ -113,11 +128,12 @@ class TimesheetController extends Controller
         Timesheet::where('user_id', $user->id)
             ->whereBetween('work_date', [$start, $end])
             ->update([
-                'submitted' => true,
+                'status' => 'submitted',
                 'submitted_at' => now(),
             ]);
 
-        return response()->json(['status' => 'submitted']);
+        return response()->json([
+            'status' => 'submitted',
+        ]);
     }
-
 }

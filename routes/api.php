@@ -36,6 +36,7 @@ Route::middleware(['web'])->group(function () {
             Route::post('start', [TimeEntryController::class, 'start']);
             Route::post('stop', [TimeEntryController::class, 'stop']);
             Route::get('running', [TimeEntryController::class, 'running']);
+            Route::patch('{timeEntry}', [TimeEntryController::class, 'update']);
         });
     });
 
