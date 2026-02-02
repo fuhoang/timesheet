@@ -7,6 +7,8 @@ export default function WeekHeader({
     submitWeek,
     submitting
 }) {
+
+    console.log(week);
     return (
         <div className="bg-white p-6 rounded-2xl shadow border flex justify-between items-center">
             <div>

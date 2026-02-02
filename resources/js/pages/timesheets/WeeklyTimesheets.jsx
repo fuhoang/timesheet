@@ -113,6 +113,7 @@ export default function WeeklyTimesheet() {
                         isToday={day.date === today}
                         locked={locked}
                         onUpdated={loadWeek}
+                        isWeekRejected={week.status === 'rejected'}
                     />
                 ))}
             </div>

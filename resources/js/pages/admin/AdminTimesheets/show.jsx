@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../../../context/ApiContext';
+import { formatDate } from '../../../utils/date';
 import RejectModal from './RejectModal';
+
 
 export default function AdminTimesheetShow() {
     const { id } = useParams();
@@ -122,7 +124,7 @@ export default function AdminTimesheetShow() {
                     Review Timesheet
                 </h1>
                 <p className="text-gray-600 mt-1">
-                    {timesheet.user.name} · {timesheet.work_date}
+                    {timesheet.user.name} · {formatDate(timesheet.work_date)} 
                 </p>
             </div>
 
