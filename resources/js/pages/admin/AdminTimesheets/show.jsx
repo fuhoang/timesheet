@@ -133,7 +133,7 @@ export default function AdminTimesheetShow() {
                     <StatusBadge status={timesheet.status} />
                 </span>
 
-                {timesheet.status === 'draft' && (
+                {timesheet.status === 'submitted' && (
                     <div className="flex space-x-2">
                         <button
                             onClick={approveTimesheet}
