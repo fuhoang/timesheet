@@ -107,7 +107,7 @@ export default function Dashboard() {
                                     </div>
 
                                     <div className="text-right">
-                                        {entry.duration_minutes ? (
+                                        {entry.ended_at ? (
                                             <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
                                                 {formatMinutes(entry.duration_minutes)}
                                             </span>
