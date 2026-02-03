@@ -80,7 +80,7 @@ class TimesheetPolicy
     {
         return
             $user->is_admin &&
-            $timesheet->isSubmitted();
+            ($timesheet->isSubmitted() || ($timesheet->status === 'draft' && $timesheet->submitted_at !== null));
     }
 
     /**
@@ -90,7 +90,7 @@ class TimesheetPolicy
     {
         return
             $user->is_admin &&
-            $timesheet->isSubmitted();
+            ($timesheet->isSubmitted() || ($timesheet->status === 'draft' && $timesheet->submitted_at !== null));
     }
 
     /**

@@ -44,7 +44,7 @@ class AdminTimesheetController extends Controller
 
         $timesheets = Timesheet::whereIn('id', $ids)->get();
 
-        $eligible = $timesheets->where('status', 'submitted');
+        $eligible = $timesheets->filter(fn ($t) => $t->approved_at === null && $t->submitted_at !== null);
 
         if ($eligible->isEmpty()) {
             return response()->json([
@@ -88,7 +88,7 @@ class AdminTimesheetController extends Controller
 
         $timesheets = Timesheet::whereIn('id', $ids)->get();
 
-        $eligible = $timesheets->where('status', 'submitted');
+        $eligible = $timesheets->filter(fn ($t) => $t->approved_at === null && $t->submitted_at !== null);
 
         if ($eligible->isEmpty()) {
             return response()->json([

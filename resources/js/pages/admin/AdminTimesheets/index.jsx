@@ -31,25 +31,25 @@ export default function AdminTimesheets() {
         }
     }
 
-    const submittedIds = timesheets
-        .filter(ts => ts.status === 'submitted')
+    const reviewableIds = timesheets
+        .filter(ts => ts.submitted_at && ts.status !== 'approved')
         .map(ts => ts.id);
 
     const allSubmittedSelected =
-        submittedIds.length > 0 &&
-        submittedIds.every(id => selectedIds.includes(id));
+        reviewableIds.length > 0 &&
+        reviewableIds.every(id => selectedIds.includes(id));
 
     function toggleSelectAllSubmitted() {
         if (allSubmittedSelected) {
             setSelectedIds(prev =>
-                prev.filter(id => !submittedIds.includes(id))
+                prev.filter(id => !reviewableIds.includes(id))
             );
             return;
         }
 
         setSelectedIds(prev => {
             const next = new Set(prev);
-            submittedIds.forEach(id => next.add(id));
+            reviewableIds.forEach(id => next.add(id));
             return Array.from(next);
         });
     }
@@ -181,7 +181,7 @@ export default function AdminTimesheets() {
                                     <td className="px-4 py-3">
                                         <input
                                             type="checkbox"
-                                            disabled={ts.status !== 'submitted'}
+                                            disabled={!ts.submitted_at || ts.status === 'approved'}
                                             checked={selectedIds.includes(ts.id)}
                                             onChange={() => toggleSelectOne(ts.id)}
                                         />
