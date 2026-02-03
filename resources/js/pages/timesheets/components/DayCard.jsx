@@ -78,13 +78,6 @@ export default function DayCard({ day, isToday, locked, onUpdated, isWeekRejecte
                 </div>
             </div>
 
-            {/* Rejection reason */}
-            {isRejected && day.rejection_reason && (
-                <div className="px-6 py-3 text-sm bg-red-100 text-red-800 border-b">
-                    <strong>Reason:</strong> {day.rejection_reason}
-                </div>
-            )}
-
             {/* Entries */}
             {day.entries.length === 0 ? (
                 <div className="px-6 py-4 text-sm text-gray-400">
