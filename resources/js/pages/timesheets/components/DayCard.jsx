@@ -160,7 +160,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
                                             {formatMinutes(entry.duration_minutes)}
                                         </div>
 
-                                        {!locked && (
+                                        {(!locked || isRejected) && (
                                             <button
                                                 onClick={() => startEdit(entry)}
                                                 className="text-indigo-600 hover:underline mt-1"
