@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TimesheetController;
 use App\Http\Controllers\Api\TimeEntryController;
 use App\Http\Controllers\Api\Admin\AdminTimesheetController;
+use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\Admin\AdminProjectController;
 
 
@@ -23,8 +24,8 @@ Route::middleware(['web'])->group(function () {
     // Authenticated users
     Route::middleware(['auth:sanctum'])->group(function () {
 
-        // Projects
-        Route::apiResource('projects', AdminProjectController::class)->only(['index', 'store', 'update', 'destroy']);
+        // Projects (non-admin list)
+        Route::apiResource('projects', ProjectController::class)->only(['index']);
 
         // Timesheets
         Route::get('/timesheets/today', [TimesheetController::class, 'today']);
@@ -42,6 +43,9 @@ Route::middleware(['web'])->group(function () {
 
     // Admin-only routes
     Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+        // Projects
+        Route::apiResource('projects', AdminProjectController::class)->only(['index', 'store', 'update', 'destroy']);
+
         // Timesheets
         Route::get('/timesheets', [AdminTimesheetController::class, 'index']);
         Route::get('/timesheets/{timesheet}', [AdminTimesheetController::class, 'show']);

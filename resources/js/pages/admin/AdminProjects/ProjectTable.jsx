@@ -5,7 +5,7 @@ export default function ProjectTable({ projects, api, reloadProjects, setEditing
         if (!confirm('Delete this project?')) return;
 
         try {
-            await api({ method: 'delete', url: `/api/projects/${id}` });
+            await api({ method: 'delete', url: `/api/admin/projects/${id}` });
             await reloadProjects();
             showToast('Project deleted');
         } catch (err) {
