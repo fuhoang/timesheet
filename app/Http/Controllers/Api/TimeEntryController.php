@@ -115,16 +115,22 @@ class TimeEntryController extends Controller
 
         /**
          * 🔑 CRITICAL FIX
-         * If timesheet was rejected → reset it
+         * If timesheet was rejected → reset the whole week
+         * so the week unlocks after the user edits.
          */
         if ($timesheet->status === 'rejected') {
-            $timesheet->update([
-                'status' => 'draft',
-                'rejection_reason' => null,
-                'submitted_at' => null,
-                'approved_at' => null,
-                'approved_by' => null,
-            ]);
+            $start = $timesheet->work_date->copy()->startOfWeek();
+            $end = $timesheet->work_date->copy()->endOfWeek();
+
+            Timesheet::where('user_id', $timesheet->user_id)
+                ->whereBetween('work_date', [$start, $end])
+                ->update([
+                    'status' => 'draft',
+                    'rejection_reason' => null,
+                    'submitted_at' => null,
+                    'approved_at' => null,
+                    'approved_by' => null,
+                ]);
         }
 
         // 🔄 Recalculate daily total
