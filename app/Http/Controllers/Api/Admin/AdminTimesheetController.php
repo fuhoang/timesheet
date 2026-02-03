@@ -28,6 +28,90 @@ class AdminTimesheetController extends Controller
     }
 
     /**
+     * Bulk approve submitted timesheets
+     */
+    public function bulkApprove(Request $request)
+    {
+        $this->authorize('viewAny', Timesheet::class);
+
+        $data = $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:timesheets,id',
+        ]);
+
+        $ids = array_values(array_unique($data['ids']));
+
+        $timesheets = Timesheet::whereIn('id', $ids)->get();
+
+        $eligible = $timesheets->where('status', 'submitted');
+
+        if ($eligible->isEmpty()) {
+            return response()->json([
+                'message' => 'No submitted timesheets to approve',
+            ], 422);
+        }
+
+        $now = now();
+        $adminId = $request->user()->id;
+
+        foreach ($eligible as $timesheet) {
+            $timesheet->update([
+                'status' => 'approved',
+                'approved_at' => $now,
+                'approved_by' => $adminId,
+                'rejection_reason' => null,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Timesheets approved',
+            'approved_count' => $eligible->count(),
+            'skipped_count' => $timesheets->count() - $eligible->count(),
+        ]);
+    }
+
+    /**
+     * Bulk reject submitted timesheets
+     */
+    public function bulkReject(Request $request)
+    {
+        $this->authorize('viewAny', Timesheet::class);
+
+        $data = $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:timesheets,id',
+            'reason' => 'required|string|max:500',
+        ]);
+
+        $ids = array_values(array_unique($data['ids']));
+
+        $timesheets = Timesheet::whereIn('id', $ids)->get();
+
+        $eligible = $timesheets->where('status', 'submitted');
+
+        if ($eligible->isEmpty()) {
+            return response()->json([
+                'message' => 'No submitted timesheets to reject',
+            ], 422);
+        }
+
+        foreach ($eligible as $timesheet) {
+            $timesheet->update([
+                'status' => 'rejected',
+                'rejection_reason' => $data['reason'],
+                'approved_at' => null,
+                'approved_by' => null,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Timesheets rejected',
+            'rejected_count' => $eligible->count(),
+            'skipped_count' => $timesheets->count() - $eligible->count(),
+        ]);
+    }
+
+    /**
      * View a single timesheet (read-only)
      */
     public function show(Timesheet $timesheet)

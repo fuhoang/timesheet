@@ -48,6 +48,8 @@ Route::middleware(['web'])->group(function () {
 
         // Timesheets
         Route::get('/timesheets', [AdminTimesheetController::class, 'index']);
+        Route::post('/timesheets/bulk-approve', [AdminTimesheetController::class, 'bulkApprove']);
+        Route::post('/timesheets/bulk-reject', [AdminTimesheetController::class, 'bulkReject']);
         Route::get('/timesheets/{timesheet}', [AdminTimesheetController::class, 'show']);
         Route::post('/timesheets/{timesheet}/approve', [AdminTimesheetController::class, 'approve']);
         Route::post('/timesheets/{timesheet}/reject', [AdminTimesheetController::class, 'reject']);
