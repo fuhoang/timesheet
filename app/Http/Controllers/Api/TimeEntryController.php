@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\TimeEntry;
+use App\Models\Timesheet;
 use Illuminate\Http\Request;
 
 class TimeEntryController extends Controller
