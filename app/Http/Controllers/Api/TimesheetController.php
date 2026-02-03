@@ -57,8 +57,24 @@ class TimesheetController extends Controller
 
         /**
          * Determine WEEK-LEVEL STATE
-         * (admin approves/rejects at week level)
+         * Locked if any day is submitted/approved/rejected.
+         * Rejected remains locked until all rejected days are edited.
          */
+        $hasSubmitted = $timesheets->contains('status', 'submitted');
+        $hasApproved = $timesheets->contains('status', 'approved');
+        $hasRejected = $timesheets->contains('status', 'rejected');
+        $locked = $hasSubmitted || $hasApproved || $hasRejected;
+
+        if ($hasApproved) {
+            $weekStatus = 'approved';
+        } elseif ($hasSubmitted) {
+            $weekStatus = 'submitted';
+        } elseif ($hasRejected) {
+            $weekStatus = 'rejected';
+        } else {
+            $weekStatus = 'draft';
+        }
+
         $weekSheet = $timesheets->first(fn ($t) => $t->submitted_at !== null);
 
         $days = [];
@@ -80,6 +96,8 @@ class TimesheetController extends Controller
                 'label' => Carbon::parse($date)->format('D d M'),
                 'total_minutes' => $total,
                 'entries' => $sheet?->entries ?? [],
+                'status' => $sheet?->status ?? 'draft',
+                'rejection_reason' => $sheet?->rejection_reason,
             ];
         }
 
@@ -88,8 +106,10 @@ class TimesheetController extends Controller
             'week_end' => $end->toDateString(),
 
             // 🔑 REQUIRED BY UI
-            'status' => $weekSheet?->status ?? 'draft',
-            'submitted' => $weekSheet !== null,
+            'status' => $weekStatus,
+            'submitted' => $hasSubmitted,
+            'locked' => $locked,
+            'can_submit' => ! $locked,
             'submitted_at' => $weekSheet?->submitted_at,
             'approved_at' => $weekSheet?->approved_at,
             'rejection_reason' => $weekSheet?->rejection_reason,

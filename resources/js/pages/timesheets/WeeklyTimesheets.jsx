@@ -56,9 +56,7 @@ export default function WeeklyTimesheet() {
 
     if (loading) return <PageSkeleton />;
 
-    const locked =
-    week.status === 'approved' ||
-    week.status === 'submitted';
+    const locked = !!week.locked;
 
 
     const isApproved = week.status === 'approved';
@@ -113,7 +111,6 @@ export default function WeeklyTimesheet() {
                         isToday={day.date === today}
                         locked={locked}
                         onUpdated={loadWeek}
-                        isWeekRejected={week.status === 'rejected'}
                     />
                 ))}
             </div>
