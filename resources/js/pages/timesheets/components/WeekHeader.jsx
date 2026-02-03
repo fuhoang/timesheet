@@ -17,7 +17,7 @@ export default function WeekHeader({
                     {week.week_start} → {week.week_end}
                 </p>
 
-                {!week.submitted ? (
+                {week.can_submit ? (
                     <button
                         onClick={submitWeek}
                         disabled={submitting}

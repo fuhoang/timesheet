@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
 
-export default function DayCard({ day, isToday, locked, onUpdated, isWeekRejected }) {
+export default function DayCard({ day, isToday, locked, onUpdated }) {
     const { api } = useApi();
     const [editingId, setEditingId] = useState(null);
     const [description, setDescription] = useState('');
     const [minutes, setMinutes] = useState('');
     const [projectId, setProjectId] = useState('');
 
-    const isRejected = isWeekRejected;
+    const isRejected = day.status === 'rejected';
 
 
     // Need to think if indivdual entries show be highlighted because admin reject individual entires
@@ -77,6 +77,13 @@ export default function DayCard({ day, isToday, locked, onUpdated, isWeekRejecte
                     {formatMinutes(day.total_minutes)}
                 </div>
             </div>
+
+            {/* Rejection reason */}
+            {isRejected && day.rejection_reason && (
+                <div className="px-6 py-3 text-sm bg-red-100 text-red-800 border-b">
+                    <strong>Reason:</strong> {day.rejection_reason}
+                </div>
+            )}
 
             {/* Entries */}
             {day.entries.length === 0 ? (
