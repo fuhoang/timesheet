@@ -48,6 +48,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
 
     return (
         <div
+            id={`day-${day.date}`}
             className={`
                 relative rounded-2xl shadow border
                 ${isToday && !isRejected ? 'bg-blue-50 border-blue-400' : 'bg-white'}
