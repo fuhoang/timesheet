@@ -17,6 +17,10 @@ export default function AdminTimesheetShow() {
     const [showReject, setShowReject] = useState(false);
     const [rejecting, setRejecting] = useState(false);
     const [rejectError, setRejectError] = useState(null);
+    const [dayNote, setDayNote] = useState('');
+    const [savingDayNote, setSavingDayNote] = useState(false);
+    const [savingEntryId, setSavingEntryId] = useState(null);
+    const [entryNotes, setEntryNotes] = useState({});
 
     /* ---------------- Load timesheet ---------------- */
 
@@ -32,6 +36,12 @@ export default function AdminTimesheetShow() {
                 url: `/api/admin/timesheets/${id}`,
             });
             setTimesheet(res);
+            setDayNote(res.admin_note || '');
+            const notes = {};
+            (res.entries || []).forEach(entry => {
+                notes[entry.id] = entry.admin_note || '';
+            });
+            setEntryNotes(notes);
         } catch (err) {
             navigate('/admin/timesheets');
         } finally {
@@ -95,6 +105,54 @@ export default function AdminTimesheetShow() {
         }
     }
 
+    /* ---------------- Day note ---------------- */
+
+    async function saveDayNote() {
+        if (!timesheet || savingDayNote) return;
+
+        setSavingDayNote(true);
+        try {
+            const res = await api({
+                method: 'patch',
+                url: `/api/admin/timesheets/${id}/note`,
+                data: { admin_note: dayNote },
+            });
+
+            setTimesheet(prev => ({
+                ...prev,
+                admin_note: res.timesheet?.admin_note ?? dayNote,
+            }));
+        } finally {
+            setSavingDayNote(false);
+        }
+    }
+
+    /* ---------------- Entry note ---------------- */
+
+    async function saveEntryNote(entryId) {
+        if (!entryId || savingEntryId) return;
+
+        setSavingEntryId(entryId);
+        try {
+            const res = await api({
+                method: 'patch',
+                url: `/api/admin/time-entries/${entryId}/note`,
+                data: { admin_note: entryNotes[entryId] || '' },
+            });
+
+            setTimesheet(prev => ({
+                ...prev,
+                entries: prev.entries.map(entry =>
+                    entry.id === entryId
+                        ? { ...entry, admin_note: res.entry?.admin_note ?? entryNotes[entryId] }
+                        : entry
+                ),
+            }));
+        } finally {
+            setSavingEntryId(null);
+        }
+    }
+
     /* ---------------- Render states ---------------- */
 
     if (loading) {
@@ -155,6 +213,26 @@ export default function AdminTimesheetShow() {
                 )}
             </div>
 
+            {/* Admin note for day */}
+            <div className="bg-white p-4 rounded-2xl shadow border space-y-3">
+                <div className="font-medium">Admin note (day)</div>
+                <textarea
+                    className="w-full min-h-24 border rounded-lg px-3 py-2 focus:outline-none focus:ring"
+                    value={dayNote}
+                    onChange={e => setDayNote(e.target.value)}
+                    placeholder="Optional note for this day..."
+                />
+                <div className="flex justify-end">
+                    <button
+                        onClick={saveDayNote}
+                        disabled={savingDayNote}
+                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                    >
+                        {savingDayNote ? 'Saving…' : 'Save note'}
+                    </button>
+                </div>
+            </div>
+
             {/* Entries */}
             <div className="bg-white rounded-2xl shadow border overflow-hidden">
                 <div className="p-4 font-semibold border-b">
@@ -167,6 +245,8 @@ export default function AdminTimesheetShow() {
                             <th className="px-4 py-3 text-left">Project</th>
                             <th className="px-4 py-3 text-left">Description</th>
                             <th className="px-4 py-3 text-right">Minutes</th>
+                            <th className="px-4 py-3 text-left">Admin Note</th>
+                            <th className="px-4 py-3 text-right"></th>
                         </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -180,6 +260,28 @@ export default function AdminTimesheetShow() {
                                 </td>
                                 <td className="px-4 py-3 text-right">
                                     {entry.duration_minutes}
+                                </td>
+                                <td className="px-4 py-3">
+                                    <textarea
+                                        className="w-full min-h-16 border rounded px-2 py-1"
+                                        value={entryNotes[entry.id] ?? ''}
+                                        onChange={e =>
+                                            setEntryNotes(prev => ({
+                                                ...prev,
+                                                [entry.id]: e.target.value,
+                                            }))
+                                        }
+                                        placeholder="Optional note..."
+                                    />
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                    <button
+                                        onClick={() => saveEntryNote(entry.id)}
+                                        disabled={savingEntryId === entry.id}
+                                        className="text-indigo-600 hover:underline disabled:opacity-60"
+                                    >
+                                        {savingEntryId === entry.id ? 'Saving…' : 'Save'}
+                                    </button>
                                 </td>
                             </tr>
                         ))}

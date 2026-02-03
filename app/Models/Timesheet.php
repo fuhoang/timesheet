@@ -25,6 +25,7 @@ class Timesheet extends Model
         'approved_at',
         'approved_by',
         'rejection_reason',
+        'admin_note',
     ];
 
     /* ---------------------------------------------

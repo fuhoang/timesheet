@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Timesheet;
+use App\Models\TimeEntry;
 use Illuminate\Http\Request;
 
 class AdminTimesheetController extends Controller
@@ -126,6 +127,48 @@ class AdminTimesheetController extends Controller
         ]);
 
         return response()->json($timesheet);
+    }
+
+    /**
+     * Update admin note for a day (timesheet)
+     */
+    public function updateNote(Request $request, Timesheet $timesheet)
+    {
+        $this->authorize('view', $timesheet);
+
+        $data = $request->validate([
+            'admin_note' => 'nullable|string|max:1000',
+        ]);
+
+        $timesheet->update([
+            'admin_note' => $data['admin_note'] ?? null,
+        ]);
+
+        return response()->json([
+            'message' => 'Admin note saved',
+            'timesheet' => $timesheet,
+        ]);
+    }
+
+    /**
+     * Update admin note for a time entry
+     */
+    public function updateEntryNote(Request $request, TimeEntry $timeEntry)
+    {
+        $this->authorize('viewAny', Timesheet::class);
+
+        $data = $request->validate([
+            'admin_note' => 'nullable|string|max:1000',
+        ]);
+
+        $timeEntry->update([
+            'admin_note' => $data['admin_note'] ?? null,
+        ]);
+
+        return response()->json([
+            'message' => 'Entry note saved',
+            'entry' => $timeEntry->fresh(),
+        ]);
     }
 
     /**
