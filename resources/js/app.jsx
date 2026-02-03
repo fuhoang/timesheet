@@ -17,7 +17,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Timesheets from './pages/timesheets';
 
-import AdminProjects from './pages/admin/AdminProjects';
+import AdminProjects from './pages/admin/AdminProjects/index';
 import AdminTimesheets from './pages/admin/AdminTimesheets/index';
 import AdminTimesheetShow from './pages/admin/AdminTimesheets/show';
 
