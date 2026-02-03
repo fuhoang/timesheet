@@ -123,7 +123,6 @@ class TimeEntryController extends Controller
             $timesheet->update([
                 'status' => 'draft',
                 'rejection_reason' => null,
-                'submitted_at' => null,
                 'approved_at' => null,
                 'approved_by' => null,
             ]);
