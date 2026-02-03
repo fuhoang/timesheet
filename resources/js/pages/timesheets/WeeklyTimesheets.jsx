@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useApi } from '../../context/ApiContext';
 import { PageSkeleton } from '../../components/skeletons/PageSkeleton';
 
@@ -18,6 +18,20 @@ export default function WeeklyTimesheet() {
     useEffect(() => {
         loadWeek();
     }, [offset]);
+
+    const firstRejectedDate = useMemo(() => {
+        if (!week?.days?.length) return null;
+        const rejected = week.days.find(day => day.status === 'rejected');
+        return rejected?.date || null;
+    }, [week]);
+
+    useEffect(() => {
+        if (!firstRejectedDate) return;
+        const el = document.getElementById(`day-${firstRejectedDate}`);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [firstRejectedDate]);
 
     async function loadWeek() {
         setLoading(true);
