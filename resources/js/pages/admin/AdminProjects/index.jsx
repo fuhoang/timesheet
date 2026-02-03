@@ -21,7 +21,7 @@ export default function AdminProjects() {
     try {
         await api({
             method: 'patch',
-            url: `/api/projects/${editingProject.id}`,
+            url: `/api/admin/projects/${editingProject.id}`,
             data,
         });
         setEditingProject(null);

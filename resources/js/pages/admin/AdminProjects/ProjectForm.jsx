@@ -29,14 +29,14 @@ export default function ProjectForm({ api, reloadProjects, editingProject, setEd
             if (editingProject) {
                 await api({
                     method: 'patch',
-                    url: `/api/projects/${editingProject.id}`,
+                    url: `/api/admin/projects/${editingProject.id}`,
                     data: { name, description },
                 });
                 showToast('Project updated successfully');
             } else {
                 await api({
                     method: 'post',
-                    url: '/api/projects',
+                    url: '/api/admin/projects',
                     data: { name, description },
                 });
                 showToast('Project created successfully');

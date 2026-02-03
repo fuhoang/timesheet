@@ -34,7 +34,8 @@ export function ProjectProvider({ children }) {
     async function loadProjects() {
         setLoading(true);
         try {
-            const data = await api({ method: 'get', url: '/api/projects' });
+            const url = user?.is_admin ? '/api/admin/projects' : '/api/projects';
+            const data = await api({ method: 'get', url });
             setProjects(data ?? []);
         } catch (err) {
             console.error('Failed to load projects', err);
