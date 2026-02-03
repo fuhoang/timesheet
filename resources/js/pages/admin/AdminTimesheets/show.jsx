@@ -190,7 +190,7 @@ export default function AdminTimesheetShow() {
             <div className="bg-white p-4 rounded-2xl shadow border flex items-center justify-between">
                 <span className="font-medium">
                     Status:
-                    <StatusBadge status={timesheet.status} />
+                    <StatusBadge status={timesheet.status === 'draft' && timesheet.submitted_at ? 'resubmitted' : timesheet.status} />
                 </span>
 
                 {timesheet.submitted_at && timesheet.status !== 'approved' && (
@@ -308,17 +308,20 @@ export default function AdminTimesheetShow() {
 
 function StatusBadge({ status }) {
     const styles = {
+        resubmitted: 'bg-blue-100 text-blue-800',
         draft: 'bg-gray-100 text-gray-700',
         submitted: 'bg-yellow-100 text-yellow-800',
         approved: 'bg-green-100 text-green-800',
         rejected: 'bg-red-100 text-red-800',
     };
 
+    const label = status === 'resubmitted' ? 'resubmitted' : status;
+
     return (
         <span
-            className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${styles[status]}`}
+            className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${styles[label] || styles[status]}`}
         >
-            {status}
+            {label}
         </span>
     );
 }
