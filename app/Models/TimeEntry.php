@@ -18,6 +18,7 @@ class TimeEntry extends Model
         'ended_at',
         'duration_minutes',
         'description',
+        'admin_note',
     ];
 
     protected $casts = [
