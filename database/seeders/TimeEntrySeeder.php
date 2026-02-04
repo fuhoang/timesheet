@@ -14,23 +14,11 @@ class TimeEntrySeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::where('email', 'user@test.com')->first();
-        $project = Project::first();
+        $users = User::all();
+        $fallbackProject = Project::first();
 
-        if (!$user || !$project) {
+        if ($users->isEmpty() || !$fallbackProject) {
             $this->command->warn('User or Project missing. Skipping TimeEntrySeeder.');
-            return;
-        }
-
-        $timesheet = Timesheet::firstOrCreate([
-            'user_id' => $user->id,
-            'work_date' => now()->toDateString(),
-        ], [
-            'status' => 'draft',
-            'total_minutes' => 0,
-        ]);
-
-        if ($timesheet->entries()->exists()) {
             return;
         }
 
@@ -49,22 +37,38 @@ class TimeEntrySeeder extends Seeder
             ],
         ];
 
-        foreach ($entries as $data) {
-            $payload = array_merge($data, [
-                'user_id' => $timesheet->user_id,
-                'timesheet_id' => $timesheet->id,
-                'project_id' => $project->id,
+        foreach ($users as $user) {
+            $project = Project::where('user_id', $user->id)->first() ?? $fallbackProject;
+
+            $timesheet = Timesheet::firstOrCreate([
+                'user_id' => $user->id,
+                'work_date' => now()->toDateString(),
+            ], [
+                'status' => 'draft',
+                'total_minutes' => 0,
             ]);
 
-            if (Schema::hasColumn('time_entries', 'admin_note')) {
-                $payload['admin_note'] = 'Seeded entry note';
+            if ($timesheet->entries()->exists()) {
+                continue;
             }
 
-            TimeEntry::create($payload);
-        }
+            foreach ($entries as $data) {
+                $payload = array_merge($data, [
+                    'user_id' => $timesheet->user_id,
+                    'timesheet_id' => $timesheet->id,
+                    'project_id' => $project->id,
+                ]);
 
-        $timesheet->update([
-            'total_minutes' => $timesheet->entries()->sum('duration_minutes'),
-        ]);
+                if (Schema::hasColumn('time_entries', 'admin_note')) {
+                    $payload['admin_note'] = 'Seeded entry note';
+                }
+
+                TimeEntry::create($payload);
+            }
+
+            $timesheet->update([
+                'total_minutes' => $timesheet->entries()->sum('duration_minutes'),
+            ]);
+        }
     }
 }

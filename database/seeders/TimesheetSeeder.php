@@ -14,96 +14,93 @@ class TimesheetSeeder extends Seeder
     public function run(): void
     {
         $admin = User::where('email', 'admin@test.com')->first();
-        $user = User::where('email', 'user@test.com')->first();
+        $users = User::all();
         $project = Project::first();
 
-        if (!$user || !$project) {
+        if ($users->isEmpty() || !$project) {
             $this->command->error('User or Project missing.');
             return;
         }
 
-        $users = collect([$user])->filter();
+        $startDate = Carbon::now()->subDays(30)->startOfDay();
+        $endDate = Carbon::now()->startOfDay();
 
-        // last 2 weeks (Mon–Fri)
-        for ($week = 0; $week < 2; $week++) {
+        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+            // skip weekends
+            if ($date->isWeekend()) {
+                continue;
+            }
 
-            for ($day = 1; $day <= 5; $day++) {
+            foreach ($users as $seedUser) {
+                $userProject = Project::where('user_id', $seedUser->id)->first() ?? $project;
+                $timesheet = Timesheet::updateOrCreate([
+                    'user_id' => $seedUser->id,
+                    'work_date' => $date->toDateString(),
+                ], [
+                    'total_minutes' => 0,
+                    'status' => 'draft',
+                ]);
 
-                $date = Carbon::now()
-                    ->startOfWeek()
-                    ->subWeeks($week)
-                    ->addDays($day - 1);
+                if ($timesheet->entries()->count() === 0) {
+                    $total = 0;
 
-                foreach ($users as $seedUser) {
-                    $timesheet = Timesheet::updateOrCreate([
-                        'user_id' => $seedUser->id,
-                        'work_date' => $date->toDateString(),
-                    ], [
-                        'total_minutes' => 0,
-                        'status' => 'draft',
+                    // create 2 entries per day
+                    for ($i = 0; $i < 2; $i++) {
+                        $start = $date->copy()->setTime(9 + ($i * 2), 0);
+                        $end   = $start->copy()->addMinutes(90);
+
+                        $minutes = $start->diffInMinutes($end);
+                        $total += $minutes;
+
+                        $timesheet->entries()->create([
+                            'user_id' => $seedUser->id,
+                            'project_id' => $userProject->id,
+                            'description' => 'Seeded work entry',
+                            'started_at' => $start,
+                            'ended_at' => $end,
+                            'duration_minutes' => $minutes,
+                        ]);
+                    }
+
+                    $timesheet->update([
+                        'total_minutes' => $total,
                     ]);
+                }
 
-                    if ($timesheet->entries()->count() === 0) {
-                        $total = 0;
+                // Set some example statuses in the recent range
+                if ($date->isSameDay($endDate->copy()->subDays(2))) {
+                    $timesheet->update([
+                        'status' => 'submitted',
+                        'submitted_at' => now(),
+                    ]);
+                }
 
-                        // create 2 entries per day
-                        for ($i = 0; $i < 2; $i++) {
-                            $start = $date->copy()->setTime(9 + ($i * 2), 0);
-                            $end   = $start->copy()->addMinutes(90);
+                if ($date->isSameDay($endDate->copy()->subDays(10))) {
+                    $timesheet->update([
+                        'status' => 'rejected',
+                        'submitted_at' => now(),
+                        'rejection_reason' => 'Please clarify description',
+                    ]);
+                }
 
-                            $minutes = $start->diffInMinutes($end);
-                            $total += $minutes;
+                if ($date->isSameDay($endDate->copy()->subDays(15)) && $admin) {
+                    $timesheet->update([
+                        'status' => 'approved',
+                        'submitted_at' => now(),
+                        'approved_at' => now(),
+                        'approved_by' => $admin->id,
+                        'rejection_reason' => null,
+                    ]);
+                }
 
-                            $timesheet->entries()->create([
-                                'user_id' => $seedUser->id,
-                                'project_id' => $project->id,
-                                'description' => 'Seeded work entry',
-                                'started_at' => $start,
-                                'ended_at' => $end,
-                                'duration_minutes' => $minutes,
-                            ]);
-                        }
-
-                        $timesheet->update([
-                            'total_minutes' => $total,
-                        ]);
-                    }
-
-                    // Set some example statuses on last week
-                    if ($week === 0 && $day === 5) {
-                        $timesheet->update([
-                            'status' => 'submitted',
-                            'submitted_at' => now(),
-                        ]);
-                    }
-
-                    if ($week === 1 && $day === 3) {
-                        $timesheet->update([
-                            'status' => 'rejected',
-                            'submitted_at' => now(),
-                            'rejection_reason' => 'Please clarify description',
-                        ]);
-                    }
-
-                    if ($week === 1 && $day === 4 && $admin) {
-                        $timesheet->update([
-                            'status' => 'approved',
-                            'submitted_at' => now(),
-                            'approved_at' => now(),
-                            'approved_by' => $admin->id,
-                            'rejection_reason' => null,
-                        ]);
-                    }
-
-                    if (Schema::hasColumn('timesheets', 'admin_note')) {
-                        $timesheet->update([
-                            'admin_note' => 'Seeded admin note',
-                        ]);
-                    }
+                if (Schema::hasColumn('timesheets', 'admin_note')) {
+                    $timesheet->update([
+                        'admin_note' => 'Seeded admin note',
+                    ]);
                 }
             }
         }
 
-        $this->command->info('2 weeks of timesheets seeded successfully.');
+        $this->command->info('30 days of timesheets seeded successfully.');
     }
 }
