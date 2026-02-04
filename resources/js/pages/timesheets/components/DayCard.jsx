@@ -179,7 +179,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
 
             {/* Lock overlay */}
             {locked && !isRejected && (
-                <div className="absolute inset-0 bg-white/70 flex items-center justify-center font-semibold text-gray-700 pointer-events-none">
+                <div className="absolute inset-0 bg-white/70 flex items-center justify-center font-semibold text-gray-800 pointer-events-none">
                     Timesheet locked
                 </div>
             )}

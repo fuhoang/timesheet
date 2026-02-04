@@ -82,6 +82,10 @@ body {
     color: #000000 !important;
 }
 
+.dark aside nav a:hover {
+    color: #000000 !important;
+}
+
 .dark .hover\\:bg-gray-200:hover,
 .dark .hover\\:bg-gray-100:hover {
     background-color: #1f2937 !important;
