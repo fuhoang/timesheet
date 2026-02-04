@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Topbar() {
@@ -11,6 +12,15 @@ export default function Topbar() {
             </h1>
 
             <div className="flex items-center gap-4">
+                {user?.is_admin ? (
+                    <Link
+                        to="/admin/timesheets"
+                        className="px-3 py-1 text-sm rounded border border-blue-600 text-blue-600 hover:bg-blue-50"
+                    >
+                        Admin
+                    </Link>
+                ) : null}
+
                 <span className="text-gray-700">
                     {user?.name}
                 </span>

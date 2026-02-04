@@ -11,6 +11,15 @@ export default function AdminLayout({ children }) {
                     Admin
                 </div>
 
+                <div className="px-4 pb-4">
+                    <Link
+                        to="/"
+                        className="block px-3 py-2 rounded border border-gray-200 text-gray-700 hover:bg-gray-100"
+                    >
+                        Back to Dashboard
+                    </Link>
+                </div>
+
                 <nav className="px-4 space-y-2">
                     <Link
                         to="/admin/projects"
