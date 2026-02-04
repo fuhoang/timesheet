@@ -53,6 +53,8 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
 
 - `composer run dev` runs Laravel + Vite together
 - `php artisan test` runs backend tests
+- `php artisan demo:seed` runs migrations and seeds demo data
+- `php artisan demo:seed --fresh` drops all tables, then migrates and seeds
 
 ## Suggested Git Flow
 
