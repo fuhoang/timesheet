@@ -29,10 +29,17 @@ export default function ThemeToggle({ className = '' }) {
     return (
         <button
             onClick={toggleTheme}
-            className={`px-3 py-1 text-sm rounded border border-gray-300 text-gray-700 hover:bg-gray-100 ${className}`}
+            className={`theme-toggle ${theme === 'dark' ? 'is-on' : ''} ${className}`}
             type="button"
+            aria-pressed={theme === 'dark'}
+            aria-label="Toggle dark mode"
         >
-            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            <span className="toggle-track">
+                <span className="toggle-thumb" />
+            </span>
+            <span className="toggle-label">
+                {theme === 'dark' ? 'Dark' : 'Light'}
+            </span>
         </button>
     );
 }
