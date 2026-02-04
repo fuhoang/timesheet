@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function AdminLayout({ children }) {
     return (
@@ -18,6 +19,10 @@ export default function AdminLayout({ children }) {
                     >
                         Back to Dashboard
                     </Link>
+                </div>
+
+                <div className="px-4 pb-4">
+                    <ThemeToggle className="w-full text-left" />
                 </div>
 
                 <nav className="px-4 space-y-2">

@@ -9,3 +9,71 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+:root {
+    --color-bg: #f3f4f6;
+    --color-surface: #ffffff;
+    --color-border: #e5e7eb;
+    --color-text: #111827;
+    --color-muted: #6b7280;
+    --color-muted-2: #9ca3af;
+}
+
+.dark {
+    --color-bg: #0b1220;
+    --color-surface: #0f172a;
+    --color-border: #1f2937;
+    --color-text: #e5e7eb;
+    --color-muted: #94a3b8;
+    --color-muted-2: #64748b;
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
+
+.dark .bg-white {
+    background-color: var(--color-surface) !important;
+}
+
+.dark .bg-gray-50 {
+    background-color: #111827 !important;
+}
+
+.dark .bg-gray-100 {
+    background-color: var(--color-bg) !important;
+}
+
+.dark .bg-blue-50 {
+    background-color: #0f1c3d !important;
+}
+
+.dark .border,
+.dark .border-b,
+.dark .border-r,
+.dark .border-t,
+.dark .border-l {
+    border-color: var(--color-border) !important;
+}
+
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 {
+    color: var(--color-text) !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500 {
+    color: var(--color-muted) !important;
+}
+
+.dark .text-gray-400 {
+    color: var(--color-muted-2) !important;
+}
+
+.dark .shadow,
+.dark .shadow-lg,
+.dark .shadow-xl {
+    box-shadow: 0 10px 25px rgba(2, 6, 23, 0.35) !important;
+}
