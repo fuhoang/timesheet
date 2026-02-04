@@ -78,6 +78,10 @@ body {
     box-shadow: 0 10px 25px rgba(2, 6, 23, 0.35) !important;
 }
 
+.dark .nav-link:hover {
+    color: #000000 !important;
+}
+
 .dark .hover\\:bg-gray-200:hover,
 .dark .hover\\:bg-gray-100:hover {
     background-color: #1f2937 !important;
