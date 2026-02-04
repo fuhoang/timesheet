@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ThemeToggle from './ThemeToggle';
 
 export default function Topbar() {
     const { user, logout } = useAuth();
@@ -12,6 +13,8 @@ export default function Topbar() {
             </h1>
 
             <div className="flex items-center gap-4">
+                <ThemeToggle />
+
                 {user?.is_admin ? (
                     <Link
                         to="/admin/timesheets"
