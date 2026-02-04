@@ -24,15 +24,16 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
    php artisan key:generate
    ```
 
-4. Database
-   - For SQLite, create the file:
-     ```bash
-     touch database/database.sqlite
+4. Database (MySQL)
+   - Create a MySQL database (e.g. `timesheet`)
+   - Update `.env`:
      ```
-   - Update `.env` to use SQLite:
-     ```
-     DB_CONNECTION=sqlite
-     DB_DATABASE=/absolute/path/to/database/database.sqlite
+     DB_CONNECTION=mysql
+     DB_HOST=127.0.0.1
+     DB_PORT=3306
+     DB_DATABASE=timesheet
+     DB_USERNAME=your_user
+     DB_PASSWORD=your_password
      ```
 
 5. Run migrations
