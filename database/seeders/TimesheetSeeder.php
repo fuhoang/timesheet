@@ -75,7 +75,7 @@ class TimesheetSeeder extends Seeder
                     ]);
                 }
 
-                if ($date->isSameDay($endDate->copy()->subDays(10))) {
+                if ($date->isSameDay($endDate->copy()->subDays(10)) || $date->isSameDay($endDate->copy()->subDays(20))) {
                     $timesheet->update([
                         'status' => 'rejected',
                         'submitted_at' => now(),
