@@ -78,6 +78,20 @@ body {
     box-shadow: 0 10px 25px rgba(2, 6, 23, 0.35) !important;
 }
 
+.dark .hover\\:bg-gray-200:hover,
+.dark .hover\\:bg-gray-100:hover {
+    background-color: #1f2937 !important;
+}
+
+.dark .hover\\:bg-gray-200:hover,
+.dark .hover\\:bg-gray-100:hover {
+    color: #f9fafb !important;
+}
+
+.dark .hover\\:underline:hover {
+    color: #f9fafb !important;
+}
+
 .theme-toggle {
     display: inline-flex;
     align-items: center;
