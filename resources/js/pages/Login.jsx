@@ -38,6 +38,16 @@ export default function Login() {
                         </div>
                     )}
 
+                    <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded mb-4 text-sm">
+                        <div className="font-medium">Demo Accounts</div>
+                        <div className="mt-1">
+                            Admin: <span className="font-mono">admin@test.com</span> / <span className="font-mono">password</span>
+                        </div>
+                        <div>
+                            User: <span className="font-mono">user@test.com</span> / <span className="font-mono">password</span>
+                        </div>
+                    </div>
+
                     <form onSubmit={submit} className="space-y-5">
 
                         <div>
