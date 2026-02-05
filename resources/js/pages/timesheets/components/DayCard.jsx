@@ -52,7 +52,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
             className={`
                 relative rounded-2xl shadow border
                 ${isToday && !isRejected ? 'bg-blue-50 border-blue-400' : 'bg-white'}
-                ${isRejected ? 'border-red-300' : ''}
+                ${isRejected ? 'border-red-300 border-l-4 border-l-red-600' : ''}
             `}
         >
 
@@ -99,11 +99,6 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
                             className={`
                                 px-6 py-4 text-sm flex justify-between gap-4
                                 transition-colors
-                                ${
-                                    isRejected
-                                        ? 'bg-red-100 border-l-4 border-red-600'
-                                        : ''
-                                }
                                 ${
                                     editingId === entry.id
                                         ? 'bg-yellow-50'
