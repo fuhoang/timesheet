@@ -52,7 +52,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
             className={`
                 relative rounded-2xl shadow border
                 ${isToday && !isRejected ? 'bg-blue-50 border-blue-400' : 'bg-white'}
-                ${isRejected ? 'border-red-300 border-l-4 border-l-red-600' : ''}
+                ${isRejected ? 'border-red-300 border-l-4 border-l-red-600 dark:border-red-500 dark:border-l-red-400' : ''}
             `}
         >
 
@@ -174,7 +174,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
 
             {/* Lock overlay */}
             {locked && !isRejected && (
-                <div className="absolute inset-0 bg-white/40 backdrop-blur-md rounded-2xl flex items-center justify-center font-semibold text-gray-900 pointer-events-none">
+                <div className="absolute inset-0 bg-white/40 dark:bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center font-semibold text-gray-900 dark:text-black pointer-events-none">
                     Timesheet locked
                 </div>
             )}
