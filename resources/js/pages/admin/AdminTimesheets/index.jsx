@@ -12,6 +12,12 @@ export default function AdminTimesheets() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [bulkLoading, setBulkLoading] = useState(false);
     const [toast, setToast] = useState(null);
+    const [filters, setFilters] = useState({
+        status: '',
+        q: '',
+        date_from: '',
+        date_to: '',
+    });
 
     useEffect(() => {
         loadTimesheets();
@@ -23,6 +29,7 @@ export default function AdminTimesheets() {
             const res = await api({
                 method: 'get',
                 url: '/api/admin/timesheets',
+                params: filters,
             });
             setTimesheets(res.data);
             setSelectedIds([]);
@@ -113,6 +120,20 @@ export default function AdminTimesheets() {
             setBulkLoading(false);
         }
     }
+
+    function updateFilter(key, value) {
+        setFilters(prev => ({ ...prev, [key]: value }));
+    }
+
+    function applyFilters(e) {
+        e?.preventDefault();
+        loadTimesheets();
+    }
+
+    function clearFilters() {
+        setFilters({ status: '', q: '', date_from: '', date_to: '' });
+        loadTimesheets();
+    }
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow border">
@@ -121,6 +142,72 @@ export default function AdminTimesheets() {
                     Review and approve submitted timesheets
                 </p>
             </div>
+
+            <form
+                onSubmit={applyFilters}
+                className="bg-white p-4 rounded-2xl shadow border flex flex-wrap gap-4 items-end"
+            >
+                <div className="flex flex-col">
+                    <label className="text-xs text-gray-500">Status</label>
+                    <select
+                        value={filters.status}
+                        onChange={e => updateFilter('status', e.target.value)}
+                        className="border rounded-lg px-3 py-2"
+                    >
+                        <option value="">All</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="draft">Draft</option>
+                        <option value="resubmitted">Resubmitted</option>
+                    </select>
+                </div>
+
+                <div className="flex flex-col">
+                    <label className="text-xs text-gray-500">User</label>
+                    <input
+                        type="text"
+                        value={filters.q}
+                        onChange={e => updateFilter('q', e.target.value)}
+                        placeholder="Name or email"
+                        className="border rounded-lg px-3 py-2"
+                    />
+                </div>
+
+                <div className="flex flex-col">
+                    <label className="text-xs text-gray-500">From</label>
+                    <input
+                        type="date"
+                        value={filters.date_from}
+                        onChange={e => updateFilter('date_from', e.target.value)}
+                        className="border rounded-lg px-3 py-2"
+                    />
+                </div>
+
+                <div className="flex flex-col">
+                    <label className="text-xs text-gray-500">To</label>
+                    <input
+                        type="date"
+                        value={filters.date_to}
+                        onChange={e => updateFilter('date_to', e.target.value)}
+                        className="border rounded-lg px-3 py-2"
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                >
+                    Apply
+                </button>
+                <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+                >
+                    Clear
+                </button>
+            </form>
 
             {toast && (
                 <div

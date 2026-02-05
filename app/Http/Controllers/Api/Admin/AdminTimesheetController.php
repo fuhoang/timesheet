@@ -16,14 +16,40 @@ class AdminTimesheetController extends Controller
     {
         $this->authorize('viewAny', Timesheet::class);
 
-        $timesheets = Timesheet::query()
+        $query = Timesheet::query()
             ->whereNotNull('submitted_at')
             ->with([
                 'user:id,name,email',
                 'approver:id,name',
             ])
-            ->orderByDesc('submitted_at')
-            ->paginate(20);
+            ->orderByDesc('submitted_at');
+
+        $status = $request->query('status');
+        if ($status === 'resubmitted') {
+            $query->where('status', 'draft')->whereNotNull('submitted_at');
+        } elseif (in_array($status, ['draft', 'submitted', 'approved', 'rejected'], true)) {
+            $query->where('status', $status);
+        }
+
+        $q = trim((string) $request->query('q', ''));
+        if ($q !== '') {
+            $query->whereHas('user', function ($sub) use ($q) {
+                $sub->where('name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%");
+            });
+        }
+
+        $dateFrom = $request->query('date_from');
+        if ($dateFrom) {
+            $query->whereDate('work_date', '>=', $dateFrom);
+        }
+
+        $dateTo = $request->query('date_to');
+        if ($dateTo) {
+            $query->whereDate('work_date', '<=', $dateTo);
+        }
+
+        $timesheets = $query->paginate(20);
 
         return response()->json($timesheets);
     }
