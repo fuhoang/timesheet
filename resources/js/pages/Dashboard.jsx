@@ -87,7 +87,7 @@ export default function Dashboard() {
             {/* Entries */}
             {timesheet?.entries?.length > 0 && (
                 <div className="bg-white rounded-2xl shadow border overflow-hidden">
-                    <div className="px-6 py-4 font-semibold text-gray-800 border-b">Today’s entries</div>
+                    <div className="px-6 py-4 font-semibold text-gray-900 border-b">Today’s entries</div>
                     <div className="divide-y">
                         {timesheet.entries.map(entry => {
                             const running = !entry.ended_at;
@@ -97,7 +97,7 @@ export default function Dashboard() {
                                     className="px-6 py-4 flex items-center justify-between"
                                 >
                                     <div className="space-y-1">
-                                        <div className={`font-medium text-gray-900 ${running ? 'dark:text-black' : 'dark:text-gray-100'}`}>{entry.project?.name ?? 'No project'}</div>
+                                        <div className={`font-medium text-black ${running ? 'dark:text-black' : 'dark:text-gray-100'}`}>{entry.project?.name ?? 'No project'}</div>
                                         {entry.description && (
                                             <div className={`text-sm text-gray-500 ${running ? 'dark:text-gray-700' : 'dark:text-gray-400'}`}>{entry.description}</div>
                                         )}
