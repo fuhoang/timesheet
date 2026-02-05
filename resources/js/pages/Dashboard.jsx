@@ -97,7 +97,7 @@ export default function Dashboard() {
                                     className="px-6 py-4 flex items-center justify-between"
                                 >
                                     <div className="space-y-1">
-                                        <div className={`font-medium text-black ${running ? 'dark:text-black' : 'dark:text-gray-100'}`}>{entry.project?.name ?? 'No project'}</div>
+                                        <div className="font-medium text-black dark:text-gray-100">{entry.project?.name ?? 'No project'}</div>
                                         {entry.description && (
                                             <div className={`text-sm text-gray-500 ${running ? 'dark:text-gray-700' : 'dark:text-gray-400'}`}>{entry.description}</div>
                                         )}
