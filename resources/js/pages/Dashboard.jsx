@@ -94,12 +94,18 @@ export default function Dashboard() {
                             return (
                                 <div
                                     key={entry.id}
-                                    className="px-6 py-4 flex items-center justify-between"
+                                    className={`px-6 py-4 flex items-center justify-between ${
+                                        running ? 'bg-green-50 dark:bg-white/70' : ''
+                                    }`}
                                 >
                                     <div className="space-y-1">
-                                        <div className="font-medium text-black dark:text-gray-100">{entry.project?.name ?? 'No project'}</div>
+                                        <div className={`font-medium text-black ${running ? 'dark:text-black' : 'dark:text-gray-100'}`}>
+                                            {entry.project?.name ?? 'No project'}
+                                        </div>
                                         {entry.description && (
-                                            <div className={`text-sm text-gray-500 ${running ? 'dark:text-gray-700' : 'dark:text-gray-400'}`}>{entry.description}</div>
+                                            <div className={`text-sm text-gray-500 ${running ? 'dark:text-gray-700' : 'dark:text-gray-400'}`}>
+                                                {entry.description}
+                                            </div>
                                         )}
                                         <div className={`text-xs text-gray-400 ${running ? 'dark:text-gray-700' : 'dark:text-gray-500'}`}>
                                             {formatTime(entry.started_at)} – {entry.ended_at ? formatTime(entry.ended_at) : 'Now'}
@@ -112,7 +118,7 @@ export default function Dashboard() {
                                                 {formatMinutes(entry.duration_minutes)}
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-900 text-sm font-medium">
                                                 Running
                                             </span>
                                         )}

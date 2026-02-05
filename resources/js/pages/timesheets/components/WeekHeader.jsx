@@ -26,7 +26,7 @@ export default function WeekHeader({
                         {submitting ? 'Submitting…' : 'Submit week'}
                     </button>
                 ) : (
-                    <span className="px-3 py-2 rounded-lg bg-gray-200 text-black mt-2 inline-block">
+                    <span className="px-3 py-2 rounded-lg bg-gray-200 text-black dark:bg-white/70 dark:text-black mt-2 inline-block">
                         Submitted
                     </span>
                 )}
