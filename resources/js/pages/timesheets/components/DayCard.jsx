@@ -101,7 +101,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
                                 transition-colors
                                 ${
                                     editingId === entry.id
-                                        ? 'bg-yellow-50'
+                                        ? 'bg-yellow-50 dark:bg-transparent dark:border dark:border-yellow-400'
                                         : ''
                                 }
                             `}
