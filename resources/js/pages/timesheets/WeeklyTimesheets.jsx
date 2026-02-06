@@ -12,6 +12,7 @@ export default function WeeklyTimesheet() {
     const [offset, setOffset] = useState(0);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [toast, setToast] = useState(null);
 
     const today = new Date().toISOString().slice(0, 10);
 
@@ -62,7 +63,13 @@ export default function WeeklyTimesheet() {
                 },
             });
 
+            setToast({ message: 'Timesheet submitted for approval', type: 'success' });
+            setTimeout(() => setToast(null), 3000);
             await loadWeek();
+        } catch (err) {
+            console.error('Failed to submit week', err);
+            setToast({ message: 'Failed to submit timesheet', type: 'error' });
+            setTimeout(() => setToast(null), 3000);
         } finally {
             setSubmitting(false);
         }
@@ -78,6 +85,15 @@ export default function WeeklyTimesheet() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
+            {toast && (
+                <div
+                    className={`fixed top-4 right-4 z-50 px-4 py-2 text-white rounded-md shadow ${
+                        toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'
+                    }`}
+                >
+                    {toast.message}
+                </div>
+            )}
 
             {/* 🔴 Rejection banner */}
             {isRejected && week.rejection_reason && (
