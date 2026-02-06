@@ -13,6 +13,7 @@ export default function WeeklyTimesheet() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [toast, setToast] = useState(null);
+    const [error, setError] = useState('');
 
     const today = new Date().toISOString().slice(0, 10);
 
@@ -36,6 +37,7 @@ export default function WeeklyTimesheet() {
 
     async function loadWeek() {
         setLoading(true);
+        setError('');
         try {
             const res = await api({
                 method: 'get',
@@ -44,6 +46,9 @@ export default function WeeklyTimesheet() {
             });
 
             setWeek(res);
+        } catch (err) {
+            console.error('Failed to load week', err);
+            setError('Unable to load this week. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -68,6 +73,7 @@ export default function WeeklyTimesheet() {
             await loadWeek();
         } catch (err) {
             console.error('Failed to submit week', err);
+            setError('Unable to submit the week. Please try again.');
             setToast({ message: 'Failed to submit timesheet', type: 'error' });
             setTimeout(() => setToast(null), 3000);
         } finally {
@@ -92,6 +98,12 @@ export default function WeeklyTimesheet() {
                     }`}
                 >
                     {toast.message}
+                </div>
+            )}
+
+            {error && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    {error}
                 </div>
             )}
 
