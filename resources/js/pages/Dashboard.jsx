@@ -94,48 +94,57 @@ export default function Dashboard() {
             </div>
 
             {/* Entries */}
-            {timesheet?.entries?.length > 0 && (
+            {!loadingTimesheet && (
                 <div className="bg-white rounded-2xl shadow border overflow-hidden">
                     <div className="px-6 py-4 font-semibold text-gray-900 border-b">Today’s entries</div>
-                    <div className="divide-y">
-                        {timesheet.entries.map(entry => {
-                            const running = !entry.ended_at;
-                            return (
-                                <div
-                                    key={entry.id}
-                                    className={`px-6 py-4 flex items-center justify-between ${
-                                        running ? 'bg-green-50 dark:bg-white/70' : ''
-                                    }`}
-                                >
-                                    <div className="space-y-1">
-                                        <div className="font-medium dashboard-entry-title">
-                                            {entry.project?.name ?? 'No project'}
-                                        </div>
-                                        {entry.description && (
-                                            <div className={`text-sm text-gray-500 ${running ? 'dark:text-gray-700' : 'dark:text-gray-400'}`}>
-                                                {entry.description}
+                    {timesheet?.entries?.length > 0 ? (
+                        <div className="divide-y">
+                            {timesheet.entries.map(entry => {
+                                const running = !entry.ended_at;
+                                return (
+                                    <div
+                                        key={entry.id}
+                                        className={`px-6 py-4 flex items-center justify-between ${
+                                            running ? 'bg-green-50 dark:bg-white/70' : ''
+                                        }`}
+                                    >
+                                        <div className="space-y-1">
+                                            <div className="font-medium dashboard-entry-title">
+                                                {entry.project?.name ?? 'No project'}
                                             </div>
-                                        )}
-                                        <div className={`text-xs text-gray-400 ${running ? 'dark:text-gray-700' : 'dark:text-gray-500'}`}>
-                                            {formatTime(entry.started_at)} – {entry.ended_at ? formatTime(entry.ended_at) : 'Now'}
+                                            {entry.description && (
+                                                <div className={`text-sm text-gray-500 ${running ? 'dark:text-gray-700' : 'dark:text-gray-400'}`}>
+                                                    {entry.description}
+                                                </div>
+                                            )}
+                                            <div className={`text-xs text-gray-400 ${running ? 'dark:text-gray-700' : 'dark:text-gray-500'}`}>
+                                                {formatTime(entry.started_at)} – {entry.ended_at ? formatTime(entry.ended_at) : 'Now'}
+                                            </div>
+                                        </div>
+
+                                        <div className="text-right">
+                                            {entry.ended_at ? (
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+                                                    {formatMinutes(entry.duration_minutes)}
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-900 text-sm font-medium">
+                                                    Running
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
-
-                                    <div className="text-right">
-                                        {entry.ended_at ? (
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
-                                                {formatMinutes(entry.duration_minutes)}
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-900 text-sm font-medium">
-                                                Running
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="px-6 py-8 text-center">
+                            <div className="text-sm font-semibold text-gray-900">No entries yet</div>
+                            <div className="mt-1 text-sm text-gray-500">
+                                Start the timer above to log your first entry for today.
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
