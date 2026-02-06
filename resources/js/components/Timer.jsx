@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useApi } from '../context/ApiContext';
 
-export default function Timer({ projectId, onChange, disabled }) {
+export default function Timer({ projectId, onChange, disabled, autoStartProjectId, onAutoStartComplete }) {
 
     const { api } = useApi();
     const [runningEntry, setRunningEntry] = useState(null);
@@ -24,6 +24,11 @@ export default function Timer({ projectId, onChange, disabled }) {
             setSeconds(0);
         }
     }, [disabled]);
+
+    useEffect(() => {
+        if (!autoStartProjectId || runningEntry || loading || disabled) return;
+        startWithProject(autoStartProjectId, true);
+    }, [autoStartProjectId, runningEntry, loading, disabled]);
 
 
     async function loadRunning() {
@@ -78,6 +83,11 @@ export default function Timer({ projectId, onChange, disabled }) {
             return;
         }
 
+        await startWithProject(projectId);
+    }
+
+    async function startWithProject(startProjectId, isAuto = false) {
+        if (!startProjectId) return;
         setLoading(true);
 
         try {
@@ -86,7 +96,7 @@ export default function Timer({ projectId, onChange, disabled }) {
                 method: 'post',
                 url: '/api/time-entries/start',
                 data: {
-                    project_id: projectId,
+                    project_id: startProjectId,
                 },
             });
 
@@ -95,8 +105,10 @@ export default function Timer({ projectId, onChange, disabled }) {
             startTicking();
 
             onChange?.();
+            if (isAuto) onAutoStartComplete?.(startProjectId);
         } catch (err) {
             alert(err.response?.data?.message ?? 'Unable to start timer');
+            if (isAuto) onAutoStartComplete?.(startProjectId);
         } finally {
             setLoading(false);
         }
