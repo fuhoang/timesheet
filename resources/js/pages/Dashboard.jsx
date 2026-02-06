@@ -5,6 +5,7 @@ import Timer from '../components/Timer';
 import ProjectSelect from '../components/ProjectSelect';
 import { DropdownSkeleton } from '../components/skeletons/DropdownSkeleton';
 import { TimerSkeleton } from '../components/skeletons/TimerSkeleton';
+import InlineAlert from '../components/ui/InlineAlert';
 
 
 export default function Dashboard() {
@@ -75,8 +76,8 @@ export default function Dashboard() {
                     )}
                 </div>
                 {timesheetError && (
-                    <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                        {timesheetError}
+                    <div className="mt-3">
+                        <InlineAlert>{timesheetError}</InlineAlert>
                     </div>
                 )}
                 {loadingTimesheet ? (
