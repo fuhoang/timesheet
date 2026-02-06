@@ -140,6 +140,20 @@ export default function AdminTimesheets() {
         setFilters({ status: '', q: '', date_from: '', date_to: '' });
         loadTimesheets();
     }
+
+    function setStatusTab(status) {
+        setFilters(prev => ({ ...prev, status }));
+        setTimeout(loadTimesheets, 0);
+    }
+
+    const statusTabs = [
+        { label: 'All', value: '' },
+        { label: 'Submitted', value: 'submitted' },
+        { label: 'Draft', value: 'draft' },
+        { label: 'Rejected', value: 'rejected' },
+        { label: 'Approved', value: 'approved' },
+    ];
+
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow border">
@@ -147,6 +161,26 @@ export default function AdminTimesheets() {
                 <p className="text-gray-600 mt-1">
                     Review and approve submitted timesheets
                 </p>
+            </div>
+
+            <div className="bg-white p-3 rounded-2xl shadow border flex flex-wrap gap-2">
+                {statusTabs.map(tab => {
+                    const isActive = filters.status === tab.value;
+                    return (
+                        <button
+                            key={tab.value}
+                            type="button"
+                            onClick={() => setStatusTab(tab.value)}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium border ${
+                                isActive
+                                    ? 'bg-blue-600 text-white border-blue-600'
+                                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    );
+                })}
             </div>
 
             <form
