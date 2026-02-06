@@ -16,6 +16,7 @@ export default function Dashboard() {
     const [loadingTimesheet, setLoadingTimesheet] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(null);
     const [resumeProjectId, setResumeProjectId] = useState(null);
+    const [timesheetError, setTimesheetError] = useState('');
 
     useEffect(() => {
         if (!selectedProject && projects.length > 0) {
@@ -39,6 +40,7 @@ export default function Dashboard() {
 
     async function loadTimesheet() {
         setLoadingTimesheet(true);
+        setTimesheetError('');
         try {
             const data = await api({
                 method: 'get',
@@ -49,6 +51,7 @@ export default function Dashboard() {
         } catch (err) {
             console.error('Failed to load timesheet', err);
             setTimesheet(null);
+            setTimesheetError('Unable to load today’s timesheet. Please try again.');
         } finally {
             setLoadingTimesheet(false);
         }
@@ -59,6 +62,11 @@ export default function Dashboard() {
             {/* Header */}
             <div className="bg-white p-6 rounded-2xl shadow border">
                 <h1 className="text-2xl font-semibold text-gray-900">Today</h1>
+                {timesheetError && (
+                    <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                        {timesheetError}
+                    </div>
+                )}
                 {loadingTimesheet ? (
                     <p className="mt-2 text-gray-400 text-sm">Loading timesheet…</p>
                 ) : (
