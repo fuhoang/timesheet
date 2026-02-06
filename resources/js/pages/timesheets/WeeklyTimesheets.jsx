@@ -7,6 +7,7 @@ import DayCard from './components/DayCard';
 
 export default function WeeklyTimesheet() {
     const { api } = useApi();
+    const isDev = !!import.meta?.env?.DEV;
 
     const [week, setWeek] = useState(null);
     const [offset, setOffset] = useState(0);
@@ -104,6 +105,18 @@ export default function WeeklyTimesheet() {
             {error && (
                 <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                     {error}
+                </div>
+            )}
+
+            {isDev && (
+                <div className="flex justify-end">
+                    <button
+                        type="button"
+                        onClick={() => setError(prev => prev ? '' : 'Unable to load this week. Please try again.')}
+                        className="text-xs font-medium text-gray-500 hover:text-gray-700"
+                    >
+                        Toggle error (dev)
+                    </button>
                 </div>
             )}
 
