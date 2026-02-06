@@ -7,7 +7,7 @@ import DayCard from './components/DayCard';
 
 export default function WeeklyTimesheet() {
     const { api } = useApi();
-    const isDev = !!import.meta?.env?.DEV;
+    const isDev = !!import.meta?.env?.DEV || window?.__APP_ENV__ === 'local';
 
     const [week, setWeek] = useState(null);
     const [offset, setOffset] = useState(0);

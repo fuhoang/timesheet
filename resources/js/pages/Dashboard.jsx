@@ -10,7 +10,7 @@ import { TimerSkeleton } from '../components/skeletons/TimerSkeleton';
 export default function Dashboard() {
     const { projects, loading: projectsLoading, loadProjects } = useProjects();
     const { api } = useApi();
-    const isDev = !!import.meta?.env?.DEV;
+    const isDev = !!import.meta?.env?.DEV || window?.__APP_ENV__ === 'local';
 
     const [selectedProject, setSelectedProject] = useState(null);
     const [timesheet, setTimesheet] = useState(null);

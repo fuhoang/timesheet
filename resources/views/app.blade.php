@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <title>Laravel 12 React</title>
 
+    <script>
+        window.__APP_ENV__ = "{{ app()->environment() }}";
+    </script>
+
     @vite(['resources/css/app.css', 'resources/js/main.jsx'])
 </head>
 <body>
