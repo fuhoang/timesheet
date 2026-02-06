@@ -72,6 +72,14 @@ body {
     color: var(--color-muted-2) !important;
 }
 
+.dashboard-entry-title {
+    color: #000000 !important;
+}
+
+.dark .dashboard-entry-title {
+    color: #f3f4f6 !important;
+}
+
 .dark .shadow,
 .dark .shadow-lg,
 .dark .shadow-xl {

@@ -99,7 +99,7 @@ export default function Dashboard() {
                                     }`}
                                 >
                                     <div className="space-y-1">
-                                        <div className="font-medium !text-black dark:!text-gray-100">
+                                        <div className="font-medium dashboard-entry-title">
                                             {entry.project?.name ?? 'No project'}
                                         </div>
                                         {entry.description && (
