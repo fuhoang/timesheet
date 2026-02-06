@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useProjects } from '../context/ProjectContext';
 import { useApi } from '../context/ApiContext';
 import Timer from '../components/Timer';
@@ -15,6 +15,7 @@ export default function Dashboard() {
     const [timesheet, setTimesheet] = useState(null);
     const [loadingTimesheet, setLoadingTimesheet] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(null);
+    const [resumeProjectId, setResumeProjectId] = useState(null);
 
     useEffect(() => {
         if (!selectedProject && projects.length > 0) {
@@ -25,6 +26,16 @@ export default function Dashboard() {
     useEffect(() => {
         loadTimesheet();
     }, [selectedProject]);
+
+    const lastProject = useMemo(() => {
+        if (!timesheet?.entries?.length) return null;
+        const sorted = [...timesheet.entries].sort((a, b) => {
+            const aTime = new Date(a.started_at).getTime();
+            const bTime = new Date(b.started_at).getTime();
+            return bTime - aTime;
+        });
+        return sorted[0]?.project || null;
+    }, [timesheet]);
 
     async function loadTimesheet() {
         setLoadingTimesheet(true);
@@ -88,8 +99,20 @@ export default function Dashboard() {
                     <Timer
                         projectId={selectedProject}
                         disabled={timesheet?.submitted}
+                        autoStartProjectId={resumeProjectId}
+                        onAutoStartComplete={() => setResumeProjectId(null)}
                         onChange={loadTimesheet}
                     />
+                )}
+
+                {!projectsLoading && lastProject && !timesheet?.submitted && (
+                    <button
+                        type="button"
+                        onClick={() => setResumeProjectId(lastProject.id)}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                    >
+                        Resume last project: <span className="font-semibold">{lastProject.name}</span>
+                    </button>
                 )}
             </div>
 
