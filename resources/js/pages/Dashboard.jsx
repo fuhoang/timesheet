@@ -14,6 +14,7 @@ export default function Dashboard() {
     const [selectedProject, setSelectedProject] = useState(null);
     const [timesheet, setTimesheet] = useState(null);
     const [loadingTimesheet, setLoadingTimesheet] = useState(true);
+    const [lastUpdated, setLastUpdated] = useState(null);
 
     useEffect(() => {
         if (!selectedProject && projects.length > 0) {
@@ -33,6 +34,7 @@ export default function Dashboard() {
                 url: '/api/timesheets/today',
             });
             setTimesheet(data);
+            setLastUpdated(new Date());
         } catch (err) {
             console.error('Failed to load timesheet', err);
             setTimesheet(null);
@@ -49,12 +51,19 @@ export default function Dashboard() {
                 {loadingTimesheet ? (
                     <p className="mt-2 text-gray-400 text-sm">Loading timesheet…</p>
                 ) : (
-                    <p className="mt-2 text-gray-600">
-                        Total time:{' '}
-                        <span className="font-semibold text-gray-900">
-                            {formatMinutes(timesheet?.total_minutes)}
-                        </span>
-                    </p>
+                    <div className="mt-2 space-y-1">
+                        <p className="text-gray-600">
+                            Total time:{' '}
+                            <span className="font-semibold text-gray-900">
+                                {formatMinutes(timesheet?.total_minutes)}
+                            </span>
+                        </p>
+                        {lastUpdated && (
+                            <p className="text-xs text-gray-500">
+                                Last updated: {formatUpdatedAt(lastUpdated)}
+                            </p>
+                        )}
+                    </div>
                 )}
             </div>
 
@@ -140,6 +149,15 @@ function formatMinutes(minutes = 0) {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return `${h}h ${m}m`;
+}
+
+function formatUpdatedAt(date) {
+    return new Intl.DateTimeFormat(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+    }).format(date);
 }
 
 function formatTime(datetime) {
