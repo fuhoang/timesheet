@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
 import { Link } from 'react-router-dom';
 import { formatDate } from '../../../utils/date';
+import Toast from '../../../components/ui/Toast';
 
 
 
@@ -249,14 +250,7 @@ export default function AdminTimesheets() {
                 </button>
             </form>
 
-            {toast && (
-                <div
-                    className={`fixed top-4 right-4 px-4 py-2 rounded-lg text-white shadow-lg z-50
-                    ${toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'}`}
-                >
-                    {toast.message}
-                </div>
-            )}
+            {toast && <Toast message={toast.message} type={toast.type} />}
 
             <div className="bg-white rounded-2xl shadow border overflow-hidden">
                 {loading ? (

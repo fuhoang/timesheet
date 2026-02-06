@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useApi } from '../../context/ApiContext';
 import { PageSkeleton } from '../../components/skeletons/PageSkeleton';
+import Toast from '../../components/ui/Toast';
+import InlineAlert from '../../components/ui/InlineAlert';
 
 import WeekHeader from './components/WeekHeader';
 import DayCard from './components/DayCard';
@@ -92,20 +94,10 @@ export default function WeeklyTimesheet() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
-            {toast && (
-                <div
-                    className={`fixed top-4 right-4 z-50 px-4 py-2 text-white rounded-md shadow ${
-                        toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'
-                    }`}
-                >
-                    {toast.message}
-                </div>
-            )}
+            {toast && <Toast message={toast.message} type={toast.type} />}
 
             {error && (
-                <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {error}
-                </div>
+                <InlineAlert>{error}</InlineAlert>
             )}
 
             {isDev && (

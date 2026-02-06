@@ -6,6 +6,7 @@ import { TableSkeleton } from '../../../components/skeletons/TableSkeleton';
 import ProjectEditModal from './ProjectEditModal';
 import ProjectForm from './ProjectForm';
 import ProjectTable from './ProjectTable';
+import Toast from '../../../components/ui/Toast';
 
 export default function AdminProjects() {
     const { api } = useApi();
@@ -49,12 +50,7 @@ export default function AdminProjects() {
     return (
         <div className="space-y-6 relative">
             {/* Toast */}
-            {toast && (
-                <div className={`fixed top-4 right-4 px-4 py-2 rounded-lg text-white shadow-lg z-50
-                    ${toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'}`}>
-                    {toast.message}
-                </div>
-            )}
+            {toast && <Toast message={toast.message} type={toast.type} />}
 
             {/* Header */}
             <div className="bg-white p-6 rounded-2xl shadow border">
