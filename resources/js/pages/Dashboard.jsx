@@ -10,6 +10,7 @@ import { TimerSkeleton } from '../components/skeletons/TimerSkeleton';
 export default function Dashboard() {
     const { projects, loading: projectsLoading, loadProjects } = useProjects();
     const { api } = useApi();
+    const isDev = !!import.meta?.env?.DEV;
 
     const [selectedProject, setSelectedProject] = useState(null);
     const [timesheet, setTimesheet] = useState(null);
@@ -61,7 +62,18 @@ export default function Dashboard() {
         <div className="max-w-5xl mx-auto space-y-8">
             {/* Header */}
             <div className="bg-white p-6 rounded-2xl shadow border">
-                <h1 className="text-2xl font-semibold text-gray-900">Today</h1>
+                <div className="flex items-center justify-between gap-3">
+                    <h1 className="text-2xl font-semibold text-gray-900">Today</h1>
+                    {isDev && (
+                        <button
+                            type="button"
+                            onClick={() => setTimesheetError(prev => prev ? '' : 'Unable to load today’s timesheet. Please try again.')}
+                            className="text-xs font-medium text-gray-500 hover:text-gray-700"
+                        >
+                            Toggle error (dev)
+                        </button>
+                    )}
+                </div>
                 {timesheetError && (
                     <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
                         {timesheetError}
