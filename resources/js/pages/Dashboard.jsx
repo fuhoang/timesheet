@@ -94,7 +94,25 @@ export default function Dashboard() {
             </div>
 
             {/* Entries */}
-            {!loadingTimesheet && (
+            {loadingTimesheet ? (
+                <div className="bg-white rounded-2xl shadow border overflow-hidden">
+                    <div className="px-6 py-4 border-b">
+                        <div className="h-4 w-32 bg-gray-200 rounded-md animate-pulse" />
+                    </div>
+                    <div className="divide-y">
+                        {[0, 1, 2].map((row) => (
+                            <div key={row} className="px-6 py-4 flex items-center justify-between">
+                                <div className="space-y-2">
+                                    <div className="h-4 w-40 bg-gray-200 rounded-md animate-pulse" />
+                                    <div className="h-3 w-56 bg-gray-200 rounded-md animate-pulse" />
+                                    <div className="h-3 w-32 bg-gray-200 rounded-md animate-pulse" />
+                                </div>
+                                <div className="h-6 w-16 bg-gray-200 rounded-full animate-pulse" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : (
                 <div className="bg-white rounded-2xl shadow border overflow-hidden">
                     <div className="px-6 py-4 font-semibold text-gray-900 border-b">Today’s entries</div>
                     {timesheet?.entries?.length > 0 ? (
