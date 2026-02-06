@@ -15,7 +15,6 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
     // or reject weekly instead of individual entries.
 
     function startEdit(entry) {
-        console.log(entry);
         setProjectId(entry.project_id);
         setEditingId(entry.id);
         setDescription(entry.description || '');
@@ -40,11 +39,6 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
             await onUpdated();
         }
     }
-
-    // console.log('Day status:', day.status);
-    // console.log('Day status:', day.timesheet_status);
-
-    // console.log(entry);
 
     return (
         <div

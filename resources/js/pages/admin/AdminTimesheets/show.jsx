@@ -171,8 +171,6 @@ export default function AdminTimesheetShow() {
         );
     }
 
-    console.log(timesheet.entries);
-    
     return (
         <div className="space-y-6">
 
