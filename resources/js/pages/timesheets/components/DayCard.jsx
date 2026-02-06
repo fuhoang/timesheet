@@ -88,7 +88,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
 
             {/* Entries */}
             {day.entries.length === 0 ? (
-                <div className="px-6 py-4 text-sm text-gray-400">
+                <div className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                     No entries
                 </div>
             ) : (
@@ -119,7 +119,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
                                         onChange={e => setDescription(e.target.value)}
                                     />
                                 ) : (
-                                    <div className="text-gray-500">
+                                    <div className="text-gray-600 dark:text-gray-300">
                                         {entry.description || '—'}
                                     </div>
                                 )}
@@ -144,7 +144,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
                                             </button>
                                             <button
                                                 onClick={() => setEditingId(null)}
-                                                className="text-gray-500 hover:underline"
+                                                className="text-gray-600 dark:text-gray-400 hover:underline"
                                             >
                                                 Cancel
                                             </button>
