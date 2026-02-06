@@ -80,7 +80,7 @@ export default function Dashboard() {
                     </div>
                 )}
                 {loadingTimesheet ? (
-                    <p className="mt-2 text-gray-400 text-sm">Loading timesheet…</p>
+                    <p className="mt-2 text-gray-500 text-sm">Loading timesheet…</p>
                 ) : (
                     <div className="mt-2 space-y-1">
                         <p className="text-gray-600">
@@ -100,7 +100,7 @@ export default function Dashboard() {
 
             {/* Timer */}
             <div className="bg-white p-6 rounded-2xl shadow border space-y-4">
-                <h2 className="text-lg font-semibold text-gray-800">Timer</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Timer</h2>
 
                 {projectsLoading ? (
                     <DropdownSkeleton />
@@ -129,7 +129,7 @@ export default function Dashboard() {
                     <button
                         type="button"
                         onClick={() => setResumeProjectId(lastProject.id)}
-                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700"
                     >
                         Resume last project: <span className="font-semibold">{lastProject.name}</span>
                     </button>
