@@ -18,6 +18,12 @@ export default function AdminTimesheets() {
         date_from: '',
         date_to: '',
     });
+    const hasActiveFilters = !!(
+        filters.status ||
+        filters.q ||
+        filters.date_from ||
+        filters.date_to
+    );
 
     useEffect(() => {
         loadTimesheets();
@@ -222,7 +228,25 @@ export default function AdminTimesheets() {
                 {loading ? (
                     <div className="p-6 text-gray-500">Loading timesheets…</div>
                 ) : timesheets.length === 0 ? (
-                    <div className="p-6 text-gray-500">No submitted timesheets</div>
+                    <div className="p-8 text-center">
+                        <div className="text-sm font-semibold text-gray-900">
+                            No timesheets found
+                        </div>
+                        <div className="mt-2 text-sm text-gray-500">
+                            {hasActiveFilters
+                                ? 'Try adjusting or clearing your filters.'
+                                : 'Once users submit their weeks, they will show up here for review.'}
+                        </div>
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                onClick={clearFilters}
+                                className="mt-4 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+                            >
+                                Clear filters
+                            </button>
+                        )}
+                    </div>
                 ) : (
                     <>
                         <div className="px-4 py-3 border-b flex items-center justify-between">
