@@ -13,9 +13,6 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
     const isRejected = day.status === 'rejected';
 
 
-    // Need to think if indivdual entries show be highlighted because admin reject individual entires
-    // or reject weekly instead of individual entries.
-
     function startEdit(entry) {
         setProjectId(entry.project_id);
         setEditingId(entry.id);
