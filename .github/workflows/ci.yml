@@ -41,6 +41,13 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-php-
+
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist
 
