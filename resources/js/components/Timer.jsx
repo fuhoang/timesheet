@@ -121,7 +121,7 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
         setLoading(true);
 
         try {
-            const res = await api({
+            await api({
                 method: 'post',
                 url: '/api/time-entries/stop',
             });
