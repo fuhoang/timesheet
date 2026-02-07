@@ -62,6 +62,24 @@ export default function Dashboard() {
         }
     }
 
+    function handleOptimisticStart(entry) {
+        setTimesheet(prev => {
+            const safePrev = prev || { entries: [], total_minutes: 0 };
+            return {
+                ...safePrev,
+                entries: [entry, ...(safePrev.entries || [])],
+            };
+        });
+    }
+
+    function handleOptimisticStop() {
+        setTimesheet(prev => {
+            if (!prev?.entries?.length) return prev;
+            const cleaned = prev.entries.filter(entry => entry.ended_at);
+            return { ...prev, entries: cleaned };
+        });
+    }
+
     return (
         <div className="max-w-5xl mx-auto space-y-8">
             {/* Header */}
@@ -126,6 +144,8 @@ export default function Dashboard() {
                         disabled={timesheet?.submitted}
                         autoStartProjectId={resumeProjectId}
                         onAutoStartComplete={() => setResumeProjectId(null)}
+                        onOptimisticStart={handleOptimisticStart}
+                        onOptimisticStop={handleOptimisticStop}
                         onChange={loadTimesheet}
                     />
                 )}

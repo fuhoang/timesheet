@@ -2,7 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useApi } from '../context/ApiContext';
 import Button from './ui/Button';
 
-export default function Timer({ projectId, onChange, disabled, autoStartProjectId, onAutoStartComplete }) {
+export default function Timer({
+    projectId,
+    onChange,
+    disabled,
+    autoStartProjectId,
+    onAutoStartComplete,
+    onOptimisticStart,
+    onOptimisticStop,
+}) {
 
     const { api } = useApi();
     const [runningEntry, setRunningEntry] = useState(null);
@@ -78,10 +86,21 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
 
     async function startWithProject(startProjectId, isAuto = false) {
         if (!startProjectId) return;
+        const optimisticEntry = {
+            id: `optimistic-${Date.now()}`,
+            project_id: startProjectId,
+            started_at: new Date().toISOString(),
+            ended_at: null,
+        };
+
+        setRunningEntry(optimisticEntry);
+        setSeconds(0);
+        startTicking();
+        onOptimisticStart?.(optimisticEntry);
+
         setLoading(true);
 
         try {
-
             const res = await api({
                 method: 'post',
                 url: '/api/time-entries/start',
@@ -91,13 +110,15 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
             });
 
             setRunningEntry(res);
-            setSeconds(0);
-            startTicking();
 
             onChange?.();
             if (isAuto) onAutoStartComplete?.(startProjectId);
         } catch (err) {
             alert(err.response?.data?.message ?? 'Unable to start timer');
+            stopTicking();
+            setRunningEntry(null);
+            setSeconds(0);
+            onOptimisticStop?.();
             if (isAuto) onAutoStartComplete?.(startProjectId);
         } finally {
             setLoading(false);
@@ -105,6 +126,11 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
     }
 
     async function stop() {
+        stopTicking();
+        setRunningEntry(null);
+        setSeconds(0);
+        onOptimisticStop?.();
+
         setLoading(true);
 
         try {
@@ -112,10 +138,6 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
                 method: 'post',
                 url: '/api/time-entries/stop',
             });
-
-            stopTicking();
-            setRunningEntry(null);
-            setSeconds(0);
 
             onChange?.();
         } catch (err) {
