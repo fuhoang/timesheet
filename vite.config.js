@@ -14,6 +14,10 @@ export default defineConfig({
     test: {
         environment: 'jsdom',
         setupFiles: 'resources/js/test/setup.js',
+        coverage: {
+            reporter: ['text', 'lcov'],
+            reportsDirectory: 'coverage',
+        },
     },
     server: {
         host: 'localhost',
@@ -24,4 +28,3 @@ export default defineConfig({
         },
     },
 });
-
