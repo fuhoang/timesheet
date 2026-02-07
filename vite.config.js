@@ -11,6 +11,10 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    test: {
+        environment: 'jsdom',
+        setupFiles: 'resources/js/test/setup.js',
+    },
     server: {
         host: 'localhost',
         port: 5173,
@@ -20,5 +24,4 @@ export default defineConfig({
         },
     },
 });
-
 

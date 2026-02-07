@@ -33,7 +33,6 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
 
         setEditingId(null);
 
-        // 🔄 REFRESH WEEK STATE
         if (onUpdated) {
             await onUpdated();
         }
@@ -82,7 +81,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
             {/* Entries */}
             {day.entries.length === 0 ? (
                 <div className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    No entries
+                    No entries yet
                 </div>
             ) : (
                 <div className="divide-y">

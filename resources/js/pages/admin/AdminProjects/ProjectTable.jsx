@@ -15,7 +15,16 @@ export default function ProjectTable({ projects, api, reloadProjects, setEditing
     }
 
     if (!projects || projects.length === 0) {
-        return <div className="p-6 text-gray-500">No projects yet.</div>;
+        return (
+            <div className="p-6 text-gray-500">
+                <div className="text-sm font-semibold text-gray-900">
+                    No projects yet
+                </div>
+                <div className="mt-1 text-sm text-gray-500">
+                    Create a project to start tracking time.
+                </div>
+            </div>
+        );
     }
 
     return (

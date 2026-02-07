@@ -1,7 +1,7 @@
 import axios from '../lib/axios';
 
 export async function csrf() {
-    await axios.get('/sanctum/csrf-cookie'); // sets XSRF-TOKEN
+    await axios.get('/sanctum/csrf-cookie');
 }
 
 export async function register(data) {
