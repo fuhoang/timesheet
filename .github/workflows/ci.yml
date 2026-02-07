@@ -47,7 +47,7 @@ jobs:
 
       - name: Prepare .env
         run: |
-          cp .env.example .env
+          cp .env.ci .env
           php artisan key:generate
           php artisan storage:link || true
           php artisan migrate --force
