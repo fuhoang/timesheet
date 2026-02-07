@@ -6,6 +6,7 @@ import ProjectSelect from '../components/ProjectSelect';
 import { DropdownSkeleton } from '../components/skeletons/DropdownSkeleton';
 import { TimerSkeleton } from '../components/skeletons/TimerSkeleton';
 import InlineAlert from '../components/ui/InlineAlert';
+import Button from '../components/ui/Button';
 import { formatMinutes, formatTime } from './timesheets/utils/time';
 
 
@@ -67,13 +68,14 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between gap-3">
                     <h1 className="text-2xl font-semibold text-gray-900">Today</h1>
                     {isDev && (
-                        <button
+                        <Button
                             type="button"
+                            variant="link-muted"
+                            size="xs"
                             onClick={() => setTimesheetError(prev => prev ? '' : 'Unable to load today’s timesheet. Please try again.')}
-                            className="text-xs font-medium text-gray-500 hover:text-gray-700"
                         >
                             Toggle error (dev)
-                        </button>
+                        </Button>
                     )}
                 </div>
                 {timesheetError && (
@@ -128,13 +130,15 @@ export default function Dashboard() {
                 )}
 
                 {!projectsLoading && lastProject && !timesheet?.submitted && (
-                    <button
+                    <Button
                         type="button"
+                        variant="link"
+                        size="sm"
                         onClick={() => setResumeProjectId(lastProject.id)}
-                        className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                        className="justify-start"
                     >
                         Resume last project: <span className="font-semibold">{lastProject.name}</span>
-                    </button>
+                    </Button>
                 )}
             </div>
 

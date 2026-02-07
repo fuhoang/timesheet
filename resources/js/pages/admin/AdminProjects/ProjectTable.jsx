@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../../../components/ui/Button';
 
 export default function ProjectTable({ projects, api, reloadProjects, setEditingProject, showToast }) {
     async function deleteProject(id) {
@@ -34,18 +35,20 @@ export default function ProjectTable({ projects, api, reloadProjects, setEditing
                             <td className="px-4 py-3 font-medium">{project.name}</td>
                             <td className="px-4 py-3 text-gray-600">{project.description || '—'}</td>
                             <td className="px-4 py-3 text-right space-x-2">
-                                <button
+                                <Button
                                     onClick={() => setEditingProject(project)}
-                                    className="text-indigo-600 hover:underline"
+                                    variant="link"
+                                    size="xs"
                                 >
                                     Edit
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={() => deleteProject(project.id)}
-                                    className="text-red-600 hover:underline"
+                                    variant="link-danger"
+                                    size="xs"
                                 >
                                     Delete
-                                </button>
+                                </Button>
                             </td>
                         </tr>
                     ))}

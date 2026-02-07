@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { formatDate } from '../../../utils/date';
 import Toast from '../../../components/ui/Toast';
 import StatusBadge from '../../../components/ui/StatusBadge';
+import Button from '../../../components/ui/Button';
 
 
 
@@ -169,18 +170,16 @@ export default function AdminTimesheets() {
                 {statusTabs.map(tab => {
                     const isActive = filters.status === tab.value;
                     return (
-                        <button
+                        <Button
                             key={tab.value}
                             type="button"
                             onClick={() => setStatusTab(tab.value)}
-                            className={`px-3 py-1.5 rounded-full text-sm font-medium border ${
-                                isActive
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
-                            }`}
+                            variant={isActive ? 'primary' : 'secondary'}
+                            size="sm"
+                            className={`rounded-full ${isActive ? 'border border-blue-600' : 'border-gray-200'}`}
                         >
                             {tab.label}
-                        </button>
+                        </Button>
                     );
                 })}
             </div>
@@ -236,19 +235,19 @@ export default function AdminTimesheets() {
                     />
                 </div>
 
-                <button
+                <Button
                     type="submit"
-                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                    variant="primary"
                 >
                     Apply
-                </button>
-                <button
+                </Button>
+                <Button
                     type="button"
                     onClick={clearFilters}
-                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+                    variant="secondary"
                 >
                     Clear
-                </button>
+                </Button>
             </form>
 
             {toast && <Toast message={toast.message} type={toast.type} />}
@@ -267,13 +266,15 @@ export default function AdminTimesheets() {
                                 : 'Once users submit their weeks, they will show up here for review.'}
                         </div>
                         {hasActiveFilters && (
-                            <button
+                            <Button
                                 type="button"
                                 onClick={clearFilters}
-                                className="mt-4 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+                                variant="secondary"
+                                size="sm"
+                                className="mt-4"
                             >
                                 Clear filters
-                            </button>
+                            </Button>
                         )}
                     </div>
                 ) : (
@@ -283,20 +284,22 @@ export default function AdminTimesheets() {
                                 {selectedIds.length} selected
                             </div>
                             <div className="flex items-center gap-2">
-                                <button
+                                <Button
                                     onClick={bulkApprove}
                                     disabled={selectedIds.length === 0 || bulkLoading}
-                                    className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-sm hover:bg-green-700 disabled:opacity-60"
+                                    variant="success"
+                                    size="sm"
                                 >
                                     {bulkLoading ? 'Working…' : 'Bulk approve'}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={bulkReject}
                                     disabled={selectedIds.length === 0 || bulkLoading}
-                                    className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm hover:bg-red-700 disabled:opacity-60"
+                                    variant="danger"
+                                    size="sm"
                                 >
                                     Bulk reject
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     <table className="w-full text-sm">

@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../../../components/ui/Button';
 
 export default function WeekHeader({
     week,
@@ -17,13 +18,14 @@ export default function WeekHeader({
                 </p>
 
                 {week.can_submit ? (
-                    <button
+                    <Button
                         onClick={submitWeek}
                         disabled={submitting}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg mt-2 hover:bg-blue-700 disabled:opacity-60"
+                        className="mt-2"
+                        variant="primary"
                     >
                         {submitting ? 'Submitting…' : 'Submit week'}
-                    </button>
+                    </Button>
                 ) : (
                     <span className="px-3 py-2 rounded-lg bg-gray-200 text-gray-900 dark:bg-white/70 dark:text-black mt-2 inline-block">
                         Submitted
@@ -32,21 +34,24 @@ export default function WeekHeader({
             </div>
 
             <div className="flex flex-wrap gap-2">
-                <button 
+                <Button
                     onClick={() => setOffset(o => o - 1)} 
-                    className="px-3 py-2 border rounded-lg text-gray-700 hover:bg-gray-100">
+                    variant="secondary"
+                >
                         ← Prev
-                </button>
-                <button 
+                </Button>
+                <Button
                     onClick={() => setOffset(0)} 
-                    className="px-3 py-2 border rounded-lg text-gray-700 hover:bg-gray-100">
+                    variant="secondary"
+                >
                         This week
-                </button>
-                <button 
+                </Button>
+                <Button
                     onClick={() => setOffset(o => o + 1)} 
-                    className="px-3 py-2 border rounded-lg text-gray-700 hover:bg-gray-100">
+                    variant="secondary"
+                >
                         Next →
-                </button>
+                </Button>
             </div>
         </div>
     );

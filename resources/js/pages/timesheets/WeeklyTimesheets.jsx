@@ -3,6 +3,7 @@ import { useApi } from '../../context/ApiContext';
 import { PageSkeleton } from '../../components/skeletons/PageSkeleton';
 import Toast from '../../components/ui/Toast';
 import InlineAlert from '../../components/ui/InlineAlert';
+import Button from '../../components/ui/Button';
 
 import WeekHeader from './components/WeekHeader';
 import DayCard from './components/DayCard';
@@ -102,13 +103,14 @@ export default function WeeklyTimesheet() {
 
             {isDev && (
                 <div className="flex justify-end">
-                    <button
+                    <Button
                         type="button"
+                        variant="link-muted"
+                        size="xs"
                         onClick={() => setError(prev => prev ? '' : 'Unable to load this week. Please try again.')}
-                        className="text-xs font-medium text-gray-500 hover:text-gray-700"
                     >
                         Toggle error (dev)
-                    </button>
+                    </Button>
                 </div>
             )}
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Button from '../../../components/ui/Button';
 
 export default function ProjectEditModal({ project, onClose, onSave, saving }) {
   const [name, setName] = useState('');
@@ -50,19 +51,12 @@ export default function ProjectEditModal({ project, onClose, onSave, saving }) {
         </div>
 
         <div className="mt-4 flex justify-end space-x-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg border hover:bg-gray-100"
-          >
+          <Button onClick={onClose} variant="secondary">
             Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
-          >
+          </Button>
+          <Button onClick={handleSave} disabled={saving} variant="primary">
             {saving ? 'Saving…' : 'Save'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
