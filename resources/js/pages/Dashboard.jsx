@@ -9,7 +9,7 @@ import InlineAlert from '../components/ui/InlineAlert';
 
 
 export default function Dashboard() {
-    const { projects, loading: projectsLoading, loadProjects } = useProjects();
+    const { projects, loading: projectsLoading } = useProjects();
     const { api } = useApi();
     const isDev = !!import.meta?.env?.DEV || window?.__APP_ENV__ === 'local';
 
