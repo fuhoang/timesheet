@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Button from '../../../components/ui/Button';
 
 export default function ProjectForm({ api, reloadProjects, editingProject, setEditingProject, showToast }) {
     const [name, setName] = useState('');
@@ -82,13 +83,13 @@ export default function ProjectForm({ api, reloadProjects, editingProject, setEd
                     {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description[0]}</p>}
                 </div>
 
-                <button
+                <Button
                     type="submit"
                     disabled={saving}
-                    className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 disabled:opacity-60"
+                    variant="primary"
                 >
                     {saving ? 'Saving…' : editingProject ? 'Save Project' : 'Add Project'}
-                </button>
+                </Button>
             </form>
         </div>
     );

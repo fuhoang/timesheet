@@ -4,6 +4,7 @@ import { useApi } from '../../../context/ApiContext';
 import { formatDate } from '../../../utils/date';
 import RejectModal from './RejectModal';
 import StatusBadge from '../../../components/ui/StatusBadge';
+import Button from '../../../components/ui/Button';
 
 
 export default function AdminTimesheetShow() {
@@ -197,20 +198,20 @@ export default function AdminTimesheetShow() {
 
                 {timesheet.submitted_at && timesheet.status !== 'approved' && (
                     <div className="flex space-x-2">
-                        <button
+                        <Button
                             onClick={approveTimesheet}
                             disabled={approving}
-                            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+                            variant="success"
                         >
                             {approving ? 'Approving…' : 'Approve'}
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
                             onClick={() => setShowReject(true)}
-                            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+                            variant="danger"
                         >
                             Reject
-                        </button>
+                        </Button>
                     </div>
                 )}
             </div>
@@ -225,13 +226,13 @@ export default function AdminTimesheetShow() {
                     placeholder="Optional note for this day..."
                 />
                 <div className="flex justify-end">
-                    <button
+                    <Button
                         onClick={saveDayNote}
                         disabled={savingDayNote}
-                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                        variant="primary"
                     >
                         {savingDayNote ? 'Saving…' : 'Save note'}
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -277,13 +278,15 @@ export default function AdminTimesheetShow() {
                                     />
                                 </td>
                                 <td className="px-4 py-3 text-right">
-                                    <button
+                                    <Button
                                         onClick={() => saveEntryNote(entry.id)}
                                         disabled={savingEntryId === entry.id}
-                                        className="text-indigo-600 hover:underline disabled:opacity-60"
+                                        variant="link"
+                                        size="xs"
+                                        className="disabled:opacity-60"
                                     >
                                         {savingEntryId === entry.id ? 'Saving…' : 'Save'}
-                                    </button>
+                                    </Button>
                                 </td>
                             </tr>
                         ))}

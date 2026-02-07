@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Button from '../../../components/ui/Button';
 
 export default function RejectModal({
     open,
@@ -39,20 +40,13 @@ export default function RejectModal({
                 )}
 
                 <div className="mt-4 flex justify-end space-x-2">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 rounded-lg border hover:bg-gray-100"
-                    >
+                    <Button onClick={onClose} variant="secondary">
                         Cancel
-                    </button>
+                    </Button>
 
-                    <button
-                        onClick={submit}
-                        disabled={loading}
-                        className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
-                    >
+                    <Button onClick={submit} disabled={loading} variant="danger">
                         {loading ? 'Rejecting…' : 'Reject'}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

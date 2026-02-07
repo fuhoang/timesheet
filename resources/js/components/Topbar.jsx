@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
+import Button from './ui/Button';
 
 export default function Topbar() {
     const { user, logout } = useAuth();
@@ -28,12 +29,9 @@ export default function Topbar() {
                     {user?.name}
                 </span>
 
-                <button
-                    onClick={logout}
-                    className="px-3 py-1 text-sm rounded bg-red-500 text-white hover:bg-red-600"
-                >
+                <Button onClick={logout} variant="danger" size="sm">
                     Logout
-                </button>
+                </Button>
             </div>
         </header>
     );

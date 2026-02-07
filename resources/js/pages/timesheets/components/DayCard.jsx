@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
 import { formatMinutes } from '../utils/time';
+import Button from '../../../components/ui/Button';
 
 export default function DayCard({ day, isToday, locked, onUpdated }) {
     const { api } = useApi();
@@ -131,18 +132,20 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
                                             onChange={e => setMinutes(e.target.value)}
                                         />
                                         <div className="mt-2 space-x-2">
-                                            <button
+                                            <Button
                                                 onClick={() => saveEdit(entry.id)}
-                                                className="text-green-600 hover:underline"
+                                                variant="link-success"
+                                                size="xs"
                                             >
                                                 Save
-                                            </button>
-                                            <button
+                                            </Button>
+                                            <Button
                                                 onClick={() => setEditingId(null)}
-                                                className="text-gray-600 dark:text-gray-400 hover:underline"
+                                                variant="link-muted"
+                                                size="xs"
                                             >
                                                 Cancel
-                                            </button>
+                                            </Button>
                                         </div>
                                     </>
                                 ) : (
@@ -152,12 +155,14 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
                                         </div>
 
                                         {(!locked || isRejected) && (
-                                            <button
+                                            <Button
                                                 onClick={() => startEdit(entry)}
-                                                className="text-indigo-600 hover:underline mt-1"
+                                                variant="link"
+                                                size="xs"
+                                                className="mt-1"
                                             >
                                                 Edit
-                                            </button>
+                                            </Button>
                                         )}
                                     </>
                                 )}

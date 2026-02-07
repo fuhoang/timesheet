@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GuestLayout from '../layouts/GuestLayout';
+import Button from '../components/ui/Button';
 
 export default function Login() {
     const { login } = useAuth();
@@ -74,13 +75,15 @@ export default function Login() {
                             />
                         </div>
 
-                        <button
+                        <Button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                            variant="primary"
+                            size="lg"
+                            className="w-full"
                         >
                             {loading ? 'Logging in...' : 'Login'}
-                        </button>
+                        </Button>
                     </form>
 
                     <p className="mt-6 text-center text-gray-500">

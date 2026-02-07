@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useApi } from '../context/ApiContext';
+import Button from './ui/Button';
 
 export default function Timer({ projectId, onChange, disabled, autoStartProjectId, onAutoStartComplete }) {
 
@@ -155,22 +156,24 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
                 {runningEntry ? (
                     <>
                         <span className="text-green-600 font-medium">Running</span>
-                        <button
+                        <Button
                             onClick={stop}
                             disabled={loading || disabled}
-                            className="px-6 py-3 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50"
+                            variant="danger"
+                            size="lg"
                         >
                             Stop
-                        </button>
+                        </Button>
                     </>
                 ) : (
-                    <button
+                    <Button
                         onClick={start}
                         disabled={loading || disabled || !projectId}
-                        className="px-6 py-3 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 disabled:opacity-50"
+                        variant="success"
+                        size="lg"
                     >
                         Start
-                    </button>
+                    </Button>
                 )}
             </div>
         </div>
