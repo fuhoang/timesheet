@@ -7,6 +7,7 @@ import { DropdownSkeleton } from '../components/skeletons/DropdownSkeleton';
 import { TimerSkeleton } from '../components/skeletons/TimerSkeleton';
 import InlineAlert from '../components/ui/InlineAlert';
 import Button from '../components/ui/Button';
+import { formatDateTime } from '../utils/date';
 import { formatMinutes, formatTime } from './timesheets/utils/time';
 
 
@@ -95,7 +96,7 @@ export default function Dashboard() {
                         </p>
                         {lastUpdated && (
                             <p className="text-xs text-gray-500">
-                                Last updated: {formatUpdatedAt(lastUpdated)}
+                                Last updated: {formatDateTime(lastUpdated)}
                             </p>
                         )}
                     </div>
@@ -221,11 +222,3 @@ export default function Dashboard() {
 /* -------------------------
    Helpers
 -------------------------- */
-function formatUpdatedAt(date) {
-    return new Intl.DateTimeFormat(undefined, {
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-    }).format(date);
-}
