@@ -24,9 +24,14 @@ class ProjectController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $project = $request->user()->projects()->create($data);
+        $project = Project::create([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'user_id' => $request->user()->id,
+        ]);
+
+        $project->users()->syncWithoutDetaching([$request->user()->id]);
 
         return response()->json($project, 201);
     }
 }
-

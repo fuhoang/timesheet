@@ -26,6 +26,8 @@ class AdminProjectController extends Controller
             'user_id' => $request->user()->id, // ✅ FIX
         ]);
 
+        $project->users()->syncWithoutDetaching([$request->user()->id]);
+
         return response()->json($project, 201);
     }
 

@@ -20,6 +20,7 @@ import Timesheets from './pages/timesheets';
 import AdminProjects from './pages/admin/AdminProjects/index';
 import AdminTimesheets from './pages/admin/AdminTimesheets/index';
 import AdminTimesheetShow from './pages/admin/AdminTimesheets/show';
+import AdminUsers from './pages/admin/AdminUsers/index';
 
 
 
@@ -70,6 +71,19 @@ export default function App() {
                                     <AdminRoute>
                                         <AdminLayout>
                                             <AdminProjects />
+                                        </AdminLayout>
+                                    </AdminRoute>
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        <Route
+                            path="/admin/users"
+                            element={
+                                <ProtectedRoute>
+                                    <AdminRoute>
+                                        <AdminLayout>
+                                            <AdminUsers />
                                         </AdminLayout>
                                     </AdminRoute>
                                 </ProtectedRoute>
