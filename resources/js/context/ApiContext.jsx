@@ -13,7 +13,6 @@ export function ApiProvider({ children }) {
     async function api(config, options = {}) {
         const { silent = false, retry = true } = options;
 
-        // wait until auth finishes booting
         if (authLoading) {
             await waitForAuth(authLoading);
         }
@@ -26,7 +25,6 @@ export function ApiProvider({ children }) {
             return res.data;
 
         } catch (err) {
-            // 🔁 auto retry once after auth boot
             if (
                 err.response?.status === 401 &&
                 retry &&

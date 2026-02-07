@@ -11,18 +11,11 @@ export function ProjectProvider({ children }) {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    /* -----------------------------
-       Load after auth boots
-    ----------------------------- */
     useEffect(() => {
         if (authLoading || !user) return;
         loadProjects();
     }, [authLoading, user]);
 
-    /* -----------------------------
-       GLOBAL reload hook
-       used after login / admin create
-    ----------------------------- */
     useEffect(() => {
         window.projectReload = loadProjects;
 
@@ -45,7 +38,6 @@ export function ProjectProvider({ children }) {
         }
     }
 
-    // load once after login
     useEffect(() => {
         if (user) {
             loadProjects();
