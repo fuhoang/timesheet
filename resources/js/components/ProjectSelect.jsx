@@ -1,5 +1,4 @@
-import React, {useEffect} from 'react';
-import { useApi } from '../context/ApiContext';
+import React from 'react';
 
 export default function ProjectSelect({ projects = [], value, onChange }) {
     return (
@@ -17,4 +16,3 @@ export default function ProjectSelect({ projects = [], value, onChange }) {
         </select>
     );
 }
-
