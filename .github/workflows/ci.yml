@@ -51,11 +51,6 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
           php artisan storage:link || true
           php artisan migrate --force
         env:
@@ -67,7 +62,9 @@ jobs:
           DB_PASSWORD: secret
           APP_ENV: testing
           APP_DEBUG: false
-          CACHE_DRIVER: file
+          CACHE_STORE: file
+          SESSION_DRIVER: file
+          QUEUE_CONNECTION: sync
 
       - name: Run PHP tests
         run: php artisan test
@@ -80,7 +77,9 @@ jobs:
           DB_PASSWORD: secret
           APP_ENV: testing
           APP_DEBUG: false
-          CACHE_DRIVER: file
+          CACHE_STORE: file
+          SESSION_DRIVER: file
+          QUEUE_CONNECTION: sync
 
       - name: Run Frontend tests
         run: npm test
