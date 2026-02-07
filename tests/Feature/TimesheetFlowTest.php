@@ -48,6 +48,7 @@ class TimesheetFlowTest extends TestCase
             'description' => null,
             'is_active' => true,
         ]);
+        $project->users()->attach($user);
 
         $timesheet = Timesheet::create([
             'user_id' => $user->id,

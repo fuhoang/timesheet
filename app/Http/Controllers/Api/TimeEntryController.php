@@ -20,6 +20,12 @@ class TimeEntryController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        if (!$request->user()->projects()->whereKey($data['project_id'])->exists()) {
+            return response()->json([
+                'message' => 'Project is not assigned to this user',
+            ], 403);
+        }
+
         $timesheet = $request->user()
             ->timesheets()
             ->firstOrCreate([
@@ -110,6 +116,12 @@ class TimeEntryController extends Controller
             'task_id'     => 'nullable|exists:tasks,id',
             'duration_minutes' => 'required|integer|min:0',
         ]);
+
+        if (!$request->user()->projects()->whereKey($data['project_id'])->exists()) {
+            return response()->json([
+                'message' => 'Project is not assigned to this user',
+            ], 403);
+        }
 
         // ✅ Update entry
         $timeEntry->update($data);

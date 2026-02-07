@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\TimeEntryController;
 use App\Http\Controllers\Api\Admin\AdminTimesheetController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\Admin\AdminProjectController;
+use App\Http\Controllers\Api\Admin\AdminUserController;
 
 
 /*
@@ -45,6 +46,10 @@ Route::middleware(['web'])->group(function () {
     Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
         // Projects
         Route::apiResource('projects', AdminProjectController::class)->only(['index', 'store', 'update', 'destroy']);
+
+        // Users + project assignments
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::put('/users/{user}/projects', [AdminUserController::class, 'updateProjects']);
 
         // Timesheets
         Route::get('/timesheets', [AdminTimesheetController::class, 'index']);

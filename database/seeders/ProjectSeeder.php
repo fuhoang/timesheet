@@ -45,13 +45,15 @@ class ProjectSeeder extends Seeder
         }
 
         foreach ($projects as $project) {
-            Project::firstOrCreate([
+            $record = Project::firstOrCreate([
                 'user_id' => $project['user_id'],
                 'name' => $project['name'],
             ], [
                 'description' => $project['description'],
                 'is_active' => true,
             ]);
+
+            $record->users()->syncWithoutDetaching([$project['user_id']]);
         }
     }
 }
