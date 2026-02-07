@@ -112,7 +112,7 @@ export default function AdminTimesheetShow() {
 
         setSavingDayNote(true);
         try {
-            const res = await api({
+            await api({
                 method: 'patch',
                 url: `/api/admin/timesheets/${id}/note`,
                 data: { admin_note: dayNote },
@@ -120,7 +120,7 @@ export default function AdminTimesheetShow() {
 
             setTimesheet(prev => ({
                 ...prev,
-                admin_note: res.timesheet?.admin_note ?? dayNote,
+                admin_note: dayNote,
             }));
         } finally {
             setSavingDayNote(false);
@@ -134,7 +134,7 @@ export default function AdminTimesheetShow() {
 
         setSavingEntryId(entryId);
         try {
-            const res = await api({
+            await api({
                 method: 'patch',
                 url: `/api/admin/time-entries/${entryId}/note`,
                 data: { admin_note: entryNotes[entryId] || '' },
@@ -144,7 +144,7 @@ export default function AdminTimesheetShow() {
                 ...prev,
                 entries: prev.entries.map(entry =>
                     entry.id === entryId
-                        ? { ...entry, admin_note: res.entry?.admin_note ?? entryNotes[entryId] }
+                        ? { ...entry, admin_note: entryNotes[entryId] }
                         : entry
                 ),
             }));
