@@ -3,6 +3,7 @@ import { useApi } from '../../../context/ApiContext';
 import { Link } from 'react-router-dom';
 import { formatDate } from '../../../utils/date';
 import Toast from '../../../components/ui/Toast';
+import StatusBadge from '../../../components/ui/StatusBadge';
 
 
 
@@ -350,23 +351,5 @@ export default function AdminTimesheets() {
                 )}
             </div>
         </div>
-    );
-}
-
-function StatusBadge({ status }) {
-    const styles = {
-        resubmitted: 'bg-blue-100 text-blue-800',
-        draft: 'bg-gray-100 text-gray-700',
-        submitted: 'bg-yellow-100 text-yellow-800',
-        approved: 'bg-green-100 text-green-800',
-        rejected: 'bg-red-100 text-red-800',
-    };
-
-    const label = status === 'resubmitted' ? 'resubmitted' : status;
-
-    return (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[label] || styles[status]}`}>
-            {label}
-        </span>
     );
 }
