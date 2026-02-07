@@ -67,6 +67,7 @@ jobs:
           DB_PASSWORD: secret
           APP_ENV: testing
           APP_DEBUG: false
+          CACHE_DRIVER: file
 
       - name: Run PHP tests
         run: php artisan test
@@ -79,6 +80,7 @@ jobs:
           DB_PASSWORD: secret
           APP_ENV: testing
           APP_DEBUG: false
+          CACHE_DRIVER: file
 
       - name: Run Frontend tests
         run: npm test
