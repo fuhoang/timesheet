@@ -10,9 +10,6 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
     const [loading, setLoading] = useState(false);
     const intervalRef = useRef(null);
 
-    /* ----------------------------------
-       Load running timer on mount
-    ---------------------------------- */
     useEffect(() => {
         loadRunning();
         return () => clearInterval(intervalRef.current);
@@ -40,7 +37,6 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
                 url: '/api/time-entries/running',
             });
 
-            // Safety check: ensure res exists and has started_at
             if (res && res.started_at) {
                 setRunningEntry(res || null);
 
@@ -51,7 +47,6 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
                 setSeconds(diff);
                 startTicking();
             } else {
-                // No running timer
                 setRunningEntry(null);
                 setSeconds(0);
             }
@@ -60,9 +55,6 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
         }
     }
 
-    /* ----------------------------------
-       Timer ticking
-    ---------------------------------- */
     function startTicking() {
         clearInterval(intervalRef.current);
 
@@ -75,9 +67,6 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
         clearInterval(intervalRef.current);
     }
 
-    /* ----------------------------------
-       Start timer
-    ---------------------------------- */
     async function start() {
         if (!projectId) {
             alert('Please select a project');
@@ -115,9 +104,6 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
         }
     }
 
-    /* ----------------------------------
-       Stop timer
-    ---------------------------------- */
     async function stop() {
         setLoading(true);
 
@@ -140,18 +126,13 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
         }
     }
 
-    /* ----------------------------------
-       UI
-    ---------------------------------- */
     return (
         <div className="space-y-4">
 
-            {/* Time display */}
             <div className="text-3xl font-mono font-semibold">
                 {formatSeconds(seconds)}
             </div>
 
-            {/* Buttons */}
             <div className="flex items-center gap-4">
                 {runningEntry ? (
                     <>
@@ -180,9 +161,6 @@ export default function Timer({ projectId, onChange, disabled, autoStartProjectI
     );
 }
 
-/* ----------------------------------
-   Helpers
----------------------------------- */
 function formatSeconds(total) {
     const h = Math.floor(total / 3600);
     const m = Math.floor((total % 3600) / 60);

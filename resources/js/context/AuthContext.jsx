@@ -27,7 +27,6 @@ export function AuthProvider({ children }) {
         await authApi.login(credentials);
         await loadUser();
 
-        // trigger projects reload
         if (typeof window !== 'undefined' && window.projectReload) {
             window.projectReload();
         }
