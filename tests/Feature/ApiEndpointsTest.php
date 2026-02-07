@@ -32,24 +32,26 @@ class ApiEndpointsTest extends TestCase
         $user = User::factory()->create();
         $other = User::factory()->create();
 
-        Project::create([
+        $active = Project::create([
             'user_id' => $user->id,
             'name' => 'Active A',
             'description' => null,
             'is_active' => true,
         ]);
-        Project::create([
+        $inactive = Project::create([
             'user_id' => $user->id,
             'name' => 'Inactive B',
             'description' => null,
             'is_active' => false,
         ]);
-        Project::create([
+        $otherProject = Project::create([
             'user_id' => $other->id,
             'name' => 'Other C',
             'description' => null,
             'is_active' => true,
         ]);
+        $active->users()->attach($user);
+        $inactive->users()->attach($user);
 
         Sanctum::actingAs($user);
 
@@ -162,6 +164,7 @@ class ApiEndpointsTest extends TestCase
             'description' => null,
             'is_active' => true,
         ]);
+        $project->users()->attach($user);
 
         $start = $this->postJson('/api/time-entries/start', [
             'project_id' => $project->id,
