@@ -6,6 +6,7 @@ import ProjectSelect from '../components/ProjectSelect';
 import { DropdownSkeleton } from '../components/skeletons/DropdownSkeleton';
 import { TimerSkeleton } from '../components/skeletons/TimerSkeleton';
 import InlineAlert from '../components/ui/InlineAlert';
+import { formatMinutes, formatTime } from './timesheets/utils/time';
 
 
 export default function Dashboard() {
@@ -216,12 +217,6 @@ export default function Dashboard() {
 /* -------------------------
    Helpers
 -------------------------- */
-function formatMinutes(minutes = 0) {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return `${h}h ${m}m`;
-}
-
 function formatUpdatedAt(date) {
     return new Intl.DateTimeFormat(undefined, {
         month: 'short',
@@ -229,9 +224,4 @@ function formatUpdatedAt(date) {
         hour: 'numeric',
         minute: '2-digit',
     }).format(date);
-}
-
-function formatTime(datetime) {
-    if (!datetime) return '';
-    return new Date(datetime.replace(' ', 'T')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }

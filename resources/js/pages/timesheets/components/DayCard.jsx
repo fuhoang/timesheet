@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
+import { formatMinutes } from '../utils/time';
 
 export default function DayCard({ day, isToday, locked, onUpdated }) {
     const { api } = useApi();
@@ -177,8 +178,3 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
 }
 
 /* helpers */
-function formatMinutes(minutes = 0) {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return `${h}h ${m}m`;
-}
