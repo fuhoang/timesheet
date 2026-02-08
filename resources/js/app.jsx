@@ -16,6 +16,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Timesheets from './pages/timesheets';
+import Reports from './pages/Reports/index';
 
 import AdminProjects from './pages/admin/AdminProjects/index';
 import AdminTimesheets from './pages/admin/AdminTimesheets/index';
@@ -55,6 +56,19 @@ export default function App() {
                                     <AuthLayout>
                                         <DashboardLayout>
                                             <Timesheets />
+                                        </DashboardLayout>
+                                    </AuthLayout>
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        <Route
+                            path="/reports"
+                            element={
+                                <ProtectedRoute>
+                                    <AuthLayout>
+                                        <DashboardLayout>
+                                            <Reports />
                                         </DashboardLayout>
                                     </AuthLayout>
                                 </ProtectedRoute>

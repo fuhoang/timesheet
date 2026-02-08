@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\TimesheetController;
 use App\Http\Controllers\Api\TimeEntryController;
 use App\Http\Controllers\Api\Admin\AdminTimesheetController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\Admin\AdminProjectController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 
@@ -27,6 +28,9 @@ Route::middleware(['web'])->group(function () {
 
         // Projects (non-admin list)
         Route::apiResource('projects', ProjectController::class)->only(['index']);
+
+        // Reports
+        Route::get('/reports', [ReportController::class, 'index']);
 
         // Timesheets
         Route::get('/timesheets/today', [TimesheetController::class, 'today']);
