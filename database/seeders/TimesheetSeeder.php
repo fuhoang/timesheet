@@ -22,7 +22,7 @@ class TimesheetSeeder extends Seeder
             return;
         }
 
-        $startDate = Carbon::now()->subDays(30)->startOfDay();
+        $startDate = Carbon::now()->subYear()->startOfDay();
         $endDate = Carbon::now()->startOfDay();
 
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
@@ -115,6 +115,6 @@ class TimesheetSeeder extends Seeder
             }
         }
 
-        $this->command->info('30 days of timesheets seeded successfully.');
+        $this->command->info('1 year of timesheets seeded successfully.');
     }
 }
