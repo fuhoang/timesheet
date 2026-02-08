@@ -112,6 +112,10 @@ export default function Reports() {
         return `${hours}h ${mins}m`;
     }
 
+    function formatHours(minutes) {
+        return `${(minutes / 60).toFixed(2)}h`;
+    }
+
     function handlePageChange(nextPage) {
         if (nextPage < 1 || nextPage > totalPages) return;
         setPage(nextPage);
@@ -276,6 +280,7 @@ export default function Reports() {
                     </div>
                     <div>
                         Page total: <span className="font-semibold text-gray-900">{formatMinutes(overallMinutes)}</span>
+                        <span className="text-gray-400"> ({formatHours(overallMinutes)})</span>
                     </div>
                 </div>
             )}
@@ -298,9 +303,32 @@ export default function Reports() {
                             <div className="text-xs uppercase text-gray-400">Total</div>
                             <div className="text-lg font-semibold text-gray-900">
                                 {formatMinutes(row.total_minutes)}
+                                <span className="text-sm text-gray-400"> ({formatHours(row.total_minutes)})</span>
                             </div>
                         </div>
                     </div>
+
+                    {row.projects?.length > 0 && (
+                        <div>
+                            <div className="text-xs uppercase text-gray-400 mb-2">Project totals</div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {row.projects.map(project => (
+                                    <div
+                                        key={`${row.user?.id ?? 'user'}-project-${project.id ?? project.name}`}
+                                        className="rounded-lg border border-gray-100 bg-white px-4 py-3 flex items-center justify-between"
+                                    >
+                                        <div className="text-sm font-medium text-gray-700">
+                                            {project.name}
+                                        </div>
+                                        <div className="text-sm font-semibold text-gray-900">
+                                            {formatMinutes(project.total_minutes)}
+                                            <span className="text-xs text-gray-400"> ({formatHours(project.total_minutes)})</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {row.days.map(day => (
