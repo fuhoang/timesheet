@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\TimeEntry;
 use App\Models\Timesheet;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -62,15 +64,8 @@ class ReportController extends Controller
             $page,
             $perPage
         ) {
-            $query = Timesheet::with([
-                'user:id,name,email',
-                'entries' => function ($entryQuery) use ($projectId) {
-                    $entryQuery->select('id', 'timesheet_id', 'duration_minutes', 'project_id');
-                    if ($projectId) {
-                        $entryQuery->where('project_id', $projectId);
-                    }
-                },
-            ])
+            $query = Timesheet::query()
+                ->select('id', 'user_id', 'work_date', 'total_minutes', 'status')
                 ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()]);
 
             if (!$user->is_admin) {
@@ -83,60 +78,71 @@ class ReportController extends Controller
                 $query->where('status', $status);
             }
 
-            if ($projectId) {
-                $query->whereHas('entries', function ($entryQuery) use ($projectId) {
-                    $entryQuery->where('project_id', $projectId);
-                });
-            }
-
             $timesheets = $query->get();
 
-            $projectIds = $timesheets
-                ->flatMap(fn ($timesheet) => $timesheet->entries)
-                ->pluck('project_id')
-                ->filter()
-                ->unique()
-                ->values();
+            $timesheetIds = $timesheets->pluck('id');
+            $userIds = $timesheets->pluck('user_id')->unique();
 
-            $projectNames = $projectIds->isNotEmpty()
-                ? Project::query()->whereIn('id', $projectIds)->pluck('name', 'id')
+            $entryTotals = $timesheetIds->isNotEmpty()
+                ? TimeEntry::query()
+                    ->select('timesheet_id', DB::raw('SUM(duration_minutes) as total_minutes'))
+                    ->when($projectId, fn ($entryQuery) => $entryQuery->where('project_id', $projectId))
+                    ->whereIn('timesheet_id', $timesheetIds)
+                    ->groupBy('timesheet_id')
+                    ->get()
+                    ->keyBy('timesheet_id')
+                : collect();
+
+            $projectTotalsRaw = $timesheetIds->isNotEmpty()
+                ? TimeEntry::query()
+                    ->select('timesheets.user_id', 'time_entries.project_id', DB::raw('SUM(time_entries.duration_minutes) as total_minutes'))
+                    ->join('timesheets', 'timesheets.id', '=', 'time_entries.timesheet_id')
+                    ->when($projectId, fn ($entryQuery) => $entryQuery->where('time_entries.project_id', $projectId))
+                    ->whereIn('time_entries.timesheet_id', $timesheetIds)
+                    ->groupBy('timesheets.user_id', 'time_entries.project_id')
+                    ->get()
+                : collect();
+
+            $projectNames = $projectTotalsRaw->isNotEmpty()
+                ? Project::query()
+                    ->whereIn('id', $projectTotalsRaw->pluck('project_id')->filter()->unique())
+                    ->pluck('name', 'id')
+                : collect();
+
+            $projectTotalsByUser = $projectTotalsRaw
+                ->groupBy('user_id')
+                ->map(function ($entries) use ($projectNames) {
+                    return $entries->map(function ($entry) use ($projectNames) {
+                        $projectIdValue = $entry->project_id;
+                        return [
+                            'id' => $projectIdValue ? (int) $projectIdValue : null,
+                            'name' => $projectIdValue
+                                ? ($projectNames[$projectIdValue] ?? 'Unknown project')
+                                : 'No project',
+                            'total_minutes' => (int) $entry->total_minutes,
+                        ];
+                    })->values()->all();
+                });
+
+            $usersMap = $userIds->isNotEmpty()
+                ? User::query()->whereIn('id', $userIds)->get(['id', 'name', 'email'])->keyBy('id')
                 : collect();
 
             $rows = $timesheets
                 ->groupBy('user_id')
-                ->map(function ($userTimesheets) use ($projectId, $projectNames) {
-                    $user = $userTimesheets->first()->user;
-
-                    $projectTotals = $userTimesheets
-                        ->flatMap(fn ($timesheet) => $timesheet->entries)
-                        ->groupBy('project_id')
-                        ->map(function ($entries, $entryProjectId) use ($projectNames) {
-                            $totalMinutes = $entries->sum('duration_minutes');
-                            return [
-                                'id' => $entryProjectId ? (int) $entryProjectId : null,
-                                'name' => $entryProjectId
-                                    ? ($projectNames[$entryProjectId] ?? 'Unknown project')
-                                    : 'No project',
-                                'total_minutes' => $totalMinutes,
-                            ];
-                        })
-                        ->values()
-                        ->all();
+                ->map(function ($userTimesheets, $userKey) use ($entryTotals, $projectTotalsByUser, $usersMap, $projectId) {
+                    $user = $usersMap->get($userKey);
 
                     $days = $userTimesheets
-                        ->groupBy(fn ($timesheet) => $timesheet->work_date->toDateString())
-                        ->map(function ($dayTimesheets) use ($projectId) {
-                            $total = $dayTimesheets->sum(function ($timesheet) use ($projectId) {
-                                $entryTotal = $timesheet->entries->sum('duration_minutes');
-                                if (!$projectId && $entryTotal === 0 && $timesheet->total_minutes) {
-                                    return $timesheet->total_minutes;
-                                }
-                                return $entryTotal;
-                            });
+                        ->map(function ($timesheet) use ($entryTotals, $projectId) {
+                            $entryTotal = $entryTotals->get($timesheet->id)->total_minutes ?? 0;
+                            $total = (!$projectId && $entryTotal === 0 && $timesheet->total_minutes)
+                                ? $timesheet->total_minutes
+                                : (int) $entryTotal;
 
                             return [
-                                'date' => $dayTimesheets->first()->work_date->toDateString(),
-                                'total_minutes' => $total,
+                                'date' => $timesheet->work_date->toDateString(),
+                                'total_minutes' => (int) $total,
                             ];
                         })
                         ->values()
@@ -154,7 +160,7 @@ class ReportController extends Controller
                             : null,
                         'total_minutes' => $totalMinutes,
                         'days' => $days,
-                        'projects' => $projectTotals,
+                        'projects' => $projectTotalsByUser->get($userKey, []),
                     ];
                 })
                 ->values()
