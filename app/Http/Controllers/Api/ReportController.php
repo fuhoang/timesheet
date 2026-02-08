@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use App\Models\Timesheet;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -15,6 +17,13 @@ class ReportController extends Controller
 
         $startParam = $request->query('start');
         $endParam = $request->query('end');
+        $status = $request->query('status');
+        $projectId = $request->query('project_id');
+        $userId = $request->query('user_id');
+        $sort = $request->query('sort', 'total_minutes');
+        $direction = strtolower($request->query('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $page = max((int) $request->query('page', 1), 1);
+        $perPage = max((int) $request->query('per_page', 10), 1);
 
         $start = $startParam
             ? Carbon::parse($startParam)->startOfDay()
@@ -27,26 +36,46 @@ class ReportController extends Controller
             [$start, $end] = [$end, $start];
         }
 
-        $query = Timesheet::with(['user:id,name,email', 'entries:id,timesheet_id,duration_minutes'])
+        $query = Timesheet::with([
+            'user:id,name,email',
+            'entries' => function ($entryQuery) use ($projectId) {
+                $entryQuery->select('id', 'timesheet_id', 'duration_minutes', 'project_id');
+                if ($projectId) {
+                    $entryQuery->where('project_id', $projectId);
+                }
+            },
+        ])
             ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()]);
 
         if (!$user->is_admin) {
             $query->where('user_id', $user->id);
+        } elseif ($userId) {
+            $query->where('user_id', $userId);
+        }
+
+        if ($status && in_array($status, ['draft', 'submitted', 'approved', 'rejected'], true)) {
+            $query->where('status', $status);
+        }
+
+        if ($projectId) {
+            $query->whereHas('entries', function ($entryQuery) use ($projectId) {
+                $entryQuery->where('project_id', $projectId);
+            });
         }
 
         $timesheets = $query->get();
 
         $rows = $timesheets
             ->groupBy('user_id')
-            ->map(function ($userTimesheets) {
+            ->map(function ($userTimesheets) use ($projectId) {
                 $user = $userTimesheets->first()->user;
 
                 $days = $userTimesheets
                     ->groupBy(fn ($timesheet) => $timesheet->work_date->toDateString())
-                    ->map(function ($dayTimesheets) {
-                        $total = $dayTimesheets->sum(function ($timesheet) {
+                    ->map(function ($dayTimesheets) use ($projectId) {
+                        $total = $dayTimesheets->sum(function ($timesheet) use ($projectId) {
                             $entryTotal = $timesheet->entries->sum('duration_minutes');
-                            if ($entryTotal === 0 && $timesheet->total_minutes) {
+                            if (!$projectId && $entryTotal === 0 && $timesheet->total_minutes) {
                                 return $timesheet->total_minutes;
                             }
                             return $entryTotal;
@@ -77,9 +106,44 @@ class ReportController extends Controller
             ->values()
             ->all();
 
+        $sortableRows = $rows;
+        if ($sort === 'name') {
+            usort($sortableRows, function ($a, $b) use ($direction) {
+                $nameA = $a['user']['name'] ?? '';
+                $nameB = $b['user']['name'] ?? '';
+                return $direction === 'asc'
+                    ? strcasecmp($nameA, $nameB)
+                    : strcasecmp($nameB, $nameA);
+            });
+        } else {
+            usort($sortableRows, function ($a, $b) use ($direction) {
+                return $direction === 'asc'
+                    ? $a['total_minutes'] <=> $b['total_minutes']
+                    : $b['total_minutes'] <=> $a['total_minutes'];
+            });
+        }
+
+        $totalRows = count($sortableRows);
+        $totalPages = (int) ceil($totalRows / $perPage);
+        $page = min($page, max($totalPages, 1));
+        $offset = ($page - 1) * $perPage;
+        $pagedRows = array_slice($sortableRows, $offset, $perPage);
+
+        $users = $user->is_admin
+            ? User::query()->select('id', 'name', 'email')->orderBy('name')->get()
+            : collect([$user->only(['id', 'name', 'email'])]);
+
+        $projectsQuery = Project::query()->select('id', 'name')->where('is_active', true);
+        if (!$user->is_admin) {
+            $projectsQuery->whereHas('users', function ($projectUserQuery) use ($user) {
+                $projectUserQuery->where('users.id', $user->id);
+            });
+        }
+        $projects = $projectsQuery->orderBy('name')->get();
+
         if ($request->query('format') === 'csv') {
             $csvLines = ['User,Email,Date,Total Minutes'];
-            foreach ($rows as $row) {
+            foreach ($sortableRows as $row) {
                 foreach ($row['days'] as $day) {
                     $csvLines[] = sprintf(
                         '"%s","%s","%s","%s"',
@@ -105,7 +169,22 @@ class ReportController extends Controller
                 'end' => $end->toDateString(),
             ],
             'grouping' => 'user',
-            'rows' => $rows,
+            'rows' => $pagedRows,
+            'meta' => [
+                'total_rows' => $totalRows,
+                'page' => $page,
+                'per_page' => $perPage,
+                'total_pages' => $totalPages,
+                'sort' => $sort,
+                'direction' => $direction,
+                'filters' => [
+                    'status' => $status,
+                    'project_id' => $projectId ? (int) $projectId : null,
+                    'user_id' => $userId ? (int) $userId : null,
+                ],
+                'users' => $users,
+                'projects' => $projects,
+            ],
         ]);
     }
 }
