@@ -15,6 +15,13 @@ export default function AdminTimesheets() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [bulkLoading, setBulkLoading] = useState(false);
     const [toast, setToast] = useState(null);
+    const [pagination, setPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        from: 0,
+        to: 0,
+        total: 0,
+    });
     const [filters, setFilters] = useState({
         status: '',
         q: '',
@@ -32,15 +39,25 @@ export default function AdminTimesheets() {
         loadTimesheets();
     }, []);
 
-    async function loadTimesheets() {
+    async function loadTimesheets(page = 1) {
         setLoading(true);
         try {
             const res = await api({
                 method: 'get',
                 url: '/api/admin/timesheets',
-                params: filters,
+                params: {
+                    ...filters,
+                    page,
+                },
             });
             setTimesheets(res.data);
+            setPagination({
+                current_page: res.current_page ?? 1,
+                last_page: res.last_page ?? 1,
+                from: res.from ?? 0,
+                to: res.to ?? 0,
+                total: res.total ?? res.data?.length ?? 0,
+            });
             setSelectedIds([]);
         } finally {
             setLoading(false);
@@ -136,17 +153,22 @@ export default function AdminTimesheets() {
 
     function applyFilters(e) {
         e?.preventDefault();
-        loadTimesheets();
+        loadTimesheets(1);
     }
 
     function clearFilters() {
         setFilters({ status: '', q: '', date_from: '', date_to: '' });
-        loadTimesheets();
+        loadTimesheets(1);
     }
 
     function setStatusTab(status) {
         setFilters(prev => ({ ...prev, status }));
-        setTimeout(loadTimesheets, 0);
+        setTimeout(() => loadTimesheets(1), 0);
+    }
+
+    function goToPage(page) {
+        if (page < 1 || page > pagination.last_page) return;
+        loadTimesheets(page);
     }
 
     const statusTabs = [
@@ -282,6 +304,9 @@ export default function AdminTimesheets() {
                         <div className="px-4 py-3 border-b flex items-center justify-between">
                             <div className="text-sm text-gray-600">
                                 {selectedIds.length} selected
+                                <span className="ml-3 text-xs text-gray-400">
+                                    Showing {pagination.from}-{pagination.to} of {pagination.total}
+                                </span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Button
@@ -350,6 +375,31 @@ export default function AdminTimesheets() {
                             ))}
                         </tbody>
                     </table>
+                        <div className="px-4 py-3 border-t flex items-center justify-between">
+                            <div className="text-sm text-gray-500">
+                                Page {pagination.current_page} of {pagination.last_page}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => goToPage(pagination.current_page - 1)}
+                                    disabled={pagination.current_page <= 1}
+                                >
+                                    Previous
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => goToPage(pagination.current_page + 1)}
+                                    disabled={pagination.current_page >= pagination.last_page}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        </div>
                     </>
                 )}
             </div>
