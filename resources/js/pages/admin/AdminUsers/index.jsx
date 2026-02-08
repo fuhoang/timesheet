@@ -11,6 +11,13 @@ export default function AdminUsers() {
     const [error, setError] = useState('');
     const [savingUserId, setSavingUserId] = useState(null);
     const [selected, setSelected] = useState({});
+    const [pagination, setPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        from: 0,
+        to: 0,
+        total: 0,
+    });
     const [userQuery, setUserQuery] = useState('');
     const [projectQuery, setProjectQuery] = useState('');
     const [bulkUsers, setBulkUsers] = useState(new Set());
@@ -21,18 +28,30 @@ export default function AdminUsers() {
         loadUsers();
     }, []);
 
-    async function loadUsers() {
+    async function loadUsers(page = 1) {
         setLoading(true);
         setError('');
         try {
-            const res = await api({ method: 'get', url: '/api/admin/users' });
-            setUsers(res.users || []);
+            const res = await api({
+                method: 'get',
+                url: '/api/admin/users',
+                params: { page, per_page: 10 },
+            });
+            setUsers(res.users?.data || []);
             setProjects(res.projects || []);
+            setPagination({
+                current_page: res.users?.current_page ?? 1,
+                last_page: res.users?.last_page ?? 1,
+                from: res.users?.from ?? 0,
+                to: res.users?.to ?? 0,
+                total: res.users?.total ?? res.users?.data?.length ?? 0,
+            });
             const initial = {};
-            (res.users || []).forEach(user => {
+            (res.users?.data || []).forEach(user => {
                 initial[user.id] = new Set((user.projects || []).map(p => p.id));
             });
             setSelected(initial);
+            setBulkUsers(new Set());
         } catch (err) {
             setError('Unable to load users');
         } finally {
@@ -93,6 +112,11 @@ export default function AdminUsers() {
             }
             return next;
         });
+    }
+
+    function goToPage(page) {
+        if (page < 1 || page > pagination.last_page) return;
+        loadUsers(page);
     }
 
     function selectAllFilteredUsers(filteredUsers) {
@@ -200,6 +224,9 @@ export default function AdminUsers() {
                             </Button>
                             <div className="text-xs text-gray-500">
                                 Selected: {bulkUsers.size} users
+                                <span className="ml-3 text-xs text-gray-400">
+                                    Showing {pagination.from}-{pagination.to} of {pagination.total}
+                                </span>
                             </div>
                         </div>
 
@@ -292,6 +319,32 @@ export default function AdminUsers() {
                             </div>
                         </div>
                     ))}
+
+                    <div className="flex items-center justify-between">
+                        <div className="text-sm text-gray-500">
+                            Page {pagination.current_page} of {pagination.last_page}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => goToPage(pagination.current_page - 1)}
+                                disabled={pagination.current_page <= 1}
+                            >
+                                Previous
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => goToPage(pagination.current_page + 1)}
+                                disabled={pagination.current_page >= pagination.last_page}
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
