@@ -31,6 +31,15 @@ export default function Reports() {
     const [direction, setDirection] = useState('desc');
     const [page, setPage] = useState(1);
     const [perPage] = useState(10);
+    const [presetName, setPresetName] = useState('');
+    const [presets, setPresets] = useState(() => {
+        try {
+            const raw = window.localStorage.getItem('reportsPresets');
+            return raw ? JSON.parse(raw) : [];
+        } catch {
+            return [];
+        }
+    });
 
     const users = report?.meta?.users ?? [];
     const projects = report?.meta?.projects ?? [];
@@ -121,6 +130,43 @@ export default function Reports() {
         setPage(nextPage);
     }
 
+    function savePreset() {
+        const name = presetName.trim();
+        if (!name) return;
+        const next = presets.filter(preset => preset.name !== name).concat({
+            name,
+            startDate,
+            endDate,
+            status,
+            projectId,
+            userId,
+            sort,
+            direction,
+        });
+        setPresets(next);
+        setPresetName('');
+        window.localStorage.setItem('reportsPresets', JSON.stringify(next));
+    }
+
+    function applyPreset(preset) {
+        setStartDate(preset.startDate);
+        setEndDate(preset.endDate);
+        setStatus(preset.status);
+        setProjectId(preset.projectId);
+        setUserId(preset.userId);
+        setSort(preset.sort);
+        setDirection(preset.direction);
+        setPage(1);
+    }
+
+    function deletePreset(name) {
+        const next = presets.filter(preset => preset.name !== name);
+        setPresets(next);
+        window.localStorage.setItem('reportsPresets', JSON.stringify(next));
+    }
+
+    const showSkeleton = apiLoading && !report;
+
     return (
         <div className="space-y-6">
             <div className="flex items-start justify-between gap-4">
@@ -141,7 +187,8 @@ export default function Reports() {
                 </button>
             </div>
 
-            <div className="bg-white border rounded-xl p-4 space-y-4">
+            <div className="sticky top-4 z-10 bg-gray-50/80 backdrop-blur">
+                <div className="bg-white border rounded-xl p-4 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label className="text-xs uppercase text-gray-500">Start</label>
@@ -255,6 +302,63 @@ export default function Reports() {
                         </div>
                     </div>
                 </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="text-xs uppercase text-gray-500">Presets</div>
+                    <select
+                        value=""
+                        onChange={event => {
+                            const selectedName = event.target.value;
+                            if (!selectedName) return;
+                            const selected = presets.find(preset => preset.name === selectedName);
+                            if (selected) {
+                                applyPreset(selected);
+                            }
+                        }}
+                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    >
+                        <option value="">Select preset</option>
+                        {presets.map(preset => (
+                            <option key={preset.name} value={preset.name}>
+                                {preset.name}
+                            </option>
+                        ))}
+                    </select>
+                    <input
+                        type="text"
+                        value={presetName}
+                        onChange={event => setPresetName(event.target.value)}
+                        placeholder="Preset name"
+                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    />
+                    <button
+                        type="button"
+                        onClick={savePreset}
+                        className="px-3 py-2 rounded-lg border text-sm hover:bg-gray-50"
+                    >
+                        Save preset
+                    </button>
+                </div>
+                {presets.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                        {presets.map(preset => (
+                            <div
+                                key={`preset-${preset.name}`}
+                                className="flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-gray-600"
+                            >
+                                <span>{preset.name}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => deletePreset(preset.name)}
+                                    className="text-red-500 hover:text-red-700"
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                </div>
             </div>
 
             {apiLoading && (
@@ -270,6 +374,27 @@ export default function Reports() {
             {!apiLoading && report?.rows?.length === 0 && (
                 <div className="text-sm text-gray-500">
                     No entries found for this range.
+                </div>
+            )}
+
+            {showSkeleton && (
+                <div className="space-y-4">
+                    {[1, 2, 3].map(item => (
+                        <div key={item} className="bg-white border rounded-xl p-5 shadow-sm space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-2">
+                                    <div className="h-4 w-40 bg-gray-200 rounded animate-pulse" />
+                                    <div className="h-3 w-56 bg-gray-100 rounded animate-pulse" />
+                                </div>
+                                <div className="h-6 w-24 bg-gray-200 rounded animate-pulse" />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {[1, 2, 3].map(inner => (
+                                    <div key={inner} className="h-12 bg-gray-100 rounded-lg animate-pulse" />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 
