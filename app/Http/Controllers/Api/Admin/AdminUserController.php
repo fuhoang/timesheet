@@ -9,13 +9,15 @@ use Illuminate\Http\Request;
 
 class AdminUserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $perPage = max((int) $request->query('per_page', 10), 1);
+
         return response()->json([
             'users' => User::query()
                 ->orderBy('name')
                 ->with(['projects:id,name'])
-                ->get(['id', 'name', 'email', 'is_admin']),
+                ->paginate($perPage, ['id', 'name', 'email', 'is_admin']),
             'projects' => Project::query()
                 ->where('is_active', true)
                 ->orderBy('name')
