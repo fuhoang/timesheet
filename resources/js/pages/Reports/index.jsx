@@ -22,9 +22,24 @@ export default function Reports() {
     const [report, setReport] = useState(null);
     const [error, setError] = useState(null);
     const [exporting, setExporting] = useState(false);
+    const [startDate, setStartDate] = useState(() => formatDate(start));
+    const [endDate, setEndDate] = useState(() => formatDate(end));
+    const [status, setStatus] = useState('');
+    const [projectId, setProjectId] = useState('');
+    const [userId, setUserId] = useState('');
+    const [sort, setSort] = useState('total_minutes');
+    const [direction, setDirection] = useState('desc');
+    const [page, setPage] = useState(1);
+    const [perPage] = useState(10);
 
-    const startDate = useMemo(() => formatDate(start), [start]);
-    const endDate = useMemo(() => formatDate(end), [end]);
+    const users = report?.meta?.users ?? [];
+    const projects = report?.meta?.projects ?? [];
+    const totalRows = report?.meta?.total_rows ?? 0;
+    const totalPages = report?.meta?.total_pages ?? 1;
+    const overallMinutes = useMemo(() => {
+        if (!report?.rows) return 0;
+        return report.rows.reduce((sum, row) => sum + row.total_minutes, 0);
+    }, [report]);
 
     useEffect(() => {
         let mounted = true;
@@ -35,6 +50,13 @@ export default function Reports() {
             params: {
                 start: startDate,
                 end: endDate,
+                status: status || undefined,
+                project_id: projectId || undefined,
+                user_id: userId || undefined,
+                sort,
+                direction,
+                page,
+                per_page: perPage,
             },
         })
             .then(data => {
@@ -51,7 +73,7 @@ export default function Reports() {
         return () => {
             mounted = false;
         };
-    }, [api, startDate, endDate]);
+    }, [api, startDate, endDate, status, projectId, userId, sort, direction, page, perPage]);
 
     async function handleExport() {
         setExporting(true);
@@ -61,6 +83,11 @@ export default function Reports() {
                     start: startDate,
                     end: endDate,
                     format: 'csv',
+                    status: status || undefined,
+                    project_id: projectId || undefined,
+                    user_id: userId || undefined,
+                    sort,
+                    direction,
                 },
                 responseType: 'blob',
             });
@@ -79,13 +106,24 @@ export default function Reports() {
         }
     }
 
+    function formatMinutes(minutes) {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return `${hours}h ${mins}m`;
+    }
+
+    function handlePageChange(nextPage) {
+        if (nextPage < 1 || nextPage > totalPages) return;
+        setPage(nextPage);
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex items-start justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-semibold text-gray-900">Reports</h1>
                     <p className="text-sm text-gray-500">
-                        Weekly summary ({startDate} to {endDate}) grouped by user.
+                        Summary ({startDate} to {endDate}) grouped by user.
                     </p>
                 </div>
 
@@ -97,6 +135,122 @@ export default function Reports() {
                 >
                     {exporting ? 'Exporting...' : 'Export CSV'}
                 </button>
+            </div>
+
+            <div className="bg-white border rounded-xl p-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label className="text-xs uppercase text-gray-500">Start</label>
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={event => {
+                                setStartDate(event.target.value);
+                                setPage(1);
+                            }}
+                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs uppercase text-gray-500">End</label>
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={event => {
+                                setEndDate(event.target.value);
+                                setPage(1);
+                            }}
+                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs uppercase text-gray-500">Status</label>
+                        <select
+                            value={status}
+                            onChange={event => {
+                                setStatus(event.target.value);
+                                setPage(1);
+                            }}
+                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        >
+                            <option value="">All statuses</option>
+                            <option value="draft">Draft</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="text-xs uppercase text-gray-500">Project</label>
+                        <select
+                            value={projectId}
+                            onChange={event => {
+                                setProjectId(event.target.value);
+                                setPage(1);
+                            }}
+                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        >
+                            <option value="">All projects</option>
+                            {projects.map(project => (
+                                <option key={project.id} value={project.id}>
+                                    {project.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {users.length > 1 ? (
+                        <div>
+                            <label className="text-xs uppercase text-gray-500">User</label>
+                            <select
+                                value={userId}
+                                onChange={event => {
+                                    setUserId(event.target.value);
+                                    setPage(1);
+                                }}
+                                className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                            >
+                                <option value="">All users</option>
+                                {users.map(user => (
+                                    <option key={user.id} value={user.id}>
+                                        {user.name} ({user.email})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    ) : (
+                        <div />
+                    )}
+                    <div>
+                        <label className="text-xs uppercase text-gray-500">Sort</label>
+                        <select
+                            value={sort}
+                            onChange={event => setSort(event.target.value)}
+                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        >
+                            <option value="total_minutes">Total minutes</option>
+                            <option value="name">User name</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="text-xs uppercase text-gray-500">Direction</label>
+                        <select
+                            value={direction}
+                            onChange={event => setDirection(event.target.value)}
+                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        >
+                            <option value="desc">Descending</option>
+                            <option value="asc">Ascending</option>
+                        </select>
+                    </div>
+                    <div className="flex items-end">
+                        <div className="text-sm text-gray-600">
+                            {totalRows} users total
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {apiLoading && (
@@ -111,7 +265,18 @@ export default function Reports() {
 
             {!apiLoading && report?.rows?.length === 0 && (
                 <div className="text-sm text-gray-500">
-                    No entries found for this week.
+                    No entries found for this range.
+                </div>
+            )}
+
+            {report?.rows?.length > 0 && (
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div>
+                        Showing page {report?.meta?.page ?? 1} of {totalPages}
+                    </div>
+                    <div>
+                        Page total: <span className="font-semibold text-gray-900">{formatMinutes(overallMinutes)}</span>
+                    </div>
                 </div>
             )}
 
@@ -132,7 +297,7 @@ export default function Reports() {
                         <div className="text-right">
                             <div className="text-xs uppercase text-gray-400">Total</div>
                             <div className="text-lg font-semibold text-gray-900">
-                                {Math.round(row.total_minutes / 60)}h {row.total_minutes % 60}m
+                                {formatMinutes(row.total_minutes)}
                             </div>
                         </div>
                     </div>
@@ -147,13 +312,37 @@ export default function Reports() {
                                     {day.date}
                                 </div>
                                 <div className="text-sm font-semibold text-gray-900">
-                                    {Math.round(day.total_minutes / 60)}h {day.total_minutes % 60}m
+                                    {formatMinutes(day.total_minutes)}
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
             ))}
+
+            {report?.rows?.length > 0 && (
+                <div className="flex items-center justify-between">
+                    <button
+                        type="button"
+                        onClick={() => handlePageChange(page - 1)}
+                        disabled={page <= 1}
+                        className="px-3 py-2 rounded-lg border text-sm disabled:opacity-50"
+                    >
+                        Previous
+                    </button>
+                    <div className="text-sm text-gray-500">
+                        Page {page} of {totalPages}
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => handlePageChange(page + 1)}
+                        disabled={page >= totalPages}
+                        className="px-3 py-2 rounded-lg border text-sm disabled:opacity-50"
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
