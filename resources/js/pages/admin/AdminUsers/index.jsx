@@ -77,6 +77,25 @@ export default function AdminUsers() {
         }
     }
 
+    async function exportLogs() {
+        const res = await api({
+            method: 'get',
+            url: '/api/admin/users',
+            params: { logs_format: 'csv' },
+            responseType: 'blob',
+        });
+
+        const blob = new Blob([res], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'assignment-logs.csv';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    }
+
     function toggleProject(userId, projectId) {
         setSelected(prev => {
             const next = { ...prev };
@@ -227,9 +246,15 @@ export default function AdminUsers() {
                 <div className="p-6 text-gray-500">Loading users…</div>
             ) : (
                 <div className="space-y-4">
+                    {filteredUsers.length === 0 && (
+                        <div className="bg-white rounded-2xl shadow border p-6 text-sm text-gray-500">
+                            No users match your filters. Try clearing the search or role filter.
+                        </div>
+                    )}
                     <AdminUsersAuditLog
                         logs={assignmentLogs}
                         formatProjectList={formatProjectList}
+                        onExport={exportLogs}
                     />
 
                     <AdminUsersFilters

@@ -180,4 +180,59 @@ class ReportsTest extends TestCase
 
         $this->assertSame(true, $response['meta']['filters']['include_drafts']);
     }
+
+    public function test_reports_status_filter_overrides_include_drafts(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 45,
+            'status' => 'draft',
+        ]);
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->addDay()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'approved',
+            'submitted_at' => now(),
+            'approved_at' => now(),
+            'approved_by' => $admin->id,
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/reports?status=approved&include_drafts=1')
+            ->assertStatus(200)
+            ->json();
+
+        $this->assertSame('approved', $response['meta']['filters']['status']);
+        $this->assertSame(true, $response['meta']['filters']['include_drafts']);
+        $this->assertCount(1, $response['rows']);
+    }
+
+    public function test_reports_returns_total_minutes_all(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 120,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/reports')
+            ->assertStatus(200)
+            ->json();
+
+        $this->assertSame(120, $response['meta']['total_minutes_all']);
+    }
 }

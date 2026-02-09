@@ -53,6 +53,7 @@ export default function Reports() {
         if (!report?.rows) return 0;
         return report.rows.reduce((sum, row) => sum + row.total_minutes, 0);
     }, [report]);
+    const totalMinutesAll = report?.meta?.total_minutes_all ?? overallMinutes;
 
     useEffect(() => {
         let mounted = true;
@@ -296,9 +297,15 @@ export default function Reports() {
                     <div>
                         Showing page {report?.meta?.page ?? 1} of {totalPages}
                     </div>
-                    <div>
-                        Page total: <span className="font-semibold text-gray-900">{formatMinutes(overallMinutes)}</span>
-                        <span className="text-gray-400"> ({formatHours(overallMinutes)})</span>
+                    <div className="text-right">
+                        <div>
+                            Page total: <span className="font-semibold text-gray-900">{formatMinutes(overallMinutes)}</span>
+                            <span className="text-gray-400"> ({formatHours(overallMinutes)})</span>
+                        </div>
+                        <div>
+                            All pages: <span className="font-semibold text-gray-900">{formatMinutes(totalMinutesAll)}</span>
+                            <span className="text-gray-400"> ({formatHours(totalMinutesAll)})</span>
+                        </div>
                     </div>
                 </div>
             )}

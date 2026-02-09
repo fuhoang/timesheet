@@ -16,6 +16,7 @@ class AdminUserController extends Controller
         $queryText = trim((string) $request->query('q', ''));
         $role = $request->query('role');
         $includeLogs = filter_var($request->query('include_logs', false), FILTER_VALIDATE_BOOL);
+        $exportLogs = $request->query('logs_format') === 'csv';
 
         $response = [
             'users' => User::query()
@@ -36,12 +37,33 @@ class AdminUserController extends Controller
                 ->get(['id', 'name']),
         ];
 
-        if ($includeLogs) {
-            $response['assignment_logs'] = AdminProjectAssignmentLog::query()
+        if ($includeLogs || $exportLogs) {
+            $logs = AdminProjectAssignmentLog::query()
                 ->with(['admin:id,name,email', 'user:id,name,email'])
                 ->latest()
                 ->limit(50)
                 ->get();
+            $response['assignment_logs'] = $logs;
+        }
+
+        if ($exportLogs) {
+            $lines = ['Admin,User,Before,After,Created At'];
+            foreach ($response['assignment_logs'] ?? [] as $log) {
+                $lines[] = sprintf(
+                    '"%s","%s","%s","%s","%s"',
+                    $log->admin?->email ?? '',
+                    $log->user?->email ?? '',
+                    implode(',', $log->before_project_ids ?? []),
+                    implode(',', $log->after_project_ids ?? []),
+                    $log->created_at?->toDateTimeString() ?? ''
+                );
+            }
+            $csv = implode("\n", $lines) . "\n";
+
+            return response($csv, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename=\"assignment-logs.csv\"',
+            ]);
         }
 
         return response()->json($response);

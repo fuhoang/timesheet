@@ -230,6 +230,7 @@ class ReportController extends Controller
 
         $sortableRows = $payload['sortableRows'];
         $pagedRows = $payload['rows'];
+        $totalMinutesAll = collect($sortableRows)->sum('total_minutes');
 
         if ($request->query('format') === 'csv') {
             $csvLines = ['User,Email,Date,Status,Submitted At,Project,Total Minutes,Hours'];
@@ -275,7 +276,6 @@ class ReportController extends Controller
                 );
             }
 
-            $totalMinutes = collect($sortableRows)->sum('total_minutes');
             $csvLines[] = sprintf(
                 '"%s","%s","%s","%s","%s","%s","%s","%s"',
                 'Totals',
@@ -284,8 +284,8 @@ class ReportController extends Controller
                 '',
                 '',
                 '',
-                $totalMinutes,
-                round($totalMinutes / 60, 2)
+                $totalMinutesAll,
+                round($totalMinutesAll / 60, 2)
             );
 
             $csv = implode("\n", $csvLines) . "\n";
@@ -316,6 +316,7 @@ class ReportController extends Controller
                     'project_id' => $projectId ? (int) $projectId : null,
                     'user_id' => $userId ? (int) $userId : null,
                 ],
+                'total_minutes_all' => $totalMinutesAll,
                 'users' => $payload['users'],
                 'projects' => $payload['projects'],
             ],

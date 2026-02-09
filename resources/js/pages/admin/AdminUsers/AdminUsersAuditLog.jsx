@@ -1,11 +1,20 @@
 import React from 'react';
 
-export default function AdminUsersAuditLog({ logs, formatProjectList }) {
+export default function AdminUsersAuditLog({ logs, formatProjectList, onExport }) {
     if (!logs || logs.length === 0) return null;
 
     return (
         <div className="bg-white rounded-2xl shadow border p-4 space-y-3">
-            <div className="text-sm font-semibold text-gray-900">Recent assignment changes</div>
+            <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold text-gray-900">Recent assignment changes</div>
+                <button
+                    type="button"
+                    onClick={onExport}
+                    className="text-xs text-gray-600 hover:text-gray-900"
+                >
+                    Export CSV
+                </button>
+            </div>
             <div className="space-y-2 text-sm text-gray-600">
                 {logs.map(log => (
                     <div key={log.id} className="space-y-1">
