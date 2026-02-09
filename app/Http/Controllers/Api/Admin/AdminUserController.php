@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminProjectAssignmentLog;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -43,7 +44,19 @@ class AdminUserController extends Controller
         ]);
 
         $ids = $data['project_ids'] ?? [];
+        $beforeIds = $user->projects()->pluck('projects.id')->sort()->values()->all();
+        $afterIds = collect($ids)->sort()->values()->all();
+
         $user->projects()->sync($ids);
+
+        if ($beforeIds !== $afterIds) {
+            AdminProjectAssignmentLog::create([
+                'admin_id' => $request->user()->id,
+                'user_id' => $user->id,
+                'before_project_ids' => $beforeIds,
+                'after_project_ids' => $afterIds,
+            ]);
+        }
 
         return response()->json([
             'message' => 'Projects updated',
