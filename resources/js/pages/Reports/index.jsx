@@ -483,10 +483,25 @@ export default function Reports() {
                         {row.days.map(day => (
                             <div
                                 key={`${row.user?.id ?? 'user'}-${day.date}`}
-                                className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 flex items-center justify-between"
+                                className={`rounded-lg border px-4 py-3 flex items-center justify-between ${
+                                    day.status === 'rejected'
+                                        ? 'border-red-200 bg-red-50'
+                                        : day.status === 'draft'
+                                            ? 'border-amber-200 bg-amber-50'
+                                            : day.status === 'submitted'
+                                                ? 'border-blue-200 bg-blue-50'
+                                                : day.status === 'approved'
+                                                    ? 'border-emerald-200 bg-emerald-50'
+                                                    : 'border-gray-100 bg-gray-50'
+                                }`}
                             >
                                 <div className="text-sm font-medium text-gray-700">
                                     {day.date}
+                                    {day.status && (
+                                        <span className="ml-2 text-[11px] uppercase text-gray-400">
+                                            {day.status}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="text-sm font-semibold text-gray-900">
                                     {formatMinutes(day.total_minutes)}

@@ -71,6 +71,15 @@ class ReportController extends Controller
                 ->select('id', 'user_id', 'work_date', 'total_minutes', 'status', 'submitted_at')
                 ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()]);
 
+            if ($projectId) {
+                $query->whereExists(function ($sub) use ($projectId) {
+                    $sub->select(DB::raw(1))
+                        ->from('time_entries')
+                        ->whereColumn('time_entries.timesheet_id', 'timesheets.id')
+                        ->where('time_entries.project_id', $projectId);
+                });
+            }
+
             if (!$user->is_admin) {
                 $query->where('user_id', $user->id);
             } elseif ($userId) {

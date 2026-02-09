@@ -12,9 +12,19 @@ class AdminUserController extends Controller
     public function index(Request $request)
     {
         $perPage = max((int) $request->query('per_page', 10), 1);
+        $queryText = trim((string) $request->query('q', ''));
+        $role = $request->query('role');
 
         return response()->json([
             'users' => User::query()
+                ->when($queryText !== '', function ($query) use ($queryText) {
+                    $query->where(function ($sub) use ($queryText) {
+                        $sub->where('name', 'like', "%{$queryText}%")
+                            ->orWhere('email', 'like', "%{$queryText}%");
+                    });
+                })
+                ->when($role === 'admin', fn ($query) => $query->where('is_admin', 1))
+                ->when($role === 'user', fn ($query) => $query->where('is_admin', 0))
                 ->orderBy('name')
                 ->with(['projects:id,name'])
                 ->paginate($perPage, ['id', 'name', 'email', 'is_admin']),
