@@ -71,7 +71,7 @@ class AdminUserController extends Controller
 
         return response()->json([
             'message' => 'Projects updated',
-            'projects' => $user->projects()->get(['id', 'name']),
+            'projects' => $user->projects()->get(['projects.id', 'projects.name']),
         ]);
     }
 }
