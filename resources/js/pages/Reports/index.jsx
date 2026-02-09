@@ -25,6 +25,7 @@ export default function Reports() {
     const [startDate, setStartDate] = useState(() => formatDate(start));
     const [endDate, setEndDate] = useState(() => formatDate(end));
     const [status, setStatus] = useState('');
+    const [includeDrafts, setIncludeDrafts] = useState(false);
     const [projectId, setProjectId] = useState('');
     const [userId, setUserId] = useState('');
     const [sort, setSort] = useState('total_minutes');
@@ -60,6 +61,7 @@ export default function Reports() {
                 start: startDate,
                 end: endDate,
                 status: status || undefined,
+                include_drafts: status ? undefined : includeDrafts,
                 project_id: projectId || undefined,
                 user_id: userId || undefined,
                 sort,
@@ -82,7 +84,7 @@ export default function Reports() {
         return () => {
             mounted = false;
         };
-    }, [api, startDate, endDate, status, projectId, userId, sort, direction, page, perPage]);
+    }, [api, startDate, endDate, status, includeDrafts, projectId, userId, sort, direction, page, perPage]);
 
     async function handleExport() {
         setExporting(true);
@@ -93,6 +95,7 @@ export default function Reports() {
                     end: endDate,
                     format: 'csv',
                     status: status || undefined,
+                    include_drafts: status ? undefined : includeDrafts,
                     project_id: projectId || undefined,
                     user_id: userId || undefined,
                     sort,
@@ -138,6 +141,7 @@ export default function Reports() {
             startDate,
             endDate,
             status,
+            includeDrafts,
             projectId,
             userId,
             sort,
@@ -152,6 +156,7 @@ export default function Reports() {
         setStartDate(preset.startDate);
         setEndDate(preset.endDate);
         setStatus(preset.status);
+        setIncludeDrafts(!!preset.includeDrafts);
         setProjectId(preset.projectId);
         setUserId(preset.userId);
         setSort(preset.sort);
@@ -301,6 +306,25 @@ export default function Reports() {
                             {totalRows} users total
                         </div>
                     </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                    <label className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            checked={includeDrafts}
+                            onChange={event => {
+                                setIncludeDrafts(event.target.checked);
+                                setPage(1);
+                            }}
+                        />
+                        Include drafts
+                    </label>
+                    {!includeDrafts && !status && (
+                        <span className="text-xs text-gray-400">
+                            Defaulting to submitted and approved.
+                        </span>
+                    )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
