@@ -22,6 +22,7 @@ export default function AdminTimesheets() {
         to: 0,
         total: 0,
     });
+    const [perPage, setPerPage] = useState(20);
     const [filters, setFilters] = useState({
         status: '',
         q: '',
@@ -48,6 +49,7 @@ export default function AdminTimesheets() {
                 params: {
                     ...filters,
                     page,
+                    per_page: perPage,
                 },
             });
             setTimesheets(res.data);
@@ -255,6 +257,22 @@ export default function AdminTimesheets() {
                         onChange={e => updateFilter('date_to', e.target.value)}
                         className="border rounded-lg px-3 py-2"
                     />
+                </div>
+
+                <div className="flex flex-col">
+                    <label className="text-xs text-gray-500">Per page</label>
+                    <select
+                        value={perPage}
+                        onChange={e => {
+                            setPerPage(Number(e.target.value));
+                            loadTimesheets(1);
+                        }}
+                        className="border rounded-lg px-3 py-2"
+                    >
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                    </select>
                 </div>
 
                 <Button

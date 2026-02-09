@@ -24,6 +24,7 @@ export default function AdminUsers() {
     const [bulkUsers, setBulkUsers] = useState(new Set());
     const [bulkProjects, setBulkProjects] = useState(new Set());
     const [bulkSaving, setBulkSaving] = useState(false);
+    const [assignmentLogs, setAssignmentLogs] = useState([]);
     const [perPage, setPerPage] = useState(10);
 
     useEffect(() => {
@@ -46,10 +47,12 @@ export default function AdminUsers() {
                     per_page: perPage,
                     q: userQuery || undefined,
                     role: roleFilter || undefined,
+                    include_logs: true,
                 },
             });
             setUsers(res.users?.data || []);
             setProjects(res.projects || []);
+            setAssignmentLogs(res.assignment_logs || []);
             setPagination({
                 current_page: res.users?.current_page ?? 1,
                 last_page: res.users?.last_page ?? 1,
@@ -209,6 +212,27 @@ export default function AdminUsers() {
                 <div className="p-6 text-gray-500">Loading users…</div>
             ) : (
                 <div className="space-y-4">
+                    {assignmentLogs.length > 0 && (
+                        <div className="bg-white rounded-2xl shadow border p-4 space-y-3">
+                            <div className="text-sm font-semibold text-gray-900">Recent assignment changes</div>
+                            <div className="space-y-2 text-sm text-gray-600">
+                                {assignmentLogs.map(log => (
+                                    <div key={log.id} className="flex flex-wrap items-center gap-2">
+                                        <span className="font-medium text-gray-800">
+                                            {log.admin?.name ?? 'Admin'}
+                                        </span>
+                                        <span>updated</span>
+                                        <span className="font-medium text-gray-800">
+                                            {log.user?.name ?? 'User'}
+                                        </span>
+                                        <span className="text-xs text-gray-400">
+                                            {new Date(log.created_at).toLocaleString()}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     <div className="bg-white rounded-2xl shadow border p-4 space-y-4">
                         <div className="flex flex-wrap items-center gap-3">
                             <input
