@@ -261,6 +261,18 @@ class ReportController extends Controller
                         round($project['total_minutes'] / 60, 2)
                     );
                 }
+
+                $csvLines[] = sprintf(
+                    '"%s","%s","%s","%s","%s","%s","%s","%s"',
+                    $row['user']['name'] ?? 'Unknown',
+                    $row['user']['email'] ?? '',
+                    '',
+                    'total',
+                    '',
+                    '',
+                    $row['total_minutes'],
+                    round($row['total_minutes'] / 60, 2)
+                );
             }
 
             $totalMinutes = collect($sortableRows)->sum('total_minutes');

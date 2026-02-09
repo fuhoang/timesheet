@@ -308,6 +308,30 @@ export default function Reports() {
                     </div>
                 </div>
 
+                <div className="flex flex-wrap items-center gap-2">
+                    {['', 'submitted', 'approved', 'rejected', 'draft'].map(value => {
+                        const label = value ? value : 'all';
+                        const active = status === value;
+                        return (
+                            <button
+                                key={`status-chip-${label}`}
+                                type="button"
+                                onClick={() => {
+                                    setStatus(value);
+                                    setPage(1);
+                                }}
+                                className={`px-3 py-1 rounded-full border text-xs uppercase ${
+                                    active
+                                        ? 'border-gray-900 bg-gray-900 text-white'
+                                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        );
+                    })}
+                </div>
+
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                     <label className="flex items-center gap-2">
                         <input
@@ -508,6 +532,13 @@ export default function Reports() {
                                 </div>
                             </div>
                         ))}
+                        <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 flex items-center justify-between">
+                            <div className="text-sm font-medium text-gray-700">Total</div>
+                            <div className="text-sm font-semibold text-gray-900">
+                                {formatMinutes(row.total_minutes)}
+                                <span className="text-xs text-gray-400"> ({formatHours(row.total_minutes)})</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             ))}

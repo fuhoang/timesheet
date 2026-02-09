@@ -24,6 +24,7 @@ export default function AdminUsers() {
     const [bulkUsers, setBulkUsers] = useState(new Set());
     const [bulkProjects, setBulkProjects] = useState(new Set());
     const [bulkSaving, setBulkSaving] = useState(false);
+    const [perPage, setPerPage] = useState(10);
 
     useEffect(() => {
         loadUsers();
@@ -31,7 +32,7 @@ export default function AdminUsers() {
 
     useEffect(() => {
         loadUsers(1);
-    }, [userQuery, roleFilter]);
+    }, [userQuery, roleFilter, perPage]);
 
     async function loadUsers(page = 1) {
         setLoading(true);
@@ -42,7 +43,7 @@ export default function AdminUsers() {
                 url: '/api/admin/users',
                 params: {
                     page,
-                    per_page: 10,
+                    per_page: perPage,
                     q: userQuery || undefined,
                     role: roleFilter || undefined,
                 },
@@ -225,6 +226,15 @@ export default function AdminUsers() {
                                 <option value="">All roles</option>
                                 <option value="admin">Admin</option>
                                 <option value="user">User</option>
+                            </select>
+                            <select
+                                value={perPage}
+                                onChange={event => setPerPage(Number(event.target.value))}
+                                className="w-full md:w-32 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                            >
+                                <option value={10}>10 / page</option>
+                                <option value={20}>20 / page</option>
+                                <option value={50}>50 / page</option>
                             </select>
                             <input
                                 type="text"
