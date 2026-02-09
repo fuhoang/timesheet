@@ -182,6 +182,17 @@ export default function AdminUsers() {
         return `${projects.length} project${projects.length === 1 ? '' : 's'}`;
     }, [projects]);
 
+    const projectNameMap = useMemo(() => {
+        const map = new Map();
+        projects.forEach(project => map.set(project.id, project.name));
+        return map;
+    }, [projects]);
+
+    function formatProjectList(ids) {
+        if (!ids || ids.length === 0) return 'None';
+        return ids.map(id => projectNameMap.get(id) || `#${id}`).join(', ');
+    }
+
     const filteredUsers = useMemo(() => {
         const query = userQuery.trim().toLowerCase();
         if (!query) return users;
@@ -217,17 +228,22 @@ export default function AdminUsers() {
                             <div className="text-sm font-semibold text-gray-900">Recent assignment changes</div>
                             <div className="space-y-2 text-sm text-gray-600">
                                 {assignmentLogs.map(log => (
-                                    <div key={log.id} className="flex flex-wrap items-center gap-2">
-                                        <span className="font-medium text-gray-800">
-                                            {log.admin?.name ?? 'Admin'}
-                                        </span>
-                                        <span>updated</span>
-                                        <span className="font-medium text-gray-800">
-                                            {log.user?.name ?? 'User'}
-                                        </span>
-                                        <span className="text-xs text-gray-400">
-                                            {new Date(log.created_at).toLocaleString()}
-                                        </span>
+                                    <div key={log.id} className="space-y-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="font-medium text-gray-800">
+                                                {log.admin?.name ?? 'Admin'}
+                                            </span>
+                                            <span>updated</span>
+                                            <span className="font-medium text-gray-800">
+                                                {log.user?.name ?? 'User'}
+                                            </span>
+                                            <span className="text-xs text-gray-400">
+                                                {new Date(log.created_at).toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                            Before: {formatProjectList(log.before_project_ids)} → After: {formatProjectList(log.after_project_ids)}
+                                        </div>
                                     </div>
                                 ))}
                             </div>

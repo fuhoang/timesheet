@@ -31,9 +31,8 @@ export default function Reports() {
     const [sort, setSort] = useState('total_minutes');
     const [direction, setDirection] = useState('desc');
     const [page, setPage] = useState(1);
-    const [perPage] = useState(10);
+    const [perPage, setPerPage] = useState(10);
     const [presetName, setPresetName] = useState('');
-    const [showDebug, setShowDebug] = useState(false);
     const [presets, setPresets] = useState(() => {
         try {
             const raw = window.localStorage.getItem('reportsPresets');
@@ -183,23 +182,14 @@ export default function Reports() {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={() => setShowDebug(prev => !prev)}
-                        className="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
-                    >
-                        {showDebug ? 'Hide debug' : 'Show debug'}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleExport}
-                        disabled={exporting}
-                        className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-60"
-                    >
-                        {exporting ? 'Exporting...' : 'Export CSV'}
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    onClick={handleExport}
+                    disabled={exporting}
+                    className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-60"
+                >
+                    {exporting ? 'Exporting...' : 'Export CSV'}
+                </button>
             </div>
 
             <div className="sticky top-4 z-10 bg-gray-50/80 backdrop-blur">
@@ -311,10 +301,20 @@ export default function Reports() {
                             <option value="asc">Ascending</option>
                         </select>
                     </div>
-                    <div className="flex items-end">
-                        <div className="text-sm text-gray-600">
-                            {totalRows} users total
-                        </div>
+                    <div>
+                        <label className="text-xs uppercase text-gray-500">Per page</label>
+                        <select
+                            value={perPage}
+                            onChange={event => {
+                                setPerPage(Number(event.target.value));
+                                setPage(1);
+                            }}
+                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        >
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                        </select>
                     </div>
                 </div>
 
@@ -429,17 +429,11 @@ export default function Reports() {
                 </div>
             )}
 
-            {showDebug && (
-                <div className="bg-white border rounded-xl p-4 text-xs text-gray-600 whitespace-pre-wrap">
-                    <div className="font-semibold text-gray-800 mb-2">Debug</div>
-                    <div>error: {error ? JSON.stringify(error, Object.getOwnPropertyNames(error)) : 'null'}</div>
-                    <div className="mt-2">report: {report ? JSON.stringify(report) : 'null'}</div>
-                </div>
-            )}
-
             {!apiLoading && report?.rows?.length === 0 && (
                 <div className="text-sm text-gray-500">
-                    No entries found for this range.
+                    {status || includeDrafts
+                        ? 'No entries found for this range.'
+                        : 'No submitted or approved entries in this range. Toggle \"Include drafts\" to see more.'}
                 </div>
             )}
 
