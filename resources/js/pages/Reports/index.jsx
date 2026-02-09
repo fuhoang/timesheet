@@ -544,6 +544,16 @@ export default function Reports() {
             ))}
 
             {report?.rows?.length > 0 && (
+                <div className="bg-white border rounded-xl p-5 shadow-sm flex items-center justify-between text-sm text-gray-600">
+                    <div className="font-medium text-gray-900">Page total</div>
+                    <div className="font-semibold text-gray-900">
+                        {formatMinutes(overallMinutes)}
+                        <span className="text-gray-400"> ({formatHours(overallMinutes)})</span>
+                    </div>
+                </div>
+            )}
+
+            {report?.rows?.length > 0 && (
                 <div className="flex items-center justify-between">
                     <button
                         type="button"

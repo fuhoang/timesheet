@@ -138,4 +138,46 @@ class ReportsTest extends TestCase
         $this->assertSame($projectA->id, $response['meta']['filters']['project_id']);
         $this->assertSame($user->id, $response['meta']['filters']['user_id']);
     }
+
+    public function test_reports_default_excludes_drafts(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'draft',
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/reports')
+            ->assertStatus(200)
+            ->json();
+
+        $this->assertSame(false, $response['meta']['filters']['include_drafts']);
+    }
+
+    public function test_reports_include_drafts_toggle(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'draft',
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/reports?include_drafts=1')
+            ->assertStatus(200)
+            ->json();
+
+        $this->assertSame(true, $response['meta']['filters']['include_drafts']);
+    }
 }

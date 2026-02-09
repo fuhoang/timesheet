@@ -15,8 +15,9 @@ class AdminUserController extends Controller
         $perPage = max((int) $request->query('per_page', 10), 1);
         $queryText = trim((string) $request->query('q', ''));
         $role = $request->query('role');
+        $includeLogs = filter_var($request->query('include_logs', false), FILTER_VALIDATE_BOOL);
 
-        return response()->json([
+        $response = [
             'users' => User::query()
                 ->when($queryText !== '', function ($query) use ($queryText) {
                     $query->where(function ($sub) use ($queryText) {
@@ -33,7 +34,17 @@ class AdminUserController extends Controller
                 ->where('is_active', true)
                 ->orderBy('name')
                 ->get(['id', 'name']),
-        ]);
+        ];
+
+        if ($includeLogs) {
+            $response['assignment_logs'] = AdminProjectAssignmentLog::query()
+                ->with(['admin:id,name,email', 'user:id,name,email'])
+                ->latest()
+                ->limit(50)
+                ->get();
+        }
+
+        return response()->json($response);
     }
 
     public function updateProjects(Request $request, User $user)
