@@ -68,7 +68,7 @@ class ReportController extends Controller
             $perPage
         ) {
             $query = Timesheet::query()
-                ->select('id', 'user_id', 'work_date', 'total_minutes', 'status')
+                ->select('id', 'user_id', 'work_date', 'total_minutes', 'status', 'submitted_at')
                 ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()]);
 
             if (!$user->is_admin) {
@@ -148,6 +148,8 @@ class ReportController extends Controller
                             return [
                                 'date' => $timesheet->work_date->toDateString(),
                                 'total_minutes' => (int) $total,
+                                'status' => $timesheet->status,
+                                'submitted_at' => $timesheet->submitted_at,
                             ];
                         })
                         ->values()
@@ -221,14 +223,16 @@ class ReportController extends Controller
         $pagedRows = $payload['rows'];
 
         if ($request->query('format') === 'csv') {
-            $csvLines = ['User,Email,Date,Project,Total Minutes,Hours'];
+            $csvLines = ['User,Email,Date,Status,Submitted At,Project,Total Minutes,Hours'];
             foreach ($sortableRows as $row) {
                 foreach ($row['days'] as $day) {
                     $csvLines[] = sprintf(
-                        '"%s","%s","%s","%s","%s","%s"',
+                        '"%s","%s","%s","%s","%s","%s","%s","%s"',
                         $row['user']['name'] ?? 'Unknown',
                         $row['user']['email'] ?? '',
                         $day['date'],
+                        $day['status'] ?? '',
+                        $day['submitted_at'] ? (string) $day['submitted_at'] : '',
                         '',
                         $day['total_minutes'],
                         round($day['total_minutes'] / 60, 2)
@@ -237,9 +241,11 @@ class ReportController extends Controller
 
                 foreach ($row['projects'] as $project) {
                     $csvLines[] = sprintf(
-                        '"%s","%s","%s","%s","%s","%s"',
+                        '"%s","%s","%s","%s","%s","%s","%s","%s"',
                         $row['user']['name'] ?? 'Unknown',
                         $row['user']['email'] ?? '',
+                        '',
+                        '',
                         '',
                         $project['name'],
                         $project['total_minutes'],
@@ -247,6 +253,19 @@ class ReportController extends Controller
                     );
                 }
             }
+
+            $totalMinutes = collect($sortableRows)->sum('total_minutes');
+            $csvLines[] = sprintf(
+                '"%s","%s","%s","%s","%s","%s","%s","%s"',
+                'Totals',
+                '',
+                '',
+                '',
+                '',
+                '',
+                $totalMinutes,
+                round($totalMinutes / 60, 2)
+            );
 
             $csv = implode("\n", $csvLines) . "\n";
 
