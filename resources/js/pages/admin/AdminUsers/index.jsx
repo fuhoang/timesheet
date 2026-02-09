@@ -19,6 +19,7 @@ export default function AdminUsers() {
         total: 0,
     });
     const [userQuery, setUserQuery] = useState('');
+    const [roleFilter, setRoleFilter] = useState('');
     const [projectQuery, setProjectQuery] = useState('');
     const [bulkUsers, setBulkUsers] = useState(new Set());
     const [bulkProjects, setBulkProjects] = useState(new Set());
@@ -28,6 +29,10 @@ export default function AdminUsers() {
         loadUsers();
     }, []);
 
+    useEffect(() => {
+        loadUsers(1);
+    }, [userQuery, roleFilter]);
+
     async function loadUsers(page = 1) {
         setLoading(true);
         setError('');
@@ -35,7 +40,12 @@ export default function AdminUsers() {
             const res = await api({
                 method: 'get',
                 url: '/api/admin/users',
-                params: { page, per_page: 10 },
+                params: {
+                    page,
+                    per_page: 10,
+                    q: userQuery || undefined,
+                    role: roleFilter || undefined,
+                },
             });
             setUsers(res.users?.data || []);
             setProjects(res.projects || []);
@@ -207,6 +217,15 @@ export default function AdminUsers() {
                                 placeholder="Search users"
                                 className="w-full md:w-64 rounded-lg border border-gray-200 px-3 py-2 text-sm"
                             />
+                            <select
+                                value={roleFilter}
+                                onChange={event => setRoleFilter(event.target.value)}
+                                className="w-full md:w-48 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                            >
+                                <option value="">All roles</option>
+                                <option value="admin">Admin</option>
+                                <option value="user">User</option>
+                            </select>
                             <input
                                 type="text"
                                 value={projectQuery}
