@@ -29,7 +29,9 @@ class AdminUserController extends Controller
                 ->when($role === 'admin', fn ($query) => $query->where('is_admin', 1))
                 ->when($role === 'user', fn ($query) => $query->where('is_admin', 0))
                 ->orderBy('name')
-                ->with(['projects:id,name'])
+                ->with(['projects' => function ($query) {
+                    $query->select('projects.id', 'projects.name');
+                }])
                 ->paginate($perPage, ['id', 'name', 'email', 'is_admin']),
             'projects' => Project::query()
                 ->where('is_active', true)
@@ -93,7 +95,7 @@ class AdminUserController extends Controller
 
         return response()->json([
             'message' => 'Projects updated',
-            'projects' => $user->projects()->get(['projects.id', 'projects.name']),
+            'projects' => $user->projects()->select('projects.id', 'projects.name')->get(),
         ]);
     }
 }
