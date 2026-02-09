@@ -21,6 +21,7 @@ class ReportController extends Controller
         $startParam = $request->query('start');
         $endParam = $request->query('end');
         $status = $request->query('status');
+        $includeDrafts = filter_var($request->query('include_drafts', false), FILTER_VALIDATE_BOOL);
         $projectId = $request->query('project_id');
         $userId = $request->query('user_id');
         $sort = $request->query('sort', 'total_minutes');
@@ -43,6 +44,7 @@ class ReportController extends Controller
             'start' => $start->toDateString(),
             'end' => $end->toDateString(),
             'status' => $status,
+            'include_drafts' => $includeDrafts,
             'project_id' => $projectId,
             'user_id' => $userId,
             'sort' => $sort,
@@ -57,6 +59,7 @@ class ReportController extends Controller
             $start,
             $end,
             $status,
+            $includeDrafts,
             $projectId,
             $userId,
             $sort,
@@ -76,6 +79,8 @@ class ReportController extends Controller
 
             if ($status && in_array($status, ['draft', 'submitted', 'approved', 'rejected'], true)) {
                 $query->where('status', $status);
+            } elseif (!$includeDrafts) {
+                $query->whereIn('status', ['submitted', 'approved']);
             }
 
             $timesheets = $query->get();
@@ -267,6 +272,7 @@ class ReportController extends Controller
                 'direction' => $direction,
                 'filters' => [
                     'status' => $status,
+                    'include_drafts' => $includeDrafts,
                     'project_id' => $projectId ? (int) $projectId : null,
                     'user_id' => $userId ? (int) $userId : null,
                 ],
