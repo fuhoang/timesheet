@@ -12,7 +12,7 @@ export default function AdminUsersBulkProjects({
     onReplace,
 }) {
     return (
-        <div className="space-y-3">
+        <div className="bg-white rounded-2xl shadow border p-4 space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {projects.map(project => (
                     <label
