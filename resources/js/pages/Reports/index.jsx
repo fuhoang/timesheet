@@ -33,6 +33,7 @@ export default function Reports() {
     const [page, setPage] = useState(1);
     const [perPage] = useState(10);
     const [presetName, setPresetName] = useState('');
+    const [showDebug, setShowDebug] = useState(false);
     const [presets, setPresets] = useState(() => {
         try {
             const raw = window.localStorage.getItem('reportsPresets');
@@ -182,14 +183,23 @@ export default function Reports() {
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={handleExport}
-                    disabled={exporting}
-                    className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-60"
-                >
-                    {exporting ? 'Exporting...' : 'Export CSV'}
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setShowDebug(prev => !prev)}
+                        className="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    >
+                        {showDebug ? 'Hide debug' : 'Show debug'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleExport}
+                        disabled={exporting}
+                        className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-60"
+                    >
+                        {exporting ? 'Exporting...' : 'Export CSV'}
+                    </button>
+                </div>
             </div>
 
             <div className="sticky top-4 z-10 bg-gray-50/80 backdrop-blur">
@@ -416,6 +426,14 @@ export default function Reports() {
             {error && (
                 <div className="text-sm text-red-600">
                     Unable to load reports. Please try again.
+                </div>
+            )}
+
+            {showDebug && (
+                <div className="bg-white border rounded-xl p-4 text-xs text-gray-600 whitespace-pre-wrap">
+                    <div className="font-semibold text-gray-800 mb-2">Debug</div>
+                    <div>error: {error ? JSON.stringify(error, Object.getOwnPropertyNames(error)) : 'null'}</div>
+                    <div className="mt-2">report: {report ? JSON.stringify(report) : 'null'}</div>
                 </div>
             )}
 
