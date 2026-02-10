@@ -169,9 +169,7 @@ export default function ReportsFilters({
                         Include drafts
                     </label>
                     {!includeDrafts && !status && (
-                        <span className="text-xs text-gray-400">
-                            Defaulting to submitted and approved.
-                        </span>
+                        <span className="text-xs text-gray-400">Drafts excluded.</span>
                     )}
                 </div>
 

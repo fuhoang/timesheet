@@ -89,7 +89,7 @@ class ReportController extends Controller
             if ($status && in_array($status, ['draft', 'submitted', 'approved', 'rejected'], true)) {
                 $query->where('status', $status);
             } elseif (!$includeDrafts) {
-                $query->whereIn('status', ['submitted', 'approved']);
+                $query->whereIn('status', ['submitted', 'approved', 'rejected']);
             }
 
             $timesheets = $query->get();
