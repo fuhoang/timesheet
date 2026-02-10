@@ -160,6 +160,29 @@ class ReportsTest extends TestCase
         $this->assertSame(false, $response['meta']['filters']['include_drafts']);
     }
 
+    public function test_reports_default_includes_rejected(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 45,
+            'status' => 'rejected',
+            'submitted_at' => now(),
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/reports')
+            ->assertStatus(200)
+            ->json();
+
+        $this->assertCount(1, $response['rows']);
+        $this->assertSame($user->id, $response['rows'][0]['user']['id']);
+    }
+
     public function test_reports_include_drafts_toggle(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
