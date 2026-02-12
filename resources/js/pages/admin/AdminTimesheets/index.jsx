@@ -396,8 +396,20 @@ export default function AdminTimesheets() {
                         <div className="px-4 py-3 border-t flex items-center justify-between">
                             <div className="text-sm text-gray-500">
                                 Page {pagination.current_page} of {pagination.last_page}
+                                <span className="ml-2 text-xs text-gray-400">
+                                    ({pagination.from}-{pagination.to} of {pagination.total})
+                                </span>
                             </div>
                             <div className="flex items-center gap-2">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => goToPage(1)}
+                                    disabled={pagination.current_page <= 1}
+                                >
+                                    First
+                                </Button>
                                 <Button
                                     type="button"
                                     variant="secondary"
@@ -415,6 +427,15 @@ export default function AdminTimesheets() {
                                     disabled={pagination.current_page >= pagination.last_page}
                                 >
                                     Next
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => goToPage(pagination.last_page)}
+                                    disabled={pagination.current_page >= pagination.last_page}
+                                >
+                                    Last
                                 </Button>
                             </div>
                         </div>
