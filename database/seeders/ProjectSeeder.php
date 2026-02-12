@@ -45,7 +45,10 @@ class ProjectSeeder extends Seeder
             ];
         }
 
-        for ($i = 1; $i <= 20; $i++) {
+        $totalProjects = 20;
+        $remaining = max($totalProjects - count($projects), 0);
+
+        for ($i = 1; $i <= $remaining; $i++) {
             $owner = $users->random();
             $projects[] = [
                 'user_id' => $owner->id,
@@ -63,7 +66,8 @@ class ProjectSeeder extends Seeder
                 'is_active' => true,
             ]);
 
-            $assignees = $users->random(min(3, $users->count()))->pluck('id')->all();
+            $assigneeCount = min($users->count(), random_int(2, 5));
+            $assignees = $users->random($assigneeCount)->pluck('id')->all();
             $assignees[] = $project['user_id'];
             $record->users()->syncWithoutDetaching(array_unique($assignees));
         }
