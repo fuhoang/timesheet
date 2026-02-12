@@ -10,6 +10,8 @@ export default function AdminUsersList({
     onToggleBulkUser,
     onSaveUser,
     onToggleProject,
+    onSelectAllProjectsForUser,
+    onClearProjectsForUser,
 }) {
     return (
         <div className="space-y-4">
@@ -19,6 +21,9 @@ export default function AdminUsersList({
                         <div>
                             <div className="font-semibold text-gray-900">{user.name}</div>
                             <div className="text-sm text-gray-500">{user.email}</div>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                            {selected[user.id]?.size ?? 0} of {projects.length} projects
                         </div>
                         <label className="flex items-center gap-2 text-sm text-gray-500">
                             <input
@@ -35,6 +40,25 @@ export default function AdminUsersList({
                             disabled={savingUserId === user.id}
                         >
                             {savingUserId === user.id ? 'Saving…' : 'Save'}
+                        </Button>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onSelectAllProjectsForUser(user.id)}
+                            disabled={projects.length === 0 || selected[user.id]?.size === projects.length}
+                        >
+                            Select all
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onClearProjectsForUser(user.id)}
+                            disabled={!selected[user.id]?.size}
+                        >
+                            Clear
                         </Button>
                     </div>
 

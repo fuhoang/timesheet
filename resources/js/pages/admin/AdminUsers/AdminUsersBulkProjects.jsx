@@ -5,20 +5,41 @@ export default function AdminUsersBulkProjects({
     projects,
     bulkProjects,
     onToggleProject,
+    onSelectAllProjects,
+    onClearAllProjects,
     bulkSaving,
     bulkUsersCount,
     onAdd,
     onRemove,
     onReplace,
 }) {
+    const totalProjects = projects.length;
     return (
         <div className="bg-white rounded-2xl shadow border p-4 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                     <div className="text-sm font-medium text-gray-900">Bulk project assignment</div>
                     <div className="text-xs text-gray-500">
-                        {bulkProjects.size} project{bulkProjects.size === 1 ? '' : 's'} selected
+                        {bulkProjects.size} of {totalProjects} selected
                     </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={onSelectAllProjects}
+                        disabled={totalProjects === 0 || bulkProjects.size === totalProjects}
+                    >
+                        Select all
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={onClearAllProjects}
+                        disabled={bulkProjects.size === 0}
+                    >
+                        Clear
+                    </Button>
                 </div>
             </div>
 
