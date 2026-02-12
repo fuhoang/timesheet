@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axios from '../lib/axios';
 import { useAuth } from './AuthContext';
 
@@ -9,12 +9,26 @@ export function ApiProvider({ children }) {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const authLoadingRef = useRef(authLoading);
 
-    async function api(config, options = {}) {
+    useEffect(() => {
+        authLoadingRef.current = authLoading;
+    }, [authLoading]);
+
+    const waitForAuth = useCallback(() => new Promise(resolve => {
+        const interval = setInterval(() => {
+            if (!authLoadingRef.current) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 40);
+    }), []);
+
+    const api = useCallback(async (config, options = {}) => {
         const { silent = false, retry = true } = options;
 
-        if (authLoading) {
-            await waitForAuth(authLoading);
+        if (authLoadingRef.current) {
+            await waitForAuth();
         }
 
         try {
@@ -39,25 +53,16 @@ export function ApiProvider({ children }) {
         } finally {
             if (!silent) setLoading(false);
         }
-    }
+    }, [user, waitForAuth]);
 
-    function waitForAuth() {
-        return new Promise(resolve => {
-            const interval = setInterval(() => {
-                if (!authLoading) {
-                    clearInterval(interval);
-                    resolve();
-                }
-            }, 40);
-        });
-    }
+    const value = useMemo(() => ({
+        api,
+        apiLoading: loading,
+        apiError: error,
+    }), [api, loading, error]);
 
     return (
-        <ApiContext.Provider value={{
-            api,
-            apiLoading: loading,
-            apiError: error,
-        }}>
+        <ApiContext.Provider value={value}>
             {children}
         </ApiContext.Provider>
     );
