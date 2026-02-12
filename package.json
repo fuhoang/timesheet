@@ -5,6 +5,10 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
+        "dev:5173": "vite --host 127.0.0.1 --port 5173",
+        "dev:5174": "vite --host 127.0.0.1 --port 5174",
+        "serve:8000": "php artisan serve --host=127.0.0.1 --port=8000",
+        "serve:8001": "php artisan serve --host=127.0.0.1 --port=8001",
         "test": "LARAVEL_BYPASS_ENV_CHECK=1 vitest run"
     },
     "devDependencies": {
