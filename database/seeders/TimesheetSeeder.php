@@ -32,7 +32,9 @@ class TimesheetSeeder extends Seeder
             }
 
             foreach ($users as $seedUser) {
-                $userProject = Project::where('user_id', $seedUser->id)->first() ?? $project;
+                $userProject = $seedUser->projects()->inRandomOrder()->first()
+                    ?? Project::where('user_id', $seedUser->id)->first()
+                    ?? $project;
                 $timesheet = Timesheet::updateOrCreate([
                     'user_id' => $seedUser->id,
                     'work_date' => $date->toDateString(),
