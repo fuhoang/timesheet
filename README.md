@@ -23,6 +23,17 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
    cp .env.example .env
    php artisan key:generate
    ```
+   - URL profile setup in `.env`:
+     - Main app:
+       - `ACTIVE_BACKEND_URL="${MAIN_BACKEND_URL}"`
+       - `ACTIVE_FRONTEND_URL="${MAIN_FRONTEND_URL}"`
+     - Dev app:
+       - `ACTIVE_BACKEND_URL="${DEV_BACKEND_URL}"`
+       - `ACTIVE_FRONTEND_URL="${DEV_FRONTEND_URL}"`
+   - Clear config after env changes:
+     ```bash
+     php artisan optimize:clear
+     ```
 
 4. Database (MySQL)
    - Create a MySQL database (e.g. `timesheet`)
@@ -45,10 +56,22 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
    ```bash
    composer run dev
    ```
+   - Manual start (recommended for two apps at once):
+     ```bash
+     # main
+     php artisan serve --host=127.0.0.1 --port=8000
+     npm run dev:5173
+
+     # dev
+     php artisan serve --host=127.0.0.1 --port=8001
+     npm run dev:5174
+     ```
 
 7. Open in browser
-   - Backend: http://localhost:8000
-   - Frontend (Vite): http://localhost:5173
+   - Main backend: `http://127.0.0.1:8000`
+   - Main frontend (Vite): `http://127.0.0.1:5173`
+   - Dev backend: `http://127.0.0.1:8001`
+   - Dev frontend (Vite): `http://127.0.0.1:5174`
 
 ## Useful Commands
 
