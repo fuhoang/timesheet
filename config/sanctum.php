@@ -2,6 +2,28 @@
 
 use Laravel\Sanctum\Sanctum;
 
+$toHostPort = static function (?string $url): ?string {
+    if (!$url) {
+        return null;
+    }
+
+    $host = parse_url($url, PHP_URL_HOST);
+    $port = parse_url($url, PHP_URL_PORT);
+
+    if (!$host) {
+        return null;
+    }
+
+    return $port ? "{$host}:{$port}" : $host;
+};
+
+$defaultStateful = array_values(array_unique(array_filter([
+    $toHostPort(config('endpoints.frontend_url')),
+    $toHostPort(config('endpoints.frontend_dev_url')),
+    $toHostPort(config('endpoints.backend_url')),
+    $toHostPort(Sanctum::currentApplicationUrlWithPort()),
+])));
+
 return [
 
     /*
@@ -15,12 +37,7 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s',
-        'localhost',
-        Sanctum::currentApplicationUrlWithPort(),
-        // Sanctum::currentRequestHost(),
-    ))),
+    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', implode(',', $defaultStateful))),
 
     /*
     |--------------------------------------------------------------------------
