@@ -7,12 +7,17 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const loadUser = async () => {
+    const loadUser = async ({ throwOnError = false } = {}) => {
         try {
             const data = await authApi.getUser();
             setUser(data);
+            return data;
         } catch {
             setUser(null);
+            if (throwOnError) {
+                throw new Error('Unauthenticated');
+            }
+            return null;
         } finally {
             setLoading(false);
         }
@@ -20,12 +25,12 @@ export function AuthProvider({ children }) {
 
     const register = async (data) => {
         await authApi.register(data);
-        await loadUser();
+        await loadUser({ throwOnError: true });
     };
 
     const login = async (credentials) => {
         await authApi.login(credentials);
-        await loadUser();
+        await loadUser({ throwOnError: true });
 
         if (typeof window !== 'undefined' && window.projectReload) {
             window.projectReload();
