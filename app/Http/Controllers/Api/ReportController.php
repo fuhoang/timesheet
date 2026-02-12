@@ -40,6 +40,8 @@ class ReportController extends Controller
             [$start, $end] = [$end, $start];
         }
 
+        $exportAll = $request->query('format') === 'csv';
+
         $cacheKey = 'reports:' . $user->id . ':' . md5(json_encode([
             'start' => $start->toDateString(),
             'end' => $end->toDateString(),
@@ -52,6 +54,7 @@ class ReportController extends Controller
             'page' => $page,
             'per_page' => $perPage,
             'is_admin' => (bool) $user->is_admin,
+            'export' => $exportAll,
         ]));
 
         $payload = Cache::remember($cacheKey, now()->addMinutes(5), function () use (
@@ -65,54 +68,112 @@ class ReportController extends Controller
             $sort,
             $direction,
             $page,
-            $perPage
+            $perPage,
+            $exportAll
         ) {
-            $query = Timesheet::query()
-                ->select('id', 'user_id', 'work_date', 'total_minutes', 'status', 'submitted_at')
-                ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()]);
+            $applyTimesheetFilters = function ($query) use (
+                $user,
+                $start,
+                $end,
+                $status,
+                $includeDrafts,
+                $projectId,
+                $userId
+            ) {
+                $query->whereBetween('timesheets.work_date', [$start->toDateString(), $end->toDateString()]);
 
-            if ($projectId) {
-                $query->whereExists(function ($sub) use ($projectId) {
-                    $sub->select(DB::raw(1))
-                        ->from('time_entries')
-                        ->whereColumn('time_entries.timesheet_id', 'timesheets.id')
-                        ->where('time_entries.project_id', $projectId);
-                });
+                if ($projectId) {
+                    $query->whereExists(function ($sub) use ($projectId) {
+                        $sub->select(DB::raw(1))
+                            ->from('time_entries')
+                            ->whereColumn('time_entries.timesheet_id', 'timesheets.id')
+                            ->where('time_entries.project_id', $projectId);
+                    });
+                }
+
+                if (!$user->is_admin) {
+                    $query->where('timesheets.user_id', $user->id);
+                } elseif ($userId) {
+                    $query->where('timesheets.user_id', $userId);
+                }
+
+                if ($status && in_array($status, ['draft', 'submitted', 'approved', 'rejected'], true)) {
+                    $query->where('timesheets.status', $status);
+                } elseif (!$includeDrafts) {
+                    $query->whereIn('timesheets.status', ['submitted', 'approved', 'rejected']);
+                }
+            };
+
+            $entryTotalsSub = TimeEntry::query()
+                ->select('timesheet_id', DB::raw('SUM(duration_minutes) as entry_minutes'))
+                ->when($projectId, fn ($entryQuery) => $entryQuery->where('project_id', $projectId))
+                ->groupBy('timesheet_id');
+
+            $userTotalsQuery = Timesheet::query()
+                ->select(
+                    'timesheets.user_id',
+                    'users.name as user_name',
+                    'users.email as user_email',
+                    DB::raw('SUM(CASE WHEN COALESCE(entry_totals.entry_minutes, 0) = 0 THEN timesheets.total_minutes ELSE entry_totals.entry_minutes END) as total_minutes')
+                )
+                ->join('users', 'users.id', '=', 'timesheets.user_id')
+                ->leftJoinSub($entryTotalsSub, 'entry_totals', function ($join) {
+                    $join->on('entry_totals.timesheet_id', '=', 'timesheets.id');
+                })
+                ->tap($applyTimesheetFilters)
+                ->groupBy('timesheets.user_id', 'users.name', 'users.email');
+
+            if ($sort === 'name') {
+                $userTotalsQuery->orderBy('users.name', $direction);
+            } else {
+                $userTotalsQuery->orderBy('total_minutes', $direction);
             }
 
-            if (!$user->is_admin) {
-                $query->where('user_id', $user->id);
-            } elseif ($userId) {
-                $query->where('user_id', $userId);
-            }
+            $totalRows = DB::query()->fromSub($userTotalsQuery, 'user_totals')->count();
+            $totalPages = (int) ceil($totalRows / $perPage);
+            $page = $exportAll ? 1 : min($page, max($totalPages, 1));
 
-            if ($status && in_array($status, ['draft', 'submitted', 'approved', 'rejected'], true)) {
-                $query->where('status', $status);
-            } elseif (!$includeDrafts) {
-                $query->whereIn('status', ['submitted', 'approved', 'rejected']);
-            }
+            $userTotalsForTotals = clone $userTotalsQuery;
 
-            $timesheets = $query->get();
+            $pagedUserTotals = $exportAll
+                ? $userTotalsQuery->get()
+                : $userTotalsQuery->forPage($page, $perPage)->get();
 
-            $timesheetIds = $timesheets->pluck('id');
-            $userIds = $timesheets->pluck('user_id')->unique();
+            $pagedUserIds = $pagedUserTotals->pluck('user_id');
 
-            $entryTotals = $timesheetIds->isNotEmpty()
-                ? TimeEntry::query()
-                    ->select('timesheet_id', DB::raw('SUM(duration_minutes) as total_minutes'))
-                    ->when($projectId, fn ($entryQuery) => $entryQuery->where('project_id', $projectId))
-                    ->whereIn('timesheet_id', $timesheetIds)
-                    ->groupBy('timesheet_id')
+            $timesheets = $pagedUserIds->isNotEmpty()
+                ? Timesheet::query()
+                    ->select(
+                        'timesheets.id',
+                        'timesheets.user_id',
+                        'timesheets.work_date',
+                        'timesheets.total_minutes',
+                        'timesheets.status',
+                        'timesheets.submitted_at',
+                        DB::raw('COALESCE(entry_totals.entry_minutes, 0) as entry_minutes')
+                    )
+                    ->leftJoinSub($entryTotalsSub, 'entry_totals', function ($join) {
+                        $join->on('entry_totals.timesheet_id', '=', 'timesheets.id');
+                    })
+                    ->tap($applyTimesheetFilters)
+                    ->whereIn('timesheets.user_id', $pagedUserIds)
+                    ->orderBy('timesheets.work_date')
                     ->get()
-                    ->keyBy('timesheet_id')
                 : collect();
 
-            $projectTotalsRaw = $timesheetIds->isNotEmpty()
+            $projectTotalsRaw = $pagedUserIds->isNotEmpty()
                 ? TimeEntry::query()
                     ->select('timesheets.user_id', 'time_entries.project_id', DB::raw('SUM(time_entries.duration_minutes) as total_minutes'))
                     ->join('timesheets', 'timesheets.id', '=', 'time_entries.timesheet_id')
                     ->when($projectId, fn ($entryQuery) => $entryQuery->where('time_entries.project_id', $projectId))
-                    ->whereIn('time_entries.timesheet_id', $timesheetIds)
+                    ->whereIn('timesheets.user_id', $pagedUserIds)
+                    ->whereBetween('timesheets.work_date', [$start->toDateString(), $end->toDateString()])
+                    ->when($status && in_array($status, ['draft', 'submitted', 'approved', 'rejected'], true), function ($entryQuery) use ($status) {
+                        $entryQuery->where('timesheets.status', $status);
+                    })
+                    ->when(!$status && !$includeDrafts, function ($entryQuery) {
+                        $entryQuery->whereIn('timesheets.status', ['submitted', 'approved', 'rejected']);
+                    })
                     ->groupBy('timesheets.user_id', 'time_entries.project_id')
                     ->get()
                 : collect();
@@ -138,72 +199,38 @@ class ReportController extends Controller
                     })->values()->all();
                 });
 
-            $usersMap = $userIds->isNotEmpty()
-                ? User::query()->whereIn('id', $userIds)->get(['id', 'name', 'email'])->keyBy('id')
-                : collect();
+            $rows = $pagedUserTotals->map(function ($userRow) use ($timesheets, $projectTotalsByUser, $projectId) {
+                $userTimesheets = $timesheets->where('user_id', $userRow->user_id);
+                $days = $userTimesheets
+                    ->map(function ($timesheet) use ($projectId) {
+                        $entryTotal = (int) $timesheet->entry_minutes;
+                        $total = $projectId
+                            ? $entryTotal
+                            : (($entryTotal === 0 && $timesheet->total_minutes)
+                                ? (int) $timesheet->total_minutes
+                                : $entryTotal);
 
-            $rows = $timesheets
-                ->groupBy('user_id')
-                ->map(function ($userTimesheets, $userKey) use ($entryTotals, $projectTotalsByUser, $usersMap, $projectId) {
-                    $user = $usersMap->get($userKey);
+                        return [
+                            'date' => $timesheet->work_date->toDateString(),
+                            'total_minutes' => $total,
+                            'status' => $timesheet->status,
+                            'submitted_at' => $timesheet->submitted_at,
+                        ];
+                    })
+                    ->values()
+                    ->all();
 
-                    $days = $userTimesheets
-                        ->map(function ($timesheet) use ($entryTotals, $projectId) {
-                            $entryTotal = $entryTotals->get($timesheet->id)->total_minutes ?? 0;
-                            $total = (!$projectId && $entryTotal === 0 && $timesheet->total_minutes)
-                                ? $timesheet->total_minutes
-                                : (int) $entryTotal;
-
-                            return [
-                                'date' => $timesheet->work_date->toDateString(),
-                                'total_minutes' => (int) $total,
-                                'status' => $timesheet->status,
-                                'submitted_at' => $timesheet->submitted_at,
-                            ];
-                        })
-                        ->values()
-                        ->all();
-
-                    $totalMinutes = collect($days)->sum('total_minutes');
-
-                    return [
-                        'user' => $user
-                            ? [
-                                'id' => $user->id,
-                                'name' => $user->name,
-                                'email' => $user->email,
-                            ]
-                            : null,
-                        'total_minutes' => $totalMinutes,
-                        'days' => $days,
-                        'projects' => $projectTotalsByUser->get($userKey, []),
-                    ];
-                })
-                ->values()
-                ->all();
-
-            $sortableRows = $rows;
-            if ($sort === 'name') {
-                usort($sortableRows, function ($a, $b) use ($direction) {
-                    $nameA = $a['user']['name'] ?? '';
-                    $nameB = $b['user']['name'] ?? '';
-                    return $direction === 'asc'
-                        ? strcasecmp($nameA, $nameB)
-                        : strcasecmp($nameB, $nameA);
-                });
-            } else {
-                usort($sortableRows, function ($a, $b) use ($direction) {
-                    return $direction === 'asc'
-                        ? $a['total_minutes'] <=> $b['total_minutes']
-                        : $b['total_minutes'] <=> $a['total_minutes'];
-                });
-            }
-
-            $totalRows = count($sortableRows);
-            $totalPages = (int) ceil($totalRows / $perPage);
-            $page = min($page, max($totalPages, 1));
-            $offset = ($page - 1) * $perPage;
-            $pagedRows = array_slice($sortableRows, $offset, $perPage);
+                return [
+                    'user' => [
+                        'id' => $userRow->user_id,
+                        'name' => $userRow->user_name,
+                        'email' => $userRow->user_email,
+                    ],
+                    'total_minutes' => (int) $userRow->total_minutes,
+                    'days' => $days,
+                    'projects' => $projectTotalsByUser->get($userRow->user_id, []),
+                ];
+            })->values()->all();
 
             $users = $user->is_admin
                 ? User::query()->select('id', 'name', 'email')->orderBy('name')->get()
@@ -218,23 +245,22 @@ class ReportController extends Controller
             $projects = $projectsQuery->orderBy('name')->get();
 
             return [
-                'rows' => $pagedRows,
-                'sortableRows' => $sortableRows,
+                'rows' => $rows,
                 'totalRows' => $totalRows,
                 'totalPages' => $totalPages,
                 'page' => $page,
+                'totalMinutesAll' => DB::query()->fromSub($userTotalsForTotals, 'user_totals')->sum('total_minutes'),
                 'users' => $users,
                 'projects' => $projects,
             ];
         });
 
-        $sortableRows = $payload['sortableRows'];
         $pagedRows = $payload['rows'];
-        $totalMinutesAll = collect($sortableRows)->sum('total_minutes');
+        $totalMinutesAll = (int) ($payload['totalMinutesAll'] ?? 0);
 
         if ($request->query('format') === 'csv') {
             $csvLines = ['User,Email,Date,Status,Submitted At,Project,Total Minutes,Hours'];
-            foreach ($sortableRows as $row) {
+            foreach ($pagedRows as $row) {
                 foreach ($row['days'] as $day) {
                     $csvLines[] = sprintf(
                         '"%s","%s","%s","%s","%s","%s","%s","%s"',
