@@ -56,6 +56,14 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
    ```bash
    composer run dev
    ```
+   - Start only main instance:
+     ```bash
+     composer run dev:main
+     ```
+   - Start only dev instance:
+     ```bash
+     composer run dev:dev
+     ```
    - Manual start (recommended for two apps at once):
      ```bash
      # main
@@ -76,9 +84,26 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
 ## Useful Commands
 
 - `composer run dev` runs Laravel + Vite together
+- `composer run dev:main` runs main instance (`8000` + `5173`)
+- `composer run dev:dev` runs dev instance (`8001` + `5174`)
 - `php artisan test` runs backend tests
 - `php artisan demo:seed` runs migrations and seeds demo data
 - `php artisan demo:seed --fresh` drops all tables, then migrates and seeds
+
+## Troubleshooting
+
+- `401 Unauthenticated` on API:
+  - Confirm backend/frontend host+port match the same instance in `.env`.
+  - Run `php artisan optimize:clear` and restart backend + Vite.
+- CORS or CSRF cookie issues:
+  - Check `CORS_ALLOWED_ORIGINS` and `SANCTUM_STATEFUL_DOMAINS` include the active frontend/backend pair.
+  - Use one host format consistently (`127.0.0.1`, not mixed with `localhost`).
+- Vite websocket/HMR errors:
+  - Restart Vite and hard refresh browser.
+  - Ensure Vite is running on the expected port (`5173` or `5174`).
+- Session collisions when running two instances:
+  - Use different `SESSION_COOKIE` values for main and dev.
+  - Prefer separate browser profiles (or normal + incognito) when testing both at once.
 
 ## Suggested Git Flow
 
