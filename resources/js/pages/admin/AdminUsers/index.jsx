@@ -151,6 +151,14 @@ export default function AdminUsers() {
         });
     }
 
+    function selectAllBulkProjects() {
+        setBulkProjects(new Set(filteredProjects.map(project => project.id)));
+    }
+
+    function clearAllBulkProjects() {
+        setBulkProjects(new Set());
+    }
+
     function goToPage(page) {
         if (page < 1 || page > pagination.last_page) return;
         loadUsers(page);
@@ -231,6 +239,20 @@ export default function AdminUsers() {
         return projects.filter(project => project.name?.toLowerCase().includes(query));
     }, [projects, projectQuery]);
 
+    function selectAllProjectsForUser(userId) {
+        setSelected(prev => ({
+            ...prev,
+            [userId]: new Set(filteredProjects.map(project => project.id)),
+        }));
+    }
+
+    function clearProjectsForUser(userId) {
+        setSelected(prev => ({
+            ...prev,
+            [userId]: new Set(),
+        }));
+    }
+
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow border">
@@ -275,6 +297,8 @@ export default function AdminUsers() {
                         projects={filteredProjects}
                         bulkProjects={bulkProjects}
                         onToggleProject={toggleBulkProject}
+                        onSelectAllProjects={selectAllBulkProjects}
+                        onClearAllProjects={clearAllBulkProjects}
                         bulkSaving={bulkSaving}
                         bulkUsersCount={bulkUsers.size}
                         onAdd={() => applyBulkUpdate('add')}
@@ -291,6 +315,8 @@ export default function AdminUsers() {
                         onToggleBulkUser={toggleBulkUser}
                         onSaveUser={saveUserProjects}
                         onToggleProject={toggleProject}
+                        onSelectAllProjectsForUser={selectAllProjectsForUser}
+                        onClearProjectsForUser={clearProjectsForUser}
                     />
 
                     <AdminUsersPagination
