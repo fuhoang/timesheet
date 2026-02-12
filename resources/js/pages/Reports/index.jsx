@@ -48,7 +48,7 @@ export default function Reports() {
     const users = report?.meta?.users ?? [];
     const projects = report?.meta?.projects ?? [];
     const totalRows = report?.meta?.total_rows ?? 0;
-    const totalPages = report?.meta?.total_pages ?? 1;
+    const totalPages = Math.max(report?.meta?.total_pages ?? 1, 1);
     const overallMinutes = useMemo(() => {
         if (!report?.rows) return 0;
         return report.rows.reduce((sum, row) => sum + row.total_minutes, 0);
@@ -266,8 +266,8 @@ export default function Reports() {
             {!apiLoading && report?.rows?.length === 0 && (
                 <div className="text-sm text-gray-500">
                     {status || includeDrafts
-                        ? 'No entries found for this range.'
-                        : 'No submitted or approved entries in this range. Toggle \"Include drafts\" to see more.'}
+                        ? 'No entries found for this range. Try widening the dates.'
+                        : 'No submitted, approved, or rejected entries in this range. Toggle "Include drafts" or widen the dates.'}
                 </div>
             )}
 
