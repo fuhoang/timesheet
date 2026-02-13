@@ -30,6 +30,8 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
      - Dev app:
        - `ACTIVE_BACKEND_URL="${DEV_BACKEND_URL}"`
        - `ACTIVE_FRONTEND_URL="${DEV_FRONTEND_URL}"`
+   - Optional (for admin System Status links):
+     - `VITE_GITHUB_REPO_URL=https://github.com/<owner>/<repo>`
    - Clear config after env changes:
      ```bash
      php artisan optimize:clear
