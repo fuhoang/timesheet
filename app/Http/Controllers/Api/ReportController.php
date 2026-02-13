@@ -20,7 +20,11 @@ class ReportController extends Controller
 
         $startParam = $request->query('start');
         $endParam = $request->query('end');
-        $status = $request->query('status');
+        $rawStatus = strtolower(trim((string) $request->query('status', '')));
+        $status = in_array($rawStatus, ['draft', 'submitted', 'approved', 'rejected'], true)
+            ? $rawStatus
+            : null;
+        $isAllStatuses = $rawStatus === 'all';
         $includeDrafts = filter_var($request->query('include_drafts', false), FILTER_VALIDATE_BOOL);
         $projectId = $request->query('project_id');
         $userId = $request->query('user_id');
@@ -45,7 +49,7 @@ class ReportController extends Controller
         $cacheKey = 'reports:' . $user->id . ':' . md5(json_encode([
             'start' => $start->toDateString(),
             'end' => $end->toDateString(),
-            'status' => $status,
+            'status' => $rawStatus ?: null,
             'include_drafts' => $includeDrafts,
             'project_id' => $projectId,
             'user_id' => $userId,
@@ -62,6 +66,7 @@ class ReportController extends Controller
             $start,
             $end,
             $status,
+            $isAllStatuses,
             $includeDrafts,
             $projectId,
             $userId,
@@ -76,6 +81,7 @@ class ReportController extends Controller
                 $start,
                 $end,
                 $status,
+                $isAllStatuses,
                 $includeDrafts,
                 $projectId,
                 $userId
@@ -97,8 +103,10 @@ class ReportController extends Controller
                     $query->where('timesheets.user_id', $userId);
                 }
 
-                if ($status && in_array($status, ['draft', 'submitted', 'approved', 'rejected'], true)) {
+                if ($status) {
                     $query->where('timesheets.status', $status);
+                } elseif ($isAllStatuses) {
+                    // Explicit "all" means include every status, including drafts.
                 } elseif (!$includeDrafts) {
                     $query->whereIn('timesheets.status', ['submitted', 'approved', 'rejected']);
                 }
@@ -168,10 +176,10 @@ class ReportController extends Controller
                     ->when($projectId, fn ($entryQuery) => $entryQuery->where('time_entries.project_id', $projectId))
                     ->whereIn('timesheets.user_id', $pagedUserIds)
                     ->whereBetween('timesheets.work_date', [$start->toDateString(), $end->toDateString()])
-                    ->when($status && in_array($status, ['draft', 'submitted', 'approved', 'rejected'], true), function ($entryQuery) use ($status) {
+                    ->when($status, function ($entryQuery) use ($status) {
                         $entryQuery->where('timesheets.status', $status);
                     })
-                    ->when(!$status && !$includeDrafts, function ($entryQuery) {
+                    ->when(!$status && !$isAllStatuses && !$includeDrafts, function ($entryQuery) {
                         $entryQuery->whereIn('timesheets.status', ['submitted', 'approved', 'rejected']);
                     })
                     ->groupBy('timesheets.user_id', 'time_entries.project_id')
@@ -337,7 +345,7 @@ class ReportController extends Controller
                 'sort' => $sort,
                 'direction' => $direction,
                 'filters' => [
-                    'status' => $status,
+                    'status' => $rawStatus ?: null,
                     'include_drafts' => $includeDrafts,
                     'project_id' => $projectId ? (int) $projectId : null,
                     'user_id' => $userId ? (int) $userId : null,

@@ -58,7 +58,8 @@ export default function ReportsFilters({
                             onChange={event => onStatusChange(event.target.value)}
                             className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
                         >
-                            <option value="">All statuses</option>
+                            <option value="">Default (no drafts)</option>
+                            <option value="all">All statuses</option>
                             <option value="draft">Draft</option>
                             <option value="submitted">Submitted</option>
                             <option value="approved">Approved</option>
@@ -139,8 +140,8 @@ export default function ReportsFilters({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    {['', 'submitted', 'approved', 'rejected', 'draft'].map(value => {
-                        const label = value ? value : 'all';
+                    {['', 'all', 'submitted', 'approved', 'rejected', 'draft'].map(value => {
+                        const label = value === '' ? 'default' : value;
                         const active = status === value;
                         return (
                             <button
