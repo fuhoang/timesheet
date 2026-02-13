@@ -27,7 +27,7 @@ class ReportController extends Controller
         $sort = $request->query('sort', 'total_minutes');
         $direction = strtolower($request->query('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
         $page = max((int) $request->query('page', 1), 1);
-        $perPage = max((int) $request->query('per_page', 10), 1);
+        $perPage = min(max((int) $request->query('per_page', 10), 1), 100);
 
         $start = $startParam
             ? Carbon::parse($startParam)->startOfDay()
