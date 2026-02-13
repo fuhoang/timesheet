@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\TimeEntryController;
 use App\Http\Controllers\Api\Admin\AdminTimesheetController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\Admin\AdminProjectController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 
@@ -17,6 +18,8 @@ use App\Http\Controllers\Api\Admin\AdminUserController;
 */
 
 Route::middleware(['web'])->group(function () {
+    Route::get('/health', [HealthController::class, 'health']);
+    Route::get('/ready', [HealthController::class, 'ready']);
 
     // Public: only login/register
     Route::get('/user', function (\Illuminate\Http\Request $request) {
