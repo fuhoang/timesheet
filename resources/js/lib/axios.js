@@ -41,4 +41,27 @@ const instance = axios.create({
   },
 });
 
+instance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error?.config;
+        const status = error?.response?.status;
+
+        // Retry once after refreshing Sanctum CSRF cookie.
+        if (
+            status === 419 &&
+            originalRequest &&
+            !originalRequest._retryAfterCsrfRefresh &&
+            !String(originalRequest.url || '').includes('/sanctum/csrf-cookie')
+        ) {
+            originalRequest._retryAfterCsrfRefresh = true;
+
+            await instance.get('/sanctum/csrf-cookie');
+            return instance(originalRequest);
+        }
+
+        throw error;
+    }
+);
+
 export default instance;
