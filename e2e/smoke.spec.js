@@ -11,11 +11,21 @@ test('login and start/stop timer', async ({ page }) => {
     await page.getByRole('button', { name: 'Login' }).click();
 
     await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+
+    const projectSelect = page.locator('select');
+    await expect(projectSelect).toBeVisible();
 
     const startButton = page.getByRole('button', { name: 'Start' });
     const stopButton = page.getByRole('button', { name: 'Stop' });
 
-    await expect(startButton).toBeVisible();
+    // Ensure we are in a known state before asserting start->stop flow.
+    if (await stopButton.isVisible()) {
+        await stopButton.click();
+        await expect(startButton).toBeVisible();
+    }
+
+    await expect(startButton).toBeEnabled();
     await startButton.click();
     await expect(stopButton).toBeVisible();
 
