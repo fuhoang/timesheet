@@ -5,6 +5,8 @@ import ReportsFilters from './ReportsFilters';
 import ReportsRow from './ReportsRow';
 import ReportsPagination from './ReportsPagination';
 
+const REPORT_LAST_REFRESH_KEY = 'reportsLastRefreshAt';
+
 function formatDate(date) {
     return date.toISOString().slice(0, 10);
 }
@@ -82,6 +84,7 @@ export default function Reports() {
                     if (mounted) {
                         setReport(data);
                         setError(null);
+                        window.localStorage.setItem(REPORT_LAST_REFRESH_KEY, new Date().toISOString());
                     }
                 })
                 .catch(err => {

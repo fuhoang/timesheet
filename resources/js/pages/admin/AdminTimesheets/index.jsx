@@ -5,6 +5,7 @@ import { formatDate } from '../../../utils/date';
 import Toast from '../../../components/ui/Toast';
 import StatusBadge from '../../../components/ui/StatusBadge';
 import Button from '../../../components/ui/Button';
+import AdminSystemStatusCard from './AdminSystemStatusCard';
 
 
 
@@ -189,6 +190,8 @@ export default function AdminTimesheets() {
                     Review and approve submitted timesheets
                 </p>
             </div>
+
+            <AdminSystemStatusCard />
 
             <div className="bg-white p-3 rounded-2xl shadow border flex flex-wrap gap-2">
                 {statusTabs.map(tab => {
