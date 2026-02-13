@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => {
         test: {
             environment: 'jsdom',
             setupFiles: 'resources/js/test/setup.js',
+            include: ['resources/js/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+            exclude: ['e2e/**', 'node_modules/**'],
             coverage: {
                 reporter: ['text', 'lcov'],
                 reportsDirectory: 'coverage',

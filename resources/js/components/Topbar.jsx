@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
+import ApiHealthStatus from './ApiHealthStatus';
 import Button from './ui/Button';
 
 export default function Topbar() {
@@ -14,6 +15,8 @@ export default function Topbar() {
             </h1>
 
             <div className="flex items-center gap-4">
+                <ApiHealthStatus />
+
                 <ThemeToggle />
 
                 {user?.is_admin ? (

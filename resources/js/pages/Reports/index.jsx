@@ -55,40 +55,48 @@ export default function Reports() {
     }, [report]);
     const totalMinutesAll = report?.meta?.total_minutes_all ?? overallMinutes;
 
+    const queryParams = useMemo(() => ({
+        start: startDate,
+        end: endDate,
+        status: status || undefined,
+        include_drafts: status ? undefined : includeDrafts,
+        project_id: projectId || undefined,
+        user_id: userId || undefined,
+        sort,
+        direction,
+        page,
+        per_page: perPage,
+    }), [startDate, endDate, status, includeDrafts, projectId, userId, sort, direction, page, perPage]);
+
     useEffect(() => {
         let mounted = true;
-
-        api({
-            method: 'get',
-            url: '/api/reports',
-            params: {
-                start: startDate,
-                end: endDate,
-                status: status || undefined,
-                include_drafts: status ? undefined : includeDrafts,
-                project_id: projectId || undefined,
-                user_id: userId || undefined,
-                sort,
-                direction,
-                page,
-                per_page: perPage,
-            },
-        })
-            .then(data => {
-                if (mounted) {
-                    setReport(data);
-                }
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => {
+            api({
+                method: 'get',
+                url: '/api/reports',
+                params: queryParams,
+                signal: controller.signal,
             })
-            .catch(err => {
-                if (mounted) {
-                    setError(err);
-                }
-            });
+                .then(data => {
+                    if (mounted) {
+                        setReport(data);
+                        setError(null);
+                    }
+                })
+                .catch(err => {
+                    if (mounted && err?.name !== 'CanceledError' && err?.code !== 'ERR_CANCELED') {
+                        setError(err);
+                    }
+                });
+        }, 180);
 
         return () => {
             mounted = false;
+            controller.abort();
+            window.clearTimeout(timer);
         };
-    }, [api, startDate, endDate, status, includeDrafts, projectId, userId, sort, direction, page, perPage]);
+    }, [api, queryParams]);
 
     async function handleExport() {
         setExporting(true);
@@ -312,7 +320,7 @@ export default function Reports() {
 
             {report?.rows?.map(row => (
                 <ReportsRow
-                    key={row.user?.id ?? row.user?.email ?? Math.random()}
+                    key={row.user?.id ?? row.user?.email}
                     row={row}
                     formatMinutes={formatMinutes}
                     formatHours={formatHours}
