@@ -98,6 +98,7 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
 - CORS or CSRF cookie issues:
   - Check `CORS_ALLOWED_ORIGINS` and `SANCTUM_STATEFUL_DOMAINS` include the active frontend/backend pair.
   - Use one host format consistently (`127.0.0.1`, not mixed with `localhost`).
+  - `419 CSRF token mismatch` responses are auto-retried once after refreshing `/sanctum/csrf-cookie`.
 - Vite websocket/HMR errors:
   - Restart Vite and hard refresh browser.
   - Ensure Vite is running on the expected port (`5173` or `5174`).
