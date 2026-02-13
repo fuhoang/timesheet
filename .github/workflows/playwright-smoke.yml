@@ -1,0 +1,96 @@
+name: Playwright Smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Playwright test runner and browser
+        run: |
+          npm i -D @playwright/test
+          npx playwright install --with-deps chromium
+
+      - name: Prepare app environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          mkdir -p database
+          touch database/database.sqlite
+          php artisan migrate --seed --force
+          npm run build
+        env:
+          APP_ENV: testing
+          APP_DEBUG: false
+          APP_URL: http://127.0.0.1:8000
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+          CACHE_STORE: file
+          SESSION_DRIVER: file
+          QUEUE_CONNECTION: sync
+          FRONTEND_URL: http://127.0.0.1:5173
+          VITE_API_URL: http://127.0.0.1:8000
+          VITE_FRONTEND_URL: http://127.0.0.1:5173
+
+      - name: Start Laravel server
+        run: php artisan serve --host=127.0.0.1 --port=8000 > /tmp/laravel-server.log 2>&1 &
+
+      - name: Wait for app
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8000/login >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "App did not become ready in time"
+          cat /tmp/laravel-server.log || true
+          exit 1
+
+      - name: Run Playwright smoke test
+        run: npx playwright test e2e/smoke.spec.js
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8000
+          E2E_EMAIL: user@test.com
+          E2E_PASSWORD: password
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          if-no-files-found: ignore
+
+      - name: Upload Playwright test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results
+          if-no-files-found: ignore
+
