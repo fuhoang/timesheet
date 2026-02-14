@@ -107,6 +107,8 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
 - Session collisions when running two instances:
   - Use different `SESSION_COOKIE` values for main and dev.
   - Prefer separate browser profiles (or normal + incognito) when testing both at once.
+- Report performance profiling:
+  - Add `profile=1` to `/api/reports` to return `meta.profile.timings_ms` for quick server-side timing checks.
 
 ## Suggested Git Flow
 

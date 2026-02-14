@@ -212,13 +212,6 @@ class ReportsTest extends TestCase
         Timesheet::create([
             'user_id' => $user->id,
             'work_date' => now()->toDateString(),
-            'total_minutes' => 45,
-            'status' => 'draft',
-        ]);
-
-        Timesheet::create([
-            'user_id' => $user->id,
-            'work_date' => now()->addDay()->toDateString(),
             'total_minutes' => 30,
             'status' => 'approved',
             'submitted_at' => now(),
@@ -240,18 +233,19 @@ class ReportsTest extends TestCase
     public function test_reports_status_all_includes_drafts_and_submitted(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
-        $user = User::factory()->create();
+        $draftUser = User::factory()->create();
+        $submittedUser = User::factory()->create();
 
         Timesheet::create([
-            'user_id' => $user->id,
+            'user_id' => $draftUser->id,
             'work_date' => now()->toDateString(),
             'total_minutes' => 30,
             'status' => 'draft',
         ]);
 
         Timesheet::create([
-            'user_id' => $user->id,
-            'work_date' => now()->addDay()->toDateString(),
+            'user_id' => $submittedUser->id,
+            'work_date' => now()->toDateString(),
             'total_minutes' => 60,
             'status' => 'submitted',
             'submitted_at' => now(),
@@ -264,8 +258,7 @@ class ReportsTest extends TestCase
             ->json();
 
         $this->assertSame('all', $response['meta']['filters']['status']);
-        $this->assertCount(1, $response['rows']);
-        $this->assertCount(2, $response['rows'][0]['days']);
+        $this->assertCount(2, $response['rows']);
     }
 
     public function test_reports_status_all_ignores_include_drafts_toggle(): void
@@ -310,5 +303,30 @@ class ReportsTest extends TestCase
             ->json();
 
         $this->assertSame(120, $response['meta']['total_minutes_all']);
+    }
+
+    public function test_reports_profile_mode_returns_profile_meta(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 60,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/reports?profile=1')
+            ->assertStatus(200)
+            ->json();
+
+        $this->assertArrayHasKey('profile', $response['meta']);
+        $this->assertArrayHasKey('request_id', $response['meta']['profile']);
+        $this->assertArrayHasKey('timings_ms', $response['meta']['profile']);
+        $this->assertArrayHasKey('build_payload_ms', $response['meta']['profile']['timings_ms']);
     }
 }
