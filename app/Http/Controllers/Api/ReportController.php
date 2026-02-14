@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ReportController extends Controller
 {
@@ -21,17 +22,26 @@ class ReportController extends Controller
         $startParam = $request->query('start');
         $endParam = $request->query('end');
         $rawStatus = strtolower(trim((string) $request->query('status', '')));
+        $isAllStatuses = $rawStatus === 'all';
         $status = in_array($rawStatus, ['draft', 'submitted', 'approved', 'rejected'], true)
             ? $rawStatus
             : null;
-        $isAllStatuses = $rawStatus === 'all';
         $includeDrafts = filter_var($request->query('include_drafts', false), FILTER_VALIDATE_BOOL);
+        if ($isAllStatuses) {
+            $includeDrafts = true;
+        }
         $projectId = $request->query('project_id');
         $userId = $request->query('user_id');
         $sort = $request->query('sort', 'total_minutes');
+        if (!in_array($sort, ['total_minutes', 'name'], true)) {
+            $sort = 'total_minutes';
+        }
         $direction = strtolower($request->query('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
         $page = max((int) $request->query('page', 1), 1);
         $perPage = min(max((int) $request->query('per_page', 10), 1), 100);
+        $profile = filter_var($request->query('profile', false), FILTER_VALIDATE_BOOL);
+        $timings = [];
+        $stepStartedAt = microtime(true);
 
         $start = $startParam
             ? Carbon::parse($startParam)->startOfDay()
@@ -66,7 +76,6 @@ class ReportController extends Controller
             $start,
             $end,
             $status,
-            $isAllStatuses,
             $includeDrafts,
             $projectId,
             $userId,
@@ -81,7 +90,6 @@ class ReportController extends Controller
                 $start,
                 $end,
                 $status,
-                $isAllStatuses,
                 $includeDrafts,
                 $projectId,
                 $userId
@@ -105,8 +113,6 @@ class ReportController extends Controller
 
                 if ($status) {
                     $query->where('timesheets.status', $status);
-                } elseif ($isAllStatuses) {
-                    // Explicit "all" means include every status, including drafts.
                 } elseif (!$includeDrafts) {
                     $query->whereIn('timesheets.status', ['submitted', 'approved', 'rejected']);
                 }
@@ -179,7 +185,7 @@ class ReportController extends Controller
                     ->when($status, function ($entryQuery) use ($status) {
                         $entryQuery->where('timesheets.status', $status);
                     })
-                    ->when(!$status && !$isAllStatuses && !$includeDrafts, function ($entryQuery) {
+                    ->when(!$status && !$includeDrafts, function ($entryQuery) {
                         $entryQuery->whereIn('timesheets.status', ['submitted', 'approved', 'rejected']);
                     })
                     ->groupBy('timesheets.user_id', 'time_entries.project_id')
@@ -257,11 +263,14 @@ class ReportController extends Controller
                 'totalRows' => $totalRows,
                 'totalPages' => $totalPages,
                 'page' => $page,
-                'totalMinutesAll' => DB::query()->fromSub($userTotalsForTotals, 'user_totals')->sum('total_minutes'),
+                'totalMinutesAll' => $totalRows > 0
+                    ? DB::query()->fromSub($userTotalsForTotals, 'user_totals')->sum('total_minutes')
+                    : 0,
                 'users' => $users,
                 'projects' => $projects,
             ];
         });
+        $timings['build_payload_ms'] = (int) round((microtime(true) - $stepStartedAt) * 1000);
 
         $pagedRows = $payload['rows'];
         $totalMinutesAll = (int) ($payload['totalMinutesAll'] ?? 0);
@@ -330,7 +339,7 @@ class ReportController extends Controller
             ]);
         }
 
-        return response()->json([
+        $response = [
             'range' => [
                 'start' => $start->toDateString(),
                 'end' => $end->toDateString(),
@@ -345,7 +354,7 @@ class ReportController extends Controller
                 'sort' => $sort,
                 'direction' => $direction,
                 'filters' => [
-                    'status' => $rawStatus ?: null,
+                    'status' => $isAllStatuses ? 'all' : ($status ?: null),
                     'include_drafts' => $includeDrafts,
                     'project_id' => $projectId ? (int) $projectId : null,
                     'user_id' => $userId ? (int) $userId : null,
@@ -354,6 +363,16 @@ class ReportController extends Controller
                 'users' => $payload['users'],
                 'projects' => $payload['projects'],
             ],
-        ]);
+        ];
+
+        if ($profile) {
+            $response['meta']['profile'] = [
+                'request_id' => (string) Str::uuid(),
+                'timings_ms' => $timings,
+                'cache_ttl_seconds' => 300,
+            ];
+        }
+
+        return response()->json($response);
     }
 }
