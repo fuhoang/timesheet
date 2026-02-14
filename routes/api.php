@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\Admin\AdminProjectController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
+use App\Http\Controllers\Api\Admin\ConfigHealthController;
 
 
 /*
@@ -51,6 +52,8 @@ Route::middleware(['web'])->group(function () {
 
     // Admin-only routes
     Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+        Route::get('/config/health', [ConfigHealthController::class, 'index']);
+
         // Projects
         Route::apiResource('projects', AdminProjectController::class)->only(['index', 'store', 'update', 'destroy']);
 
