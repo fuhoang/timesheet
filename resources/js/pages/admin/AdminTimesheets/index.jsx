@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
-import { Link } from 'react-router-dom';
-import { formatDate } from '../../../utils/date';
 import Toast from '../../../components/ui/Toast';
-import StatusBadge from '../../../components/ui/StatusBadge';
-import Button from '../../../components/ui/Button';
 import AdminSystemStatusCard from './AdminSystemStatusCard';
-
-
+import AdminTimesheetsStatusTabs from './AdminTimesheetsStatusTabs';
+import AdminTimesheetsFilters from './AdminTimesheetsFilters';
+import AdminTimesheetsTable from './AdminTimesheetsTable';
 
 export default function AdminTimesheets() {
     const { api } = useApi();
@@ -174,14 +171,6 @@ export default function AdminTimesheets() {
         loadTimesheets(page);
     }
 
-    const statusTabs = [
-        { label: 'All', value: '' },
-        { label: 'Submitted', value: 'submitted' },
-        { label: 'Draft', value: 'draft' },
-        { label: 'Rejected', value: 'rejected' },
-        { label: 'Approved', value: 'approved' },
-    ];
-
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow border">
@@ -193,258 +182,40 @@ export default function AdminTimesheets() {
 
             <AdminSystemStatusCard />
 
-            <div className="bg-white p-3 rounded-2xl shadow border flex flex-wrap gap-2">
-                {statusTabs.map(tab => {
-                    const isActive = filters.status === tab.value;
-                    return (
-                        <Button
-                            key={tab.value}
-                            type="button"
-                            onClick={() => setStatusTab(tab.value)}
-                            variant={isActive ? 'primary' : 'secondary'}
-                            size="sm"
-                            className={`rounded-full ${isActive ? 'border border-blue-600' : 'border-gray-200'}`}
-                        >
-                            {tab.label}
-                        </Button>
-                    );
-                })}
-            </div>
+            <AdminTimesheetsStatusTabs
+                currentStatus={filters.status}
+                onSelect={setStatusTab}
+            />
 
-            <form
-                onSubmit={applyFilters}
-                className="bg-white p-4 rounded-2xl shadow border flex flex-wrap gap-4 items-end"
-            >
-                <div className="flex flex-col">
-                    <label className="text-xs text-gray-500">Status</label>
-                    <select
-                        value={filters.status}
-                        onChange={e => updateFilter('status', e.target.value)}
-                        className="border rounded-lg px-3 py-2"
-                    >
-                        <option value="">All</option>
-                        <option value="submitted">Submitted</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="draft">Draft</option>
-                        <option value="resubmitted">Resubmitted</option>
-                    </select>
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="text-xs text-gray-500">User</label>
-                    <input
-                        type="text"
-                        value={filters.q}
-                        onChange={e => updateFilter('q', e.target.value)}
-                        placeholder="Name or email"
-                        className="border rounded-lg px-3 py-2"
-                    />
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="text-xs text-gray-500">From</label>
-                    <input
-                        type="date"
-                        value={filters.date_from}
-                        onChange={e => updateFilter('date_from', e.target.value)}
-                        className="border rounded-lg px-3 py-2"
-                    />
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="text-xs text-gray-500">To</label>
-                    <input
-                        type="date"
-                        value={filters.date_to}
-                        onChange={e => updateFilter('date_to', e.target.value)}
-                        className="border rounded-lg px-3 py-2"
-                    />
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="text-xs text-gray-500">Per page</label>
-                    <select
-                        value={perPage}
-                        onChange={e => {
-                            setPerPage(Number(e.target.value));
-                            loadTimesheets(1);
-                        }}
-                        className="border rounded-lg px-3 py-2"
-                    >
-                        <option value={10}>10</option>
-                        <option value={20}>20</option>
-                        <option value={50}>50</option>
-                    </select>
-                </div>
-
-                <Button
-                    type="submit"
-                    variant="primary"
-                >
-                    Apply
-                </Button>
-                <Button
-                    type="button"
-                    onClick={clearFilters}
-                    variant="secondary"
-                >
-                    Clear
-                </Button>
-            </form>
+            <AdminTimesheetsFilters
+                filters={filters}
+                perPage={perPage}
+                onUpdateFilter={updateFilter}
+                onPerPageChange={value => {
+                    setPerPage(value);
+                    loadTimesheets(1);
+                }}
+                onApply={applyFilters}
+                onClear={clearFilters}
+            />
 
             {toast && <Toast message={toast.message} type={toast.type} />}
 
-            <div className="bg-white rounded-2xl shadow border overflow-hidden">
-                {loading ? (
-                    <div className="p-6 text-gray-500">Loading timesheets…</div>
-                ) : timesheets.length === 0 ? (
-                    <div className="p-8 text-center">
-                        <div className="text-sm font-semibold text-gray-900">
-                            No timesheets found
-                        </div>
-                        <div className="mt-2 text-sm text-gray-500">
-                            {hasActiveFilters
-                                ? 'Try adjusting or clearing your filters.'
-                                : 'Once users submit their weeks, they will show up here for review.'}
-                        </div>
-                        {hasActiveFilters && (
-                            <Button
-                                type="button"
-                                onClick={clearFilters}
-                                variant="secondary"
-                                size="sm"
-                                className="mt-4"
-                            >
-                                Clear filters
-                            </Button>
-                        )}
-                    </div>
-                ) : (
-                    <>
-                        <div className="px-4 py-3 border-b flex items-center justify-between">
-                            <div className="text-sm text-gray-600">
-                                {selectedIds.length} selected
-                                <span className="ml-3 text-xs text-gray-400">
-                                    Showing {pagination.from}-{pagination.to} of {pagination.total}
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    onClick={bulkApprove}
-                                    disabled={selectedIds.length === 0 || bulkLoading}
-                                    variant="success"
-                                    size="sm"
-                                >
-                                    {bulkLoading ? 'Working…' : 'Bulk approve'}
-                                </Button>
-                                <Button
-                                    onClick={bulkReject}
-                                    disabled={selectedIds.length === 0 || bulkLoading}
-                                    variant="danger"
-                                    size="sm"
-                                >
-                                    Bulk reject
-                                </Button>
-                            </div>
-                        </div>
-                    <table className="w-full text-sm">
-                        <thead className="bg-gray-50 border-b">
-                            <tr>
-                                <th className="px-4 py-3 text-left w-10">
-                                    <input
-                                        type="checkbox"
-                                        checked={allSubmittedSelected}
-                                        onChange={toggleSelectAllSubmitted}
-                                    />
-                                </th>
-                                <th className="px-4 py-3 text-left">User</th>
-                                <th className="px-4 py-3 text-left">Week</th>
-                                <th className="px-4 py-3 text-left">Status</th>
-                                <th className="px-4 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {timesheets.map(ts => (
-                                <tr key={ts.id}>
-                                    <td className="px-4 py-3">
-                                        <input
-                                            type="checkbox"
-                                            disabled={!ts.submitted_at || ts.status === 'approved'}
-                                            checked={selectedIds.includes(ts.id)}
-                                            onChange={() => toggleSelectOne(ts.id)}
-                                        />
-                                    </td>
-                                    <td className="px-4 py-3 font-medium">
-                                        {ts.user.name}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {formatDate(ts.work_date)}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <StatusBadge status={ts.status === 'draft' && ts.submitted_at ? 'resubmitted' : ts.status} />
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <Link
-                                            to={`/admin/timesheets/${ts.id}`}
-                                            className="text-indigo-600 hover:underline"
-                                        >
-                                            Review
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                        <div className="px-4 py-3 border-t flex items-center justify-between">
-                            <div className="text-sm text-gray-500">
-                                Page {pagination.current_page} of {pagination.last_page}
-                                <span className="ml-2 text-xs text-gray-400">
-                                    ({pagination.from}-{pagination.to} of {pagination.total})
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => goToPage(1)}
-                                    disabled={pagination.current_page <= 1}
-                                >
-                                    First
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => goToPage(pagination.current_page - 1)}
-                                    disabled={pagination.current_page <= 1}
-                                >
-                                    Previous
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => goToPage(pagination.current_page + 1)}
-                                    disabled={pagination.current_page >= pagination.last_page}
-                                >
-                                    Next
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => goToPage(pagination.last_page)}
-                                    disabled={pagination.current_page >= pagination.last_page}
-                                >
-                                    Last
-                                </Button>
-                            </div>
-                        </div>
-                    </>
-                )}
-            </div>
+            <AdminTimesheetsTable
+                loading={loading}
+                timesheets={timesheets}
+                hasActiveFilters={hasActiveFilters}
+                onClearFilters={clearFilters}
+                selectedIds={selectedIds}
+                bulkLoading={bulkLoading}
+                onBulkApprove={bulkApprove}
+                onBulkReject={bulkReject}
+                pagination={pagination}
+                allSubmittedSelected={allSubmittedSelected}
+                onToggleSelectAll={toggleSelectAllSubmitted}
+                onToggleSelectOne={toggleSelectOne}
+                onGoToPage={goToPage}
+            />
         </div>
     );
 }
