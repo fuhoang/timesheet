@@ -112,6 +112,33 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
 - Admin config diagnostics:
   - Use `/api/admin/config/health` (admin-only) to verify APP/FRONTEND/CORS/SANCTUM alignment.
 
+### Test Config Health Validator
+
+1. Login as admin and open `http://127.0.0.1:8000/admin/timesheets`.
+   - In **System Status**, confirm `Config` shows `ok` when configuration is aligned.
+
+2. Check endpoint directly (admin session required):
+   - `GET /api/admin/config/health`
+   - Verify response includes `ok`, `failed_count`, and `checks[]`.
+
+3. Negative test (intentional mismatch):
+   - Example: set `CORS_ALLOWED_ORIGINS=http://localhost:5173` while `FRONTEND_URL=http://127.0.0.1:5173`
+   - Run:
+     ```bash
+     php artisan optimize:clear
+     ```
+   - Reload admin timesheets and confirm `Config` shows `issues` with fix hints.
+
+4. Restore values and confirm recovery:
+   - Align URL hosts (use one format consistently).
+   - Run `php artisan optimize:clear`.
+   - Reload page and confirm `Config` returns to `ok`.
+
+5. Run backend tests:
+   ```bash
+   php artisan test tests/Feature/ConfigHealthEndpointTest.php
+   ```
+
 ## Suggested Git Flow
 
 Use a shared `dev` branch for day-to-day work, and merge into `main` when ready to release.
