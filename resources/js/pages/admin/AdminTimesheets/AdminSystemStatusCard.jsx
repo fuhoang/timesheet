@@ -15,6 +15,8 @@ export default function AdminSystemStatusCard() {
     const [loading, setLoading] = useState(true);
     const [apiStatus, setApiStatus] = useState('checking');
     const [dbStatus, setDbStatus] = useState('checking');
+    const [configStatus, setConfigStatus] = useState('checking');
+    const [configChecks, setConfigChecks] = useState([]);
     const [lastCheckedAt, setLastCheckedAt] = useState(null);
     const [lastReportRefreshAt, setLastReportRefreshAt] = useState(() => {
         return window.localStorage.getItem(REPORT_LAST_REFRESH_KEY);
@@ -33,9 +35,10 @@ export default function AdminSystemStatusCard() {
     const loadStatus = useCallback(async () => {
         setLoading(true);
         try {
-            const [healthResult, readyResult] = await Promise.allSettled([
+            const [healthResult, readyResult, configResult] = await Promise.allSettled([
                 api({ method: 'get', url: '/api/health' }),
                 api({ method: 'get', url: '/api/ready' }),
+                api({ method: 'get', url: '/api/admin/config/health' }),
             ]);
 
             setApiStatus(healthResult.status === 'fulfilled' ? 'online' : 'offline');
@@ -47,6 +50,14 @@ export default function AdminSystemStatusCard() {
                 setDbStatus('ready');
             } else {
                 setDbStatus('not_ready');
+            }
+
+            if (configResult.status === 'fulfilled') {
+                setConfigStatus(configResult.value?.ok ? 'ok' : 'issues');
+                setConfigChecks(configResult.value?.checks ?? []);
+            } else {
+                setConfigStatus('issues');
+                setConfigChecks([]);
             }
         } finally {
             setLastCheckedAt(new Date().toISOString());
@@ -78,12 +89,26 @@ export default function AdminSystemStatusCard() {
                 </button>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 <StatusItem label="API" value={apiStatus} />
                 <StatusItem label="DB" value={dbStatus} />
+                <StatusItem label="Config" value={configStatus} />
                 <StatusItem label="Last report refresh" value={formatTimestamp(lastReportRefreshAt)} />
                 <StatusItem label="Last checked" value={formatTimestamp(lastCheckedAt)} />
             </div>
+
+            {configStatus === 'issues' && configChecks.length > 0 && (
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                    <div className="text-xs font-semibold text-amber-900">Config issues detected</div>
+                    <div className="mt-2 space-y-1">
+                        {configChecks.filter(check => !check.ok).map(check => (
+                            <div key={check.key} className="text-xs text-amber-800">
+                                {check.label}: {check.hint || 'Check configuration values.'}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {(workflowUrl || artifactsUrl) && (
                 <div className="mt-4 flex flex-wrap gap-2">
