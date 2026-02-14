@@ -111,6 +111,7 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
   - Add `profile=1` to `/api/reports` to return `meta.profile.timings_ms` for quick server-side timing checks.
 - Admin config diagnostics:
   - Use `/api/admin/config/health` (admin-only) to verify APP/FRONTEND/CORS/SANCTUM alignment.
+  - Admin UI: open `/admin/system` for detailed diagnostics and fix hints.
 
 ### Test Config Health Validator
 

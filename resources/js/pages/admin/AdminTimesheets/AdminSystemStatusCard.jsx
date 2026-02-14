@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
+import { Link } from 'react-router-dom';
 
 const REPORT_LAST_REFRESH_KEY = 'reportsLastRefreshAt';
 
@@ -97,18 +98,15 @@ export default function AdminSystemStatusCard() {
                 <StatusItem label="Last checked" value={formatTimestamp(lastCheckedAt)} />
             </div>
 
-            {configStatus === 'issues' && configChecks.length > 0 && (
-                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
-                    <div className="text-xs font-semibold text-amber-900">Config issues detected</div>
-                    <div className="mt-2 space-y-1">
-                        {configChecks.filter(check => !check.ok).map(check => (
-                            <div key={check.key} className="text-xs text-amber-800">
-                                {check.label}: {check.hint || 'Check configuration values.'}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+            <div className="mt-3 text-xs text-gray-600">
+                {configStatus === 'issues'
+                    ? `${configChecks.filter(check => !check.ok).length} config check(s) failing.`
+                    : 'Config checks healthy.'}
+                {' '}
+                <Link to="/admin/system" className="text-blue-700 hover:underline">
+                    View diagnostics
+                </Link>
+            </div>
 
             {(workflowUrl || artifactsUrl) && (
                 <div className="mt-4 flex flex-wrap gap-2">
