@@ -47,6 +47,12 @@ export default function AdminLayout({ children }) {
                     >
                         Timesheets
                     </Link>
+                    <Link
+                        to="/admin/system"
+                        className="block px-3 py-2 rounded hover:bg-gray-100"
+                    >
+                        System
+                    </Link>
                 </nav>
 
             </aside>
