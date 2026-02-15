@@ -218,6 +218,65 @@ class ApiEndpointsTest extends TestCase
         Carbon::setTestNow();
     }
 
+    public function test_time_entry_start_reopens_submitted_timesheet_to_draft(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $project = Project::create([
+            'user_id' => $user->id,
+            'name' => 'Proj',
+            'description' => null,
+            'is_active' => true,
+        ]);
+        $project->users()->attach($user);
+
+        $timesheet = Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        $this->postJson('/api/time-entries/start', [
+            'project_id' => $project->id,
+            'description' => 'Work',
+        ])->assertStatus(201);
+
+        $timesheet->refresh();
+        $this->assertSame('draft', $timesheet->status);
+        $this->assertNotNull($timesheet->submitted_at);
+    }
+
+    public function test_time_entry_start_is_forbidden_for_approved_timesheet(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $project = Project::create([
+            'user_id' => $user->id,
+            'name' => 'Proj',
+            'description' => null,
+            'is_active' => true,
+        ]);
+        $project->users()->attach($user);
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'approved',
+            'submitted_at' => now(),
+            'approved_at' => now(),
+        ]);
+
+        $this->postJson('/api/time-entries/start', [
+            'project_id' => $project->id,
+            'description' => 'Work',
+        ])->assertStatus(403);
+    }
+
     public function test_admin_timesheet_actions(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

@@ -5,6 +5,7 @@ import { formatDate } from '../../../utils/date';
 import RejectModal from './RejectModal';
 import StatusBadge from '../../../components/ui/StatusBadge';
 import Button from '../../../components/ui/Button';
+import { getApiErrorDetails } from '../../../utils/apiError';
 
 
 export default function AdminTimesheetShow() {
@@ -106,9 +107,7 @@ export default function AdminTimesheetShow() {
 
             setShowReject(false);
         } catch (err) {
-            setRejectError(
-                err.response?.data?.message || 'Failed to reject timesheet'
-            );
+            setRejectError(getApiErrorDetails(err, 'Failed to reject timesheet').fullMessage);
         } finally {
             setRejecting(false);
         }

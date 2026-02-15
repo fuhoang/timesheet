@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useApi } from './ApiContext';
 import { useAuth } from './AuthContext';
+import { useLocation } from 'react-router-dom';
 
 const ProjectContext = createContext(null);
 
 export function ProjectProvider({ children }) {
     const { api } = useApi();
     const { user, loading: authLoading } = useAuth();
+    const location = useLocation();
 
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -27,7 +29,10 @@ export function ProjectProvider({ children }) {
     async function loadProjects() {
         setLoading(true);
         try {
-            const url = user?.is_admin ? '/api/admin/projects' : '/api/projects';
+            const isAdminPage = location.pathname.startsWith('/admin');
+            const url = user?.is_admin && isAdminPage
+                ? '/api/admin/projects'
+                : '/api/projects';
             const data = await api({ method: 'get', url });
             setProjects(data ?? []);
         } catch (err) {
@@ -44,7 +49,7 @@ export function ProjectProvider({ children }) {
         } else {
             setProjects([]);
         }
-    }, [user]);
+    }, [user, location.pathname]);
 
     return (
         <ProjectContext.Provider value={{ 

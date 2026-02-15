@@ -22,6 +22,7 @@ export default function Dashboard() {
     const [lastUpdated, setLastUpdated] = useState(null);
     const [resumeProjectId, setResumeProjectId] = useState(null);
     const [timesheetError, setTimesheetError] = useState('');
+    const isTimerDisabled = timesheet?.status === 'approved';
 
     useEffect(() => {
         if (!selectedProject && projects.length > 0) {
@@ -141,7 +142,7 @@ export default function Dashboard() {
 
                     <Timer
                         projectId={selectedProject}
-                        disabled={timesheet?.submitted}
+                        disabled={isTimerDisabled}
                         autoStartProjectId={resumeProjectId}
                         onAutoStartComplete={() => setResumeProjectId(null)}
                         onOptimisticStart={handleOptimisticStart}
@@ -150,7 +151,7 @@ export default function Dashboard() {
                     />
                 )}
 
-                {!projectsLoading && lastProject && !timesheet?.submitted && (
+                {!projectsLoading && lastProject && !isTimerDisabled && (
                     <Button
                         type="button"
                         variant="link"
