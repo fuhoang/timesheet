@@ -10,19 +10,30 @@ export default function AdminSystem() {
     const [payload, setPayload] = useState(null);
     const [fixingWeekStatus, setFixingWeekStatus] = useState(false);
     const [fixResult, setFixResult] = useState(null);
+    const [historyPage, setHistoryPage] = useState(1);
+    const [historyPerPage, setHistoryPerPage] = useState(10);
+    const [historyActor, setHistoryActor] = useState('');
 
     const load = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await api({ method: 'get', url: '/api/admin/config/health' });
+            const res = await api({
+                method: 'get',
+                url: '/api/admin/config/health',
+                params: {
+                    history_page: historyPage,
+                    history_per_page: historyPerPage,
+                    history_actor: historyActor || undefined,
+                },
+            });
             setPayload(res);
         } catch (err) {
             setError(getApiErrorDetails(err, 'Unable to load system diagnostics.'));
         } finally {
             setLoading(false);
         }
-    }, [api]);
+    }, [api, historyActor, historyPage, historyPerPage]);
 
     useEffect(() => {
         load();
@@ -31,6 +42,7 @@ export default function AdminSystem() {
     const checks = payload?.checks ?? [];
     const failed = checks.filter(check => !check.ok);
     const values = payload?.values ?? {};
+    const history = payload?.history ?? { data: [], current_page: 1, last_page: 1, total: 0, per_page: historyPerPage };
 
     async function copyText(value) {
         if (!value) return;
@@ -54,6 +66,11 @@ export default function AdminSystem() {
         } finally {
             setFixingWeekStatus(false);
         }
+    }
+
+    function applyHistoryFilter() {
+        setHistoryPage(1);
+        load();
     }
 
     return (
@@ -191,6 +208,95 @@ export default function AdminSystem() {
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow border p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="text-sm font-semibold text-gray-900">In-progress week fix history</div>
+                    <div className="text-xs text-gray-500">Total: {history.total ?? 0}</div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                    <input
+                        type="text"
+                        value={historyActor}
+                        onChange={event => setHistoryActor(event.target.value)}
+                        placeholder="Filter by admin name/email"
+                        className="w-full md:w-64 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    />
+                    <select
+                        value={historyPerPage}
+                        onChange={event => {
+                            setHistoryPerPage(Number(event.target.value));
+                            setHistoryPage(1);
+                        }}
+                        className="w-full md:w-36 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    >
+                        <option value={10}>10 / page</option>
+                        <option value={20}>20 / page</option>
+                        <option value={50}>50 / page</option>
+                    </select>
+                    <button
+                        type="button"
+                        onClick={applyHistoryFilter}
+                        className="px-3 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
+                    >
+                        Apply
+                    </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-50 border-b">
+                            <tr>
+                                <th className="px-3 py-2 text-left">When</th>
+                                <th className="px-3 py-2 text-left">Admin</th>
+                                <th className="px-3 py-2 text-left">Timesheet</th>
+                                <th className="px-3 py-2 text-left">User</th>
+                                <th className="px-3 py-2 text-left">Transition</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                            {history.data?.length ? history.data.map(row => (
+                                <tr key={`history-${row.id}`}>
+                                    <td className="px-3 py-2 text-gray-700">{new Date(row.created_at).toLocaleString()}</td>
+                                    <td className="px-3 py-2 text-gray-700">{row.actor?.name || '—'}</td>
+                                    <td className="px-3 py-2 text-gray-700">#{row.timesheet?.id || '—'} ({row.timesheet?.work_date || '—'})</td>
+                                    <td className="px-3 py-2 text-gray-700">{row.timesheet?.user?.name || '—'}</td>
+                                    <td className="px-3 py-2 text-gray-700">{row.from_status || 'null'} → {row.to_status}</td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan={5} className="px-3 py-3 text-gray-500">No history records.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="flex items-center justify-between">
+                    <div className="text-xs text-gray-500">
+                        Page {history.current_page || 1} of {history.last_page || 1}
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            type="button"
+                            className="px-2 py-1 text-xs rounded border border-gray-300 disabled:opacity-60"
+                            disabled={(history.current_page || 1) <= 1}
+                            onClick={() => setHistoryPage(Math.max(1, (history.current_page || 1) - 1))}
+                        >
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="px-2 py-1 text-xs rounded border border-gray-300 disabled:opacity-60"
+                            disabled={(history.current_page || 1) >= (history.last_page || 1)}
+                            onClick={() => setHistoryPage((history.current_page || 1) + 1)}
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {!loading && failed.length > 0 && (
