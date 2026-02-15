@@ -5,10 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\TimeEntry;
 use App\Models\Timesheet;
+use App\Services\TimesheetRulesEngine;
 use Illuminate\Http\Request;
 
 class TimeEntryController extends Controller
 {
+    public function __construct(private TimesheetRulesEngine $rules)
+    {
+    }
+
     /**
      * Start a time entry
      */
@@ -41,13 +46,18 @@ class TimeEntryController extends Controller
             ]);
         }
 
-        if ($timesheet->status === 'approved') {
+        $editRule = $this->rules->evaluateTimesheetEdit($timesheet);
+        if (!$editRule['allowed']) {
             return response()->json([
-                'message' => 'Approved timesheets cannot be edited',
+                'message' => $editRule['message'],
+                'rule' => [
+                    'reason' => $editRule['reason'],
+                    'allowed' => $editRule['allowed'],
+                ],
             ], 403);
         }
 
-        if (in_array($timesheet->status, ['submitted', 'rejected'], true)) {
+        if ($editRule['can_reopen']) {
             $fromStatus = $timesheet->status;
             $timesheet->update([
                 'status' => 'draft',
@@ -130,9 +140,14 @@ class TimeEntryController extends Controller
         $this->authorize('update', $timesheet);
 
         // ❌ Approved timesheets are immutable
-        if ($timesheet->status === 'approved') {
+        $editRule = $this->rules->evaluateTimesheetEdit($timesheet);
+        if (!$editRule['allowed']) {
             return response()->json([
-                'message' => 'Approved timesheets cannot be edited',
+                'message' => $editRule['message'],
+                'rule' => [
+                    'reason' => $editRule['reason'],
+                    'allowed' => $editRule['allowed'],
+                ],
             ], 403);
         }
 
