@@ -54,17 +54,50 @@ export default function AdminSystem() {
     }
 
     async function fixInProgressWeekStatuses() {
+        if (!window.confirm('Fix in-progress week statuses now? This will reset submitted/rejected/approved rows in current week to draft.')) {
+            return;
+        }
         setFixingWeekStatus(true);
         setFixResult(null);
         setError(null);
         try {
-            const res = await api({ method: 'post', url: '/api/admin/config/fix-in-progress-week' });
+            const res = await api({
+                method: 'post',
+                url: '/api/admin/config/fix-in-progress-week',
+                data: { confirm: true },
+            });
             setFixResult(`Fixed ${res.fixed_count ?? 0} row(s).`);
             await load();
         } catch (err) {
             setError(getApiErrorDetails(err, 'Unable to fix in-progress week statuses.'));
         } finally {
             setFixingWeekStatus(false);
+        }
+    }
+
+    async function exportHistoryCsv() {
+        try {
+            const csvBlob = await api({
+                method: 'get',
+                url: '/api/admin/config/health',
+                params: {
+                    history_format: 'csv',
+                    history_actor: historyActor || undefined,
+                },
+                responseType: 'blob',
+            });
+
+            const blob = new Blob([csvBlob], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'in-progress-week-fix-history.csv';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            setError(getApiErrorDetails(err, 'Unable to export history CSV.'));
         }
     }
 
@@ -213,7 +246,16 @@ export default function AdminSystem() {
             <div className="bg-white rounded-2xl shadow border p-4 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="text-sm font-semibold text-gray-900">In-progress week fix history</div>
-                    <div className="text-xs text-gray-500">Total: {history.total ?? 0}</div>
+                    <div className="flex items-center gap-3">
+                        <div className="text-xs text-gray-500">Total: {history.total ?? 0}</div>
+                        <button
+                            type="button"
+                            onClick={exportHistoryCsv}
+                            className="px-2 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
+                        >
+                            Export CSV
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
