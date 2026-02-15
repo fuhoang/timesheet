@@ -146,7 +146,7 @@ class ConfigHealthEndpointTest extends TestCase
             'rejection_reason' => 'Needs update',
         ]);
 
-        $this->postJson('/api/admin/config/fix-in-progress-week')
+        $this->postJson('/api/admin/config/fix-in-progress-week', ['confirm' => true])
             ->assertStatus(200)
             ->assertJson(['status' => 'ok', 'fixed_count' => 1]);
 
@@ -198,7 +198,7 @@ class ConfigHealthEndpointTest extends TestCase
             'rejection_reason' => 'Needs update',
         ]);
 
-        $this->postJson('/api/admin/config/fix-in-progress-week')
+        $this->postJson('/api/admin/config/fix-in-progress-week', ['confirm' => true])
             ->assertStatus(200);
 
         $response = $this->getJson('/api/admin/config/health?history_page=1&history_per_page=10&history_actor=Fix')
@@ -218,5 +218,79 @@ class ConfigHealthEndpointTest extends TestCase
 
         $this->postJson('/api/admin/config/fix-in-progress-week')
             ->assertStatus(403);
+    }
+
+    public function test_admin_fix_requires_confirmation_payload(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-02-10 10:00:00'));
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+        Sanctum::actingAs($admin);
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->startOfWeek()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        $this->postJson('/api/admin/config/fix-in-progress-week')
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['confirm']);
+        Carbon::setTestNow();
+    }
+
+    public function test_admin_config_health_history_pagination_bounds_are_clamped(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-02-10 10:00:00'));
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+        Sanctum::actingAs($admin);
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->startOfWeek()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'rejected',
+            'submitted_at' => now(),
+            'rejection_reason' => 'Needs update',
+        ]);
+
+        $this->postJson('/api/admin/config/fix-in-progress-week', ['confirm' => true])
+            ->assertStatus(200);
+
+        $response = $this->getJson('/api/admin/config/health?history_page=0&history_per_page=999')
+            ->assertStatus(200)
+            ->json();
+
+        $this->assertSame(1, $response['history']['current_page']);
+        $this->assertSame(50, $response['history']['per_page']);
+        Carbon::setTestNow();
+    }
+
+    public function test_admin_can_export_fix_history_csv(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-02-10 10:00:00'));
+        $admin = User::factory()->create(['is_admin' => true, 'name' => 'Csv Admin']);
+        $user = User::factory()->create();
+        Sanctum::actingAs($admin);
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->startOfWeek()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        $this->postJson('/api/admin/config/fix-in-progress-week', ['confirm' => true])
+            ->assertStatus(200);
+
+        $response = $this->get('/api/admin/config/health?history_format=csv');
+        $response->assertStatus(200);
+        $this->assertStringContainsString('text/csv', (string) $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('Csv Admin', $response->getContent());
+        Carbon::setTestNow();
     }
 }
