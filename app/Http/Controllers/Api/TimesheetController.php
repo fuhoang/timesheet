@@ -5,11 +5,16 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\TimeEntry;
 use App\Models\Timesheet;
+use App\Services\TimesheetRulesEngine;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class TimesheetController extends Controller
 {
+    public function __construct(private TimesheetRulesEngine $rules)
+    {
+    }
+
     public function today(Request $request)
     {
         $date = Carbon::today();
@@ -48,42 +53,13 @@ class TimesheetController extends Controller
 
         $start = $baseDate->copy()->startOfWeek();
         $end   = $baseDate->copy()->endOfWeek();
-        $weekComplete = now()->greaterThanOrEqualTo($end->copy()->endOfDay());
-
         $timesheets = Timesheet::where('user_id', $user->id)
             ->whereBetween('work_date', [$start, $end])
             ->with('entries.project')
             ->orderBy('work_date')
             ->get();
 
-        /**
-         * Determine WEEK-LEVEL STATE
-         * Locked if any day is submitted/approved/rejected.
-         * Rejected remains locked until all rejected days are edited.
-         */
-        $hasSubmitted = $timesheets->contains('status', 'submitted');
-        $hasApproved = $timesheets->contains('status', 'approved');
-        $hasRejected = $timesheets->contains('status', 'rejected');
-
-        if (!$weekComplete) {
-            // In-progress week stays editable even if legacy seeded/submitted rows exist.
-            $locked = false;
-            $weekStatus = 'draft';
-            $isSubmitted = false;
-        } else {
-            $locked = $hasSubmitted || $hasApproved || $hasRejected;
-            $isSubmitted = $hasSubmitted;
-
-            if ($hasApproved) {
-                $weekStatus = 'approved';
-            } elseif ($hasSubmitted) {
-                $weekStatus = 'submitted';
-            } elseif ($hasRejected) {
-                $weekStatus = 'rejected';
-            } else {
-                $weekStatus = 'draft';
-            }
-        }
+        $weekRules = $this->rules->evaluateWeek($timesheets, $end);
 
         $weekSheet = $timesheets->first(fn ($t) => $t->submitted_at !== null);
 
@@ -116,12 +92,14 @@ class TimesheetController extends Controller
             'week_end' => $end->toDateString(),
 
             // 🔑 REQUIRED BY UI
-            'status' => $weekStatus,
-            'submitted' => $isSubmitted,
-            'locked' => $locked,
-            'week_complete' => $weekComplete,
+            'status' => $weekRules['status'],
+            'submitted' => $weekRules['submitted'],
+            'locked' => $weekRules['locked'],
+            'week_complete' => $weekRules['week_complete'],
             'submit_available_at' => $end->copy()->endOfDay()->toIso8601String(),
-            'can_submit' => $weekComplete && ! $locked,
+            'can_submit' => $weekRules['can_submit'],
+            'submit_blocked_reason' => $weekRules['submit_blocked_reason'],
+            'submit_blocked_message' => $weekRules['submit_blocked_message'],
             'submitted_at' => $weekSheet?->submitted_at,
             'approved_at' => $weekSheet?->approved_at,
             'rejection_reason' => $weekSheet?->rejection_reason,
@@ -141,9 +119,18 @@ class TimesheetController extends Controller
         $start = Carbon::parse($data['week_start'])->startOfWeek();
         $end   = Carbon::parse($data['week_start'])->endOfWeek();
 
-        if (now()->lt($end->copy()->endOfDay())) {
+        $timesheets = Timesheet::where('user_id', $user->id)
+            ->whereBetween('work_date', [$start, $end])
+            ->get();
+        $weekRules = $this->rules->evaluateWeek($timesheets, $end);
+        if (!$weekRules['can_submit']) {
             return response()->json([
-                'message' => 'Week is still in progress and cannot be submitted yet.',
+                'message' => $weekRules['submit_blocked_message'] ?? 'Week cannot be submitted',
+                'rule' => [
+                    'reason' => $weekRules['submit_blocked_reason'],
+                    'week_complete' => $weekRules['week_complete'],
+                    'locked' => $weekRules['locked'],
+                ],
             ], 422);
         }
 
@@ -165,10 +152,6 @@ class TimesheetController extends Controller
                 'duration_minutes' => $minutes,
             ]);
         }
-
-        $timesheets = Timesheet::where('user_id', $user->id)
-            ->whereBetween('work_date', [$start, $end])
-            ->get();
 
         $submittedAt = now();
         foreach ($timesheets as $timesheet) {
