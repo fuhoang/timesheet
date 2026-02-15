@@ -78,4 +78,23 @@ class ConfigHealthEndpointTest extends TestCase
         $this->getJson('/api/admin/config/health')
             ->assertStatus(403);
     }
+
+    public function test_admin_config_health_handles_malformed_urls_without_500(): void
+    {
+        config([
+            'app.url' => 'http://127.0.0.1:8000%%',
+            'endpoints.frontend_url' => 'http://127.0.0.1:5173%%',
+            'cors.allowed_origins' => ['http://127.0.0.1:5173'],
+            'sanctum.stateful' => ['127.0.0.1:5173', '127.0.0.1:8000'],
+        ]);
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/admin/config/health')
+            ->assertStatus(200)
+            ->json();
+
+        $this->assertFalse($response['ok']);
+    }
 }

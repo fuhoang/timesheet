@@ -96,15 +96,22 @@ class ConfigHealthController extends Controller
             return null;
         }
 
-        $host = parse_url($urlOrHost, PHP_URL_HOST);
-        $port = parse_url($urlOrHost, PHP_URL_PORT);
+        $normalized = trim($urlOrHost);
+        if ($normalized === '') {
+            return null;
+        }
+
+        // Accept already-host:port values from SANCTUM_STATEFUL_DOMAINS style config.
+        if (preg_match('/^[a-zA-Z0-9\.\-]+(:\d+)?$/', $normalized)) {
+            return $normalized;
+        }
+
+        // Use @ to prevent malformed URL warnings from becoming 500 errors.
+        $host = @parse_url($normalized, PHP_URL_HOST);
+        $port = @parse_url($normalized, PHP_URL_PORT);
 
         if ($host) {
             return $port ? "{$host}:{$port}" : $host;
-        }
-
-        if (str_contains($urlOrHost, ':')) {
-            return $urlOrHost;
         }
 
         return null;
