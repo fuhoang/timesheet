@@ -268,11 +268,11 @@ export default function Reports() {
     const showSkeleton = apiLoading && !report;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 reports-page">
             <div className="flex items-start justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Reports</h1>
-                    <p className="text-sm text-gray-500">
+                    <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Reports</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">
                         Summary ({startDate} to {endDate}) grouped by user.
                     </p>
                 </div>
@@ -281,7 +281,7 @@ export default function Reports() {
                     type="button"
                     onClick={handleExport}
                     disabled={exporting}
-                    className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-60"
+                    className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-gray-800 dark:bg-blue-600 dark:hover:bg-blue-500 disabled:opacity-60"
                 >
                     {exporting ? 'Exporting...' : 'Export CSV'}
                 </button>
@@ -347,17 +347,17 @@ export default function Reports() {
             />
 
             {apiLoading && (
-                <div className="text-sm text-gray-500">Loading report...</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300">Loading report...</div>
             )}
 
             {error && (
-                <div className="text-sm text-red-600">
+                <div className="text-sm text-red-600 dark:text-red-300">
                     Unable to load reports. Please try again.
                 </div>
             )}
 
             {!apiLoading && report?.rows?.length === 0 && (
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-gray-300">
                     {status || includeDrafts
                         ? 'No entries found for this range. Try widening the dates.'
                         : 'No submitted, approved, or rejected entries in this range. Toggle "Include drafts" or widen the dates.'}
@@ -386,18 +386,18 @@ export default function Reports() {
             )}
 
             {report?.rows?.length > 0 && (
-                <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-300">
                     <div>
                         Showing page {report?.meta?.page ?? 1} of {totalPages}
                     </div>
                     <div className="text-right">
                         <div>
-                            Page total: <span className="font-semibold text-gray-900">{formatMinutes(overallMinutes)}</span>
-                            <span className="text-gray-400"> ({formatHours(overallMinutes)})</span>
+                            Page total: <span className="font-semibold text-gray-900 dark:text-gray-100">{formatMinutes(overallMinutes)}</span>
+                            <span className="text-gray-400 dark:text-gray-500"> ({formatHours(overallMinutes)})</span>
                         </div>
                         <div>
-                            All pages: <span className="font-semibold text-gray-900">{formatMinutes(totalMinutesAll)}</span>
-                            <span className="text-gray-400"> ({formatHours(totalMinutesAll)})</span>
+                            All pages: <span className="font-semibold text-gray-900 dark:text-gray-100">{formatMinutes(totalMinutesAll)}</span>
+                            <span className="text-gray-400 dark:text-gray-500"> ({formatHours(totalMinutesAll)})</span>
                         </div>
                     </div>
                 </div>
@@ -413,11 +413,11 @@ export default function Reports() {
             ))}
 
             {report?.rows?.length > 0 && (
-                <div className="bg-white border rounded-xl p-5 shadow-sm flex items-center justify-between text-sm text-gray-600">
-                    <div className="font-medium text-gray-900">Page total</div>
-                    <div className="font-semibold text-gray-900">
+                <div className="bg-white border rounded-xl p-5 shadow-sm flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+                    <div className="font-medium text-gray-900 dark:text-gray-100">Page total</div>
+                    <div className="font-semibold text-gray-900 dark:text-gray-100">
                         {formatMinutes(overallMinutes)}
-                        <span className="text-gray-400"> ({formatHours(overallMinutes)})</span>
+                        <span className="text-gray-400 dark:text-gray-500"> ({formatHours(overallMinutes)})</span>
                     </div>
                 </div>
             )}
