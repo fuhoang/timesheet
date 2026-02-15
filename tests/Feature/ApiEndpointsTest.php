@@ -387,6 +387,58 @@ class ApiEndpointsTest extends TestCase
             ->assertStatus(200);
     }
 
+    public function test_admin_override_requires_reason(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        Sanctum::actingAs($admin);
+
+        $timesheet = Timesheet::create([
+            'user_id' => $admin->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 20,
+            'status' => 'draft',
+            'submitted_at' => null,
+        ]);
+
+        $this->postJson("/api/admin/timesheets/{$timesheet->id}/approve", [
+            'override' => true,
+        ])->assertStatus(422)
+            ->assertJsonValidationErrors(['override_reason']);
+    }
+
+    public function test_admin_override_approve_logs_audit_payload(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        Sanctum::actingAs($admin);
+
+        $timesheet = Timesheet::create([
+            'user_id' => $admin->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 20,
+            'status' => 'draft',
+            'submitted_at' => null,
+        ]);
+
+        $this->postJson("/api/admin/timesheets/{$timesheet->id}/approve", [
+            'override' => true,
+            'override_reason' => 'Manual exception for payroll close',
+        ])->assertStatus(200)
+            ->assertJsonPath('override_used', true);
+
+        $timesheet->refresh();
+        $this->assertSame('approved', $timesheet->status);
+
+        $history = $timesheet->statusHistory()->latest('id')->first();
+        $this->assertNotNull($history);
+        $this->assertIsArray($history->context);
+        $this->assertSame('approve', $history->context['source']);
+        $this->assertTrue((bool) ($history->context['override']['used'] ?? false));
+        $this->assertSame('Manual exception for payroll close', $history->context['override']['reason'] ?? null);
+        $this->assertSame('not_submitted', $history->context['override']['rule_reason'] ?? null);
+        $this->assertSame('approve', $history->context['override']['action'] ?? null);
+        $this->assertNotEmpty($history->context['override']['request_id'] ?? null);
+    }
+
     public function test_bulk_admin_approve_and_reject_endpoints(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
@@ -455,6 +507,18 @@ class ApiEndpointsTest extends TestCase
         $this->assertNotNull($row);
         $this->assertArrayHasKey('rules', $row);
         $this->assertSame('already_approved', $row['rules']['approve']['reason']);
+    }
+
+    public function test_admin_rules_endpoint_returns_contract(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        Sanctum::actingAs($admin);
+
+        $this->getJson('/api/admin/rules')
+            ->assertStatus(200)
+            ->assertJsonPath('admin_actions.0.action', 'approve')
+            ->assertJsonPath('admin_actions.0.override_requires_reason', true)
+            ->assertJsonPath('override_contract.fields.0', 'override');
     }
 
     public function test_admin_notes_endpoints(): void
