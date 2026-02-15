@@ -11,101 +11,154 @@
 }
 
 :root {
-    --color-bg: #f3f4f6;
-    --color-surface: #ffffff;
-    --color-border: #e5e7eb;
-    --color-text: #111827;
-    --color-muted: #6b7280;
-    --color-muted-2: #9ca3af;
+    color-scheme: light;
+    --app-bg: #eef3fb;
+    --app-surface: #ffffff;
+    --app-surface-2: #f5f8ff;
+    --app-border: #d3def0;
+    --app-text: #0c1424;
+    --app-muted: #42516a;
+    --app-muted-2: #68758e;
+    --app-accent: #2563eb;
+    --app-accent-2: #1d4ed8;
+    --app-success-bg: #d9f9e6;
+    --app-success-text: #145c35;
+    --app-warning-bg: #fff0cd;
+    --app-warning-text: #8e4b10;
+    --app-danger-bg: #ffe3e6;
+    --app-danger-text: #8c1d2f;
+    --app-info-bg: #dceaff;
+    --app-info-text: #1845a3;
+    --app-overlay: rgba(255, 255, 255, 0.55);
+    --app-focus: rgba(37, 99, 235, 0.35);
+    --app-shadow: 0 10px 30px rgba(13, 27, 57, 0.07);
+    --app-shadow-lg: 0 22px 56px rgba(13, 27, 57, 0.12);
 }
 
 .dark {
-    --color-bg: #0b1220;
-    --color-surface: #0f172a;
-    --color-border: #1f2937;
-    --color-text: #e5e7eb;
-    --color-muted: #94a3b8;
-    --color-muted-2: #64748b;
+    color-scheme: dark;
+    --app-bg: #0a1020;
+    --app-surface: #111a2d;
+    --app-surface-2: #17233b;
+    --app-border: #27354f;
+    --app-text: #e8eefc;
+    --app-muted: #b5c1da;
+    --app-muted-2: #8a98b6;
+    --app-accent: #60a5fa;
+    --app-accent-2: #3b82f6;
+    --app-success-bg: #1a3a2a;
+    --app-success-text: #93e2ac;
+    --app-warning-bg: #412f11;
+    --app-warning-text: #f8d38b;
+    --app-danger-bg: #3f1d24;
+    --app-danger-text: #ffb8c1;
+    --app-info-bg: #1a2d52;
+    --app-info-text: #a8c5ff;
+    --app-overlay: rgba(14, 22, 39, 0.58);
+    --app-focus: rgba(96, 165, 250, 0.45);
+    --app-shadow: 0 12px 26px rgba(0, 0, 0, 0.25);
+    --app-shadow-lg: 0 24px 50px rgba(0, 0, 0, 0.4);
+}
+
+html,
+body,
+#app {
+    min-height: 100%;
 }
 
 body {
-    background-color: var(--color-bg);
-    color: var(--color-text);
+    background: var(--app-bg);
+    color: var(--app-text);
 }
 
-.dark .bg-white {
-    background-color: var(--color-surface) !important;
+html:not(.dark) body {
+    background-image:
+        radial-gradient(1200px 420px at 0% -20%, rgba(37, 99, 235, 0.09), transparent 65%),
+        radial-gradient(900px 350px at 100% 0%, rgba(14, 165, 233, 0.08), transparent 62%),
+        linear-gradient(180deg, #f6f9ff 0%, var(--app-bg) 30%);
+    background-attachment: fixed;
 }
 
-.dark .bg-gray-50 {
-    background-color: #111827 !important;
+a,
+button,
+input,
+select,
+textarea {
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
-.dark .bg-gray-100 {
-    background-color: var(--color-bg) !important;
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--app-focus);
 }
 
-.dark .bg-blue-50 {
-    background-color: #0f1c3d !important;
+.bg-white {
+    background-color: var(--app-surface) !important;
 }
 
-.dark .border,
-.dark .border-b,
-.dark .border-r,
-.dark .border-t,
-.dark .border-l {
-    border-color: var(--color-border) !important;
+.bg-blue-50 {
+    background-color: #eaf2ff !important;
 }
 
-.dark .text-gray-900,
-.dark .text-gray-800,
-.dark .text-gray-700 {
-    color: var(--color-text) !important;
+.bg-gray-100 {
+    background-color: var(--app-bg) !important;
 }
 
-.dark .text-gray-600,
-.dark .text-gray-500 {
-    color: var(--color-muted) !important;
+.bg-gray-50 {
+    background-color: var(--app-surface-2) !important;
 }
 
-.dark .text-gray-400 {
-    color: var(--color-muted-2) !important;
+.border,
+.border-b,
+.border-r,
+.border-t,
+.border-l,
+[class*='border-gray-'] {
+    border-color: var(--app-border) !important;
+}
+
+.text-black,
+.text-gray-900,
+.text-gray-800,
+.text-gray-700 {
+    color: var(--app-text) !important;
+}
+
+.text-gray-600,
+.text-gray-500 {
+    color: var(--app-muted) !important;
+}
+
+.text-gray-400 {
+    color: var(--app-muted-2) !important;
+}
+
+.shadow,
+.shadow-sm,
+.shadow-lg,
+.shadow-xl {
+    box-shadow: var(--app-shadow) !important;
+}
+
+html:not(.dark) .bg-white.border,
+html:not(.dark) .bg-white[class*='rounded-'] {
+    box-shadow: var(--app-shadow);
+}
+
+.rounded-2xl {
+    border-radius: 1rem;
+}
+
+.rounded-3xl {
+    border-radius: 1.5rem;
 }
 
 .dashboard-entry-title {
-    color: #000000 !important;
-}
-
-.dark .dashboard-entry-title {
-    color: #f3f4f6 !important;
-}
-
-.dark .shadow,
-.dark .shadow-lg,
-.dark .shadow-xl {
-    box-shadow: 0 10px 25px rgba(2, 6, 23, 0.35) !important;
-}
-
-.dark .nav-link:hover {
-    color: #000000 !important;
-}
-
-.dark aside nav a:hover {
-    color: #000000 !important;
-}
-
-.dark .hover\\:bg-gray-200:hover,
-.dark .hover\\:bg-gray-100:hover {
-    background-color: #1f2937 !important;
-}
-
-.dark .hover\\:bg-gray-200:hover,
-.dark .hover\\:bg-gray-100:hover {
-    color: #f9fafb !important;
-}
-
-.dark .hover\\:underline:hover {
-    color: #f9fafb !important;
+    color: var(--app-text) !important;
 }
 
 .theme-toggle {
@@ -113,20 +166,22 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.35rem 0.6rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--app-border);
     border-radius: 999px;
-    background: var(--color-surface);
-    color: var(--color-text);
-    transition: border-color 150ms ease, background-color 150ms ease;
+    background: var(--app-surface);
+    color: var(--app-text);
 }
 
 .theme-toggle .toggle-track {
     width: 44px;
     height: 24px;
     border-radius: 999px;
-    background: #e5e7eb;
+    background: #d7deeb;
     position: relative;
-    transition: background-color 150ms ease;
+}
+
+.dark .theme-toggle .toggle-track {
+    background: #2c3b58;
 }
 
 .theme-toggle .toggle-thumb {
@@ -137,33 +192,156 @@ body {
     position: absolute;
     top: 3px;
     left: 3px;
-    transition: transform 150ms ease, background-color 150ms ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: transform 160ms ease, background-color 160ms ease;
 }
 
 .theme-toggle .toggle-label {
     font-size: 0.875rem;
-    color: var(--color-text);
+    color: var(--app-text);
 }
 
 .theme-toggle.is-on .toggle-track {
-    background: #2563eb;
+    background: var(--app-accent);
 }
 
 .theme-toggle.is-on .toggle-thumb {
     transform: translateX(20px);
-    background: #e5e7eb;
+    background: #eff6ff;
 }
 
-.dark .theme-toggle {
-    border-color: var(--color-border);
-    background: var(--color-surface);
+.app-nav-link {
+    color: var(--app-muted);
 }
 
-.dark .theme-toggle .toggle-track {
-    background: #1f2937;
+.app-nav-link:hover {
+    background: color-mix(in oklab, var(--app-accent) 7%, var(--app-surface-2));
+    color: var(--app-text);
 }
 
-.dark .theme-toggle.is-on .toggle-track {
-    background: #3b82f6;
+.app-nav-link-active {
+    background: var(--app-accent);
+    color: #ffffff !important;
+}
+
+.dark .app-nav-link-active {
+    background: var(--app-accent-2);
+    color: #ffffff !important;
+}
+
+.app-highlight-running {
+    background: color-mix(in oklab, var(--app-success-bg) 66%, var(--app-surface));
+}
+
+.app-highlight-editing {
+    background: color-mix(in oklab, var(--app-warning-bg) 65%, var(--app-surface));
+    border-color: color-mix(in oklab, var(--app-warning-text) 40%, var(--app-border)) !important;
+}
+
+.app-highlight-rejected {
+    background: color-mix(in oklab, var(--app-danger-bg) 72%, var(--app-surface));
+    border-color: color-mix(in oklab, var(--app-danger-text) 35%, var(--app-border)) !important;
+}
+
+.app-lock-overlay {
+    background: var(--app-overlay);
+    backdrop-filter: blur(8px);
+    color: var(--app-text);
+}
+
+html:not(.dark) .app-lock-overlay {
+    border: 1px solid color-mix(in oklab, var(--app-border) 75%, white);
+}
+
+.app-pill {
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.app-pill-success {
+    background: var(--app-success-bg);
+    color: var(--app-success-text) !important;
+}
+
+.app-pill-info {
+    background: var(--app-info-bg);
+    color: var(--app-info-text) !important;
+}
+
+.app-pill-warning {
+    background: var(--app-warning-bg);
+    color: var(--app-warning-text) !important;
+}
+
+.app-pill-danger {
+    background: var(--app-danger-bg);
+    color: var(--app-danger-text) !important;
+}
+
+.reports-page .reports-filters {
+    background: color-mix(in oklab, var(--app-surface) 92%, transparent);
+    border-color: var(--app-border);
+    box-shadow: var(--app-shadow);
+}
+
+html:not(.dark) .reports-page .reports-filters {
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+}
+
+.dark .reports-page .reports-filters {
+    background: color-mix(in oklab, var(--app-surface) 88%, #020617 12%);
+}
+
+.reports-page .reports-row {
+    border-color: color-mix(in oklab, var(--app-border) 90%, var(--app-accent) 10%);
+}
+
+.reports-day {
+    border-color: var(--app-border) !important;
+    background: var(--app-surface-2) !important;
+}
+
+.reports-day .text-sm,
+.reports-day .text-xs {
+    color: var(--app-text) !important;
+}
+
+.reports-day-rejected {
+    border-color: color-mix(in oklab, var(--app-danger-text) 35%, var(--app-border)) !important;
+    background: color-mix(in oklab, var(--app-danger-bg) 80%, var(--app-surface)) !important;
+}
+
+.reports-day-draft {
+    border-color: color-mix(in oklab, var(--app-warning-text) 35%, var(--app-border)) !important;
+    background: color-mix(in oklab, var(--app-warning-bg) 76%, var(--app-surface)) !important;
+}
+
+.reports-day-submitted {
+    border-color: color-mix(in oklab, var(--app-info-text) 35%, var(--app-border)) !important;
+    background: color-mix(in oklab, var(--app-info-bg) 76%, var(--app-surface)) !important;
+}
+
+.reports-day-approved {
+    border-color: color-mix(in oklab, var(--app-success-text) 35%, var(--app-border)) !important;
+    background: color-mix(in oklab, var(--app-success-bg) 76%, var(--app-surface)) !important;
+}
+
+html:not(.dark) input,
+html:not(.dark) select,
+html:not(.dark) textarea {
+    background-color: #ffffff;
+    border-color: color-mix(in oklab, var(--app-border) 86%, #ffffff);
+    color: var(--app-text);
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+    color: var(--app-muted-2);
+}
+
+html:not(.dark) input:hover,
+html:not(.dark) select:hover,
+html:not(.dark) textarea:hover {
+    border-color: color-mix(in oklab, var(--app-accent) 28%, var(--app-border));
 }

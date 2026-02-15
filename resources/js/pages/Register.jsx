@@ -56,7 +56,7 @@ export default function Register() {
                                 placeholder="Your name"
                                 value={form.name}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none ${errors.name ? 'border-red-500' : ''}`}
+                                className={`w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 ${errors.name ? 'border-red-500' : ''}`}
                                 required
                             />
                             {errors.name && <p className="text-red-600 mt-1">{errors.name[0]}</p>}
@@ -71,7 +71,7 @@ export default function Register() {
                                 placeholder="you@example.com"
                                 value={form.email}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none ${errors.email ? 'border-red-500' : ''}`}
+                                className={`w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 ${errors.email ? 'border-red-500' : ''}`}
                                 required
                             />
                             {errors.email && <p className="text-red-600 mt-1">{errors.email[0]}</p>}
@@ -86,7 +86,7 @@ export default function Register() {
                                 placeholder="••••••••"
                                 value={form.password}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none ${errors.password ? 'border-red-500' : ''}`}
+                                className={`w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 ${errors.password ? 'border-red-500' : ''}`}
                                 required
                             />
                             {errors.password && <p className="text-red-600 mt-1">{errors.password[0]}</p>}
@@ -101,7 +101,7 @@ export default function Register() {
                                 placeholder="••••••••"
                                 value={form.password_confirmation}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                                 required
                             />
                         </div>

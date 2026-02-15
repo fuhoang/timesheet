@@ -28,7 +28,7 @@ export default function WeekHeader({
                     </Button>
                 ) : (
                     <div className="mt-2 space-y-1">
-                        <span className="px-3 py-2 rounded-lg bg-gray-200 text-gray-900 dark:bg-white/70 dark:text-black inline-block">
+                        <span className="px-3 py-2 rounded-lg bg-gray-200 text-gray-900 dark:bg-slate-700 dark:text-slate-100 inline-block">
                             {week.week_complete ? 'Submitted' : 'Week in progress'}
                         </span>
                         {!week.week_complete && week.submit_available_at && (

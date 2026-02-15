@@ -8,9 +8,9 @@ export default function Sidebar() {
     const { user } = useAuth();
 
     const linkClass = ({ isActive }) =>
-        `nav-link block px-4 py-2 rounded-lg transition ${
+        `nav-link app-nav-link block px-4 py-2 rounded-lg transition ${
             isActive
-                ? 'bg-blue-600 text-white'
+                ? 'app-nav-link-active'
                 : 'text-gray-700 hover:bg-gray-200'
         }`;
 

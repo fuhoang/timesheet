@@ -194,7 +194,7 @@ export default function Dashboard() {
                                     <div
                                         key={entry.id}
                                         className={`px-6 py-4 flex items-center justify-between ${
-                                            running ? 'bg-green-50 dark:bg-white/70' : ''
+                                            running ? 'app-highlight-running' : ''
                                         }`}
                                     >
                                         <div className="space-y-1">
@@ -213,11 +213,11 @@ export default function Dashboard() {
 
                                         <div className="text-right">
                                             {entry.ended_at ? (
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full app-pill app-pill-info text-sm font-medium">
                                                     {formatMinutes(entry.duration_minutes)}
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-900 text-sm font-medium">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full app-pill app-pill-success text-sm font-medium">
                                                     Running
                                                 </span>
                                             )}

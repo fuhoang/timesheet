@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import ThemeToggle from '../components/ThemeToggle';
 import { useApi } from '../context/ApiContext';
 
@@ -8,6 +8,11 @@ export default function AdminLayout({ children }) {
     const lastSyncText = apiLastSuccessAt
         ? new Date(apiLastSuccessAt).toLocaleTimeString()
         : 'No successful sync yet';
+
+    const navClass = ({ isActive }) =>
+        `block px-3 py-2 rounded transition app-nav-link ${
+            isActive ? 'app-nav-link-active' : 'hover:bg-gray-100'
+        }`;
 
     return (
         <div className="min-h-screen bg-gray-100 flex">
@@ -32,39 +37,39 @@ export default function AdminLayout({ children }) {
                 </div>
 
                 <nav className="px-4 space-y-2">
-                    <Link
+                    <NavLink
                         to="/admin/projects"
-                        className="block px-3 py-2 rounded hover:bg-gray-100"
+                        className={navClass}
                     >
                         Projects
-                    </Link>
-                    <Link
+                    </NavLink>
+                    <NavLink
                         to="/admin/users"
-                        className="block px-3 py-2 rounded hover:bg-gray-100"
+                        className={navClass}
                     >
                         Users
-                    </Link>
+                    </NavLink>
                 </nav>
 
                 <nav className="px-4 space-y-2">
-                    <Link
+                    <NavLink
                         to="/admin/timesheets"
-                        className="block px-3 py-2 rounded hover:bg-gray-100"
+                        className={navClass}
                     >
                         Timesheets
-                    </Link>
-                    <Link
+                    </NavLink>
+                    <NavLink
                         to="/admin/rules"
-                        className="block px-3 py-2 rounded hover:bg-gray-100"
+                        className={navClass}
                     >
                         Rules
-                    </Link>
-                    <Link
+                    </NavLink>
+                    <NavLink
                         to="/admin/system"
-                        className="block px-3 py-2 rounded hover:bg-gray-100"
+                        className={navClass}
                     >
                         System
-                    </Link>
+                    </NavLink>
                 </nav>
 
             </aside>

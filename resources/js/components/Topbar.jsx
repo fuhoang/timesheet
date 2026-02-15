@@ -22,13 +22,13 @@ export default function Topbar() {
                 {user?.is_admin ? (
                     <Link
                         to="/admin/timesheets"
-                        className="px-3 py-1 text-sm rounded border border-blue-600 text-blue-600 hover:bg-blue-50"
+                        className="px-3 py-1 text-sm rounded border border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-200 dark:hover:bg-blue-900/30"
                     >
                         Admin
                     </Link>
                 ) : null}
 
-                <span className="text-gray-700">
+                <span className="text-gray-700 dark:text-gray-200">
                     {user?.name}
                 </span>
 

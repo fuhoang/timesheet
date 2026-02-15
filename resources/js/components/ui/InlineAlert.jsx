@@ -2,10 +2,10 @@ import React from 'react';
 
 export default function InlineAlert({ type = 'error', children, requestId = null }) {
     const styles = {
-        error: 'border-red-200 bg-red-50 text-red-700',
-        success: 'border-green-200 bg-green-50 text-green-700',
-        warning: 'border-yellow-200 bg-yellow-50 text-yellow-800',
-        info: 'border-blue-200 bg-blue-50 text-blue-700',
+        error: 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200',
+        success: 'border-green-200 bg-green-50 text-green-700 dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-200',
+        warning: 'border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-900/60 dark:bg-yellow-950/40 dark:text-yellow-200',
+        info: 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-200',
     };
 
     async function copyRequestId() {
