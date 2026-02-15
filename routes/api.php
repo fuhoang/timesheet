@@ -63,9 +63,12 @@ Route::middleware(['web'])->group(function () {
 
         // Timesheets
         Route::get('/timesheets', [AdminTimesheetController::class, 'index']);
-        Route::post('/timesheets/bulk-approve', [AdminTimesheetController::class, 'bulkApprove']);
-        Route::post('/timesheets/bulk-reject', [AdminTimesheetController::class, 'bulkReject']);
+        Route::post('/timesheets/bulk-approve', [AdminTimesheetController::class, 'bulkApprove'])
+            ->middleware('throttle:15,1');
+        Route::post('/timesheets/bulk-reject', [AdminTimesheetController::class, 'bulkReject'])
+            ->middleware('throttle:15,1');
         Route::get('/timesheets/{timesheet}', [AdminTimesheetController::class, 'show']);
+        Route::get('/timesheets/{timesheet}/history', [AdminTimesheetController::class, 'history']);
         Route::patch('/timesheets/{timesheet}/note', [AdminTimesheetController::class, 'updateNote']);
         Route::patch('/time-entries/{timeEntry}/note', [AdminTimesheetController::class, 'updateEntryNote']);
         Route::post('/timesheets/{timesheet}/approve', [AdminTimesheetController::class, 'approve']);

@@ -82,11 +82,15 @@ class AdminTimesheetController extends Controller
         $adminId = $request->user()->id;
 
         foreach ($eligible as $timesheet) {
+            $fromStatus = $timesheet->status;
             $timesheet->update([
                 'status' => 'approved',
                 'approved_at' => $now,
                 'approved_by' => $adminId,
                 'rejection_reason' => null,
+            ]);
+            $timesheet->logStatusTransition($fromStatus, 'approved', $request->user(), null, [
+                'source' => 'bulk_approve',
             ]);
         }
 
@@ -123,11 +127,15 @@ class AdminTimesheetController extends Controller
         }
 
         foreach ($eligible as $timesheet) {
+            $fromStatus = $timesheet->status;
             $timesheet->update([
                 'status' => 'rejected',
                 'rejection_reason' => $data['reason'],
                 'approved_at' => null,
                 'approved_by' => null,
+            ]);
+            $timesheet->logStatusTransition($fromStatus, 'rejected', $request->user(), $data['reason'], [
+                'source' => 'bulk_reject',
             ]);
         }
 
@@ -210,12 +218,14 @@ class AdminTimesheetController extends Controller
             ], 422);
         }
 
+        $fromStatus = $timesheet->status;
         $timesheet->update([
             'status' => 'approved',
             'approved_at' => now(),
             'approved_by' => $request->user()->id,
             'rejection_reason' => null,
         ]);
+        $timesheet->logStatusTransition($fromStatus, 'approved', $request->user());
 
         return response()->json([
             'message' => 'Timesheet approved',
@@ -240,12 +250,14 @@ class AdminTimesheetController extends Controller
             ], 422);
         }
 
+        $fromStatus = $timesheet->status;
         $timesheet->update([
             'status' => 'rejected',
             'rejection_reason' => $data['reason'],
             'approved_at' => null,
             'approved_by' => null,
         ]);
+        $timesheet->logStatusTransition($fromStatus, 'rejected', $request->user(), $data['reason']);
 
         return response()->json([
             'message' => 'Timesheet rejected',
@@ -261,6 +273,7 @@ class AdminTimesheetController extends Controller
     {
         $this->authorize('unlock', $timesheet);
 
+        $fromStatus = $timesheet->status;
         $timesheet->update([
             'status' => 'draft',
             'submitted_at' => null,
@@ -268,9 +281,23 @@ class AdminTimesheetController extends Controller
             'approved_by' => null,
             'rejection_reason' => null,
         ]);
+        $timesheet->logStatusTransition($fromStatus, 'draft', $request->user(), null, [
+            'source' => 'unlock',
+        ]);
 
         return response()->json([
             'message' => 'Timesheet unlocked',
         ]);
+    }
+
+    public function history(Timesheet $timesheet)
+    {
+        $this->authorize('view', $timesheet);
+
+        $history = $timesheet->statusHistory()
+            ->with('actor:id,name,email')
+            ->get();
+
+        return response()->json($history);
     }
 }

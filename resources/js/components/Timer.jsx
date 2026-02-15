@@ -126,6 +126,9 @@ export default function Timer({
     }
 
     async function stop() {
+        const previousEntry = runningEntry;
+        const previousSeconds = seconds;
+
         stopTicking();
         setRunningEntry(null);
         setSeconds(0);
@@ -142,6 +145,12 @@ export default function Timer({
             onChange?.();
         } catch (err) {
             console.error(err.response?.data);
+            setRunningEntry(previousEntry || null);
+            setSeconds(previousSeconds);
+            if (previousEntry) {
+                startTicking();
+                onOptimisticStart?.(previousEntry);
+            }
             alert(err.response?.data?.message ?? 'Unable to stop timer');
         } finally {
             setLoading(false);
