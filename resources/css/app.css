@@ -12,27 +12,27 @@
 
 :root {
     color-scheme: light;
-    --app-bg: #f3f6fb;
+    --app-bg: #eef3fb;
     --app-surface: #ffffff;
-    --app-surface-2: #f8fafc;
-    --app-border: #dbe3ef;
-    --app-text: #0b1220;
-    --app-muted: #4b5565;
-    --app-muted-2: #6b7280;
+    --app-surface-2: #f5f8ff;
+    --app-border: #d3def0;
+    --app-text: #0c1424;
+    --app-muted: #42516a;
+    --app-muted-2: #68758e;
     --app-accent: #2563eb;
     --app-accent-2: #1d4ed8;
-    --app-success-bg: #dcfce7;
-    --app-success-text: #166534;
-    --app-warning-bg: #fef3c7;
-    --app-warning-text: #92400e;
-    --app-danger-bg: #fee2e2;
-    --app-danger-text: #991b1b;
-    --app-info-bg: #dbeafe;
-    --app-info-text: #1e40af;
+    --app-success-bg: #d9f9e6;
+    --app-success-text: #145c35;
+    --app-warning-bg: #fff0cd;
+    --app-warning-text: #8e4b10;
+    --app-danger-bg: #ffe3e6;
+    --app-danger-text: #8c1d2f;
+    --app-info-bg: #dceaff;
+    --app-info-text: #1845a3;
     --app-overlay: rgba(255, 255, 255, 0.55);
     --app-focus: rgba(37, 99, 235, 0.35);
-    --app-shadow: 0 10px 24px rgba(2, 6, 23, 0.06);
-    --app-shadow-lg: 0 20px 44px rgba(2, 6, 23, 0.1);
+    --app-shadow: 0 10px 30px rgba(13, 27, 57, 0.07);
+    --app-shadow-lg: 0 22px 56px rgba(13, 27, 57, 0.12);
 }
 
 .dark {
@@ -71,6 +71,14 @@ body {
     color: var(--app-text);
 }
 
+html:not(.dark) body {
+    background-image:
+        radial-gradient(1200px 420px at 0% -20%, rgba(37, 99, 235, 0.09), transparent 65%),
+        radial-gradient(900px 350px at 100% 0%, rgba(14, 165, 233, 0.08), transparent 62%),
+        linear-gradient(180deg, #f6f9ff 0%, var(--app-bg) 30%);
+    background-attachment: fixed;
+}
+
 a,
 button,
 input,
@@ -90,6 +98,10 @@ textarea:focus-visible {
 
 .bg-white {
     background-color: var(--app-surface) !important;
+}
+
+.bg-blue-50 {
+    background-color: #eaf2ff !important;
 }
 
 .bg-gray-100 {
@@ -130,6 +142,11 @@ textarea:focus-visible {
 .shadow-lg,
 .shadow-xl {
     box-shadow: var(--app-shadow) !important;
+}
+
+html:not(.dark) .bg-white.border,
+html:not(.dark) .bg-white[class*='rounded-'] {
+    box-shadow: var(--app-shadow);
 }
 
 .rounded-2xl {
@@ -197,7 +214,7 @@ textarea:focus-visible {
 }
 
 .app-nav-link:hover {
-    background: var(--app-surface-2);
+    background: color-mix(in oklab, var(--app-accent) 7%, var(--app-surface-2));
     color: var(--app-text);
 }
 
@@ -231,6 +248,10 @@ textarea:focus-visible {
     color: var(--app-text);
 }
 
+html:not(.dark) .app-lock-overlay {
+    border: 1px solid color-mix(in oklab, var(--app-border) 75%, white);
+}
+
 .app-pill {
     border-radius: 999px;
     padding: 0.25rem 0.75rem;
@@ -262,6 +283,10 @@ textarea:focus-visible {
     background: color-mix(in oklab, var(--app-surface) 92%, transparent);
     border-color: var(--app-border);
     box-shadow: var(--app-shadow);
+}
+
+html:not(.dark) .reports-page .reports-filters {
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
 }
 
 .dark .reports-page .reports-filters {
@@ -300,4 +325,23 @@ textarea:focus-visible {
 .reports-day-approved {
     border-color: color-mix(in oklab, var(--app-success-text) 35%, var(--app-border)) !important;
     background: color-mix(in oklab, var(--app-success-bg) 76%, var(--app-surface)) !important;
+}
+
+html:not(.dark) input,
+html:not(.dark) select,
+html:not(.dark) textarea {
+    background-color: #ffffff;
+    border-color: color-mix(in oklab, var(--app-border) 86%, #ffffff);
+    color: var(--app-text);
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+    color: var(--app-muted-2);
+}
+
+html:not(.dark) input:hover,
+html:not(.dark) select:hover,
+html:not(.dark) textarea:hover {
+    border-color: color-mix(in oklab, var(--app-accent) 28%, var(--app-border));
 }
