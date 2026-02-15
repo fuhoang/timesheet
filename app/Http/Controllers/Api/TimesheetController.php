@@ -48,6 +48,7 @@ class TimesheetController extends Controller
 
         $start = $baseDate->copy()->startOfWeek();
         $end   = $baseDate->copy()->endOfWeek();
+        $weekComplete = now()->greaterThanOrEqualTo($end->copy()->endOfDay());
 
         $timesheets = Timesheet::where('user_id', $user->id)
             ->whereBetween('work_date', [$start, $end])
@@ -63,16 +64,25 @@ class TimesheetController extends Controller
         $hasSubmitted = $timesheets->contains('status', 'submitted');
         $hasApproved = $timesheets->contains('status', 'approved');
         $hasRejected = $timesheets->contains('status', 'rejected');
-        $locked = $hasSubmitted || $hasApproved || $hasRejected;
 
-        if ($hasApproved) {
-            $weekStatus = 'approved';
-        } elseif ($hasSubmitted) {
-            $weekStatus = 'submitted';
-        } elseif ($hasRejected) {
-            $weekStatus = 'rejected';
-        } else {
+        if (!$weekComplete) {
+            // In-progress week stays editable even if legacy seeded/submitted rows exist.
+            $locked = false;
             $weekStatus = 'draft';
+            $isSubmitted = false;
+        } else {
+            $locked = $hasSubmitted || $hasApproved || $hasRejected;
+            $isSubmitted = $hasSubmitted;
+
+            if ($hasApproved) {
+                $weekStatus = 'approved';
+            } elseif ($hasSubmitted) {
+                $weekStatus = 'submitted';
+            } elseif ($hasRejected) {
+                $weekStatus = 'rejected';
+            } else {
+                $weekStatus = 'draft';
+            }
         }
 
         $weekSheet = $timesheets->first(fn ($t) => $t->submitted_at !== null);
@@ -107,9 +117,10 @@ class TimesheetController extends Controller
 
             // 🔑 REQUIRED BY UI
             'status' => $weekStatus,
-            'submitted' => $hasSubmitted,
+            'submitted' => $isSubmitted,
             'locked' => $locked,
-            'can_submit' => ! $locked,
+            'week_complete' => $weekComplete,
+            'can_submit' => $weekComplete && ! $locked,
             'submitted_at' => $weekSheet?->submitted_at,
             'approved_at' => $weekSheet?->approved_at,
             'rejection_reason' => $weekSheet?->rejection_reason,
@@ -125,6 +136,12 @@ class TimesheetController extends Controller
 
         $start = Carbon::parse($request->week_start)->startOfWeek();
         $end   = Carbon::parse($request->week_start)->endOfWeek();
+
+        if (now()->lt($end->copy()->endOfDay())) {
+            return response()->json([
+                'message' => 'Week is still in progress and cannot be submitted yet.',
+            ], 422);
+        }
 
         /* ----------------------------------------
            AUTO-STOP RUNNING TIMER
