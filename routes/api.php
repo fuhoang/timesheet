@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TimesheetController;
 use App\Http\Controllers\Api\TimeEntryController;
 use App\Http\Controllers\Api\Admin\AdminTimesheetController;
+use App\Http\Controllers\Api\Admin\AdminRulesController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\HealthController;
@@ -65,6 +66,7 @@ Route::middleware(['web'])->group(function () {
 
         // Timesheets
         Route::get('/timesheets', [AdminTimesheetController::class, 'index']);
+        Route::get('/rules', [AdminRulesController::class, 'index']);
         Route::post('/timesheets/bulk-approve', [AdminTimesheetController::class, 'bulkApprove'])
             ->middleware('throttle:15,1');
         Route::post('/timesheets/bulk-reject', [AdminTimesheetController::class, 'bulkReject'])

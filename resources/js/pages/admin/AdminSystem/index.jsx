@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
 import InlineAlert from '../../../components/ui/InlineAlert';
 import { getApiErrorDetails } from '../../../utils/apiError';
+import ConfirmActionModal from '../../../components/ui/ConfirmActionModal';
 
 export default function AdminSystem() {
     const { api } = useApi();
@@ -15,6 +16,7 @@ export default function AdminSystem() {
     const [historyActor, setHistoryActor] = useState('');
     const [operationsPage, setOperationsPage] = useState(1);
     const [operationsPerPage, setOperationsPerPage] = useState(10);
+    const [showFixModal, setShowFixModal] = useState(false);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -59,9 +61,6 @@ export default function AdminSystem() {
     }
 
     async function fixInProgressWeekStatuses() {
-        if (!window.confirm('Fix in-progress week statuses now? This will reset submitted/rejected/approved rows in current week to draft.')) {
-            return;
-        }
         setFixingWeekStatus(true);
         setFixResult(null);
         setError(null);
@@ -73,6 +72,7 @@ export default function AdminSystem() {
             });
             setFixResult(`Fixed ${res.fixed_count ?? 0} row(s).`);
             await load();
+            setShowFixModal(false);
         } catch (err) {
             setError(getApiErrorDetails(err, 'Unable to fix in-progress week statuses.'));
         } finally {
@@ -232,7 +232,7 @@ export default function AdminSystem() {
                                             {check.key === 'in_progress_week_statuses' && !check.ok && (
                                                 <button
                                                     type="button"
-                                                    onClick={fixInProgressWeekStatuses}
+                                                    onClick={() => setShowFixModal(true)}
                                                     disabled={fixingWeekStatus}
                                                     className="px-2 py-1 rounded border border-amber-300 text-xs text-amber-800 hover:bg-amber-50 disabled:opacity-60"
                                                 >
@@ -433,6 +433,16 @@ export default function AdminSystem() {
                     </div>
                 </div>
             )}
+
+            <ConfirmActionModal
+                open={showFixModal}
+                title="Fix in-progress week statuses"
+                message="This resets submitted/rejected/approved rows in the current week back to draft."
+                confirmText="Fix now"
+                loading={fixingWeekStatus}
+                onClose={() => setShowFixModal(false)}
+                onConfirm={fixInProgressWeekStatuses}
+            />
         </div>
     );
 }

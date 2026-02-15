@@ -82,13 +82,35 @@ class AdminTimesheetController extends Controller
         $data = $request->validate([
             'ids' => 'required|array|min:1',
             'ids.*' => 'integer|exists:timesheets,id',
+            'override' => 'sometimes|boolean',
+            'override_reason' => 'nullable|string|max:500',
         ]);
 
         $ids = array_values(array_unique($data['ids']));
+        $useOverride = (bool) ($data['override'] ?? false);
+        $overrideReason = $useOverride ? trim((string) ($data['override_reason'] ?? '')) : '';
+        if ($useOverride && $overrideReason === '') {
+            return response()->json([
+                'message' => 'Override reason is required',
+                'errors' => [
+                    'override_reason' => ['Override reason is required when override is enabled.'],
+                ],
+            ], 422);
+        }
 
         $timesheets = Timesheet::whereIn('id', $ids)->get();
-
-        $eligible = $timesheets->filter(fn ($t) => $this->rules->evaluateAdminApprove($t)['allowed']);
+        $blocked = collect();
+        $eligible = $timesheets->filter(function ($t) use (&$blocked) {
+            $rule = $this->rules->evaluateAdminApprove($t);
+            if ($rule['allowed']) {
+                return true;
+            }
+            $blocked->put($t->id, $rule);
+            return false;
+        });
+        if ($useOverride) {
+            $eligible = $timesheets;
+        }
 
         if ($eligible->isEmpty()) {
             return response()->json([
@@ -101,6 +123,7 @@ class AdminTimesheetController extends Controller
 
         $now = now();
         $adminId = $request->user()->id;
+        $requestId = (string) $request->attributes->get('request_id');
 
         foreach ($eligible as $timesheet) {
             $fromStatus = $timesheet->status;
@@ -110,8 +133,18 @@ class AdminTimesheetController extends Controller
                 'approved_by' => $adminId,
                 'rejection_reason' => null,
             ]);
+            $rule = $blocked->get($timesheet->id);
+            $isOverride = $useOverride && $rule !== null;
             $timesheet->logStatusTransition($fromStatus, 'approved', $request->user(), null, [
                 'source' => 'bulk_approve',
+                'override' => $isOverride ? [
+                    'used' => true,
+                    'reason' => $overrideReason,
+                    'rule_reason' => $rule['reason'] ?? null,
+                    'rule_message' => $rule['message'] ?? null,
+                    'request_id' => $requestId,
+                    'action' => 'approve',
+                ] : null,
             ]);
         }
 
@@ -119,6 +152,7 @@ class AdminTimesheetController extends Controller
             'message' => 'Timesheets approved',
             'approved_count' => $eligible->count(),
             'skipped_count' => $timesheets->count() - $eligible->count(),
+            'override_used' => $useOverride,
         ]);
     }
 
@@ -133,13 +167,35 @@ class AdminTimesheetController extends Controller
             'ids' => 'required|array|min:1',
             'ids.*' => 'integer|exists:timesheets,id',
             'reason' => 'required|string|max:500',
+            'override' => 'sometimes|boolean',
+            'override_reason' => 'nullable|string|max:500',
         ]);
 
         $ids = array_values(array_unique($data['ids']));
+        $useOverride = (bool) ($data['override'] ?? false);
+        $overrideReason = $useOverride ? trim((string) ($data['override_reason'] ?? '')) : '';
+        if ($useOverride && $overrideReason === '') {
+            return response()->json([
+                'message' => 'Override reason is required',
+                'errors' => [
+                    'override_reason' => ['Override reason is required when override is enabled.'],
+                ],
+            ], 422);
+        }
 
         $timesheets = Timesheet::whereIn('id', $ids)->get();
-
-        $eligible = $timesheets->filter(fn ($t) => $this->rules->evaluateAdminReject($t)['allowed']);
+        $blocked = collect();
+        $eligible = $timesheets->filter(function ($t) use (&$blocked) {
+            $rule = $this->rules->evaluateAdminReject($t);
+            if ($rule['allowed']) {
+                return true;
+            }
+            $blocked->put($t->id, $rule);
+            return false;
+        });
+        if ($useOverride) {
+            $eligible = $timesheets;
+        }
 
         if ($eligible->isEmpty()) {
             return response()->json([
@@ -150,6 +206,7 @@ class AdminTimesheetController extends Controller
             ], 422);
         }
 
+        $requestId = (string) $request->attributes->get('request_id');
         foreach ($eligible as $timesheet) {
             $fromStatus = $timesheet->status;
             $timesheet->update([
@@ -158,8 +215,18 @@ class AdminTimesheetController extends Controller
                 'approved_at' => null,
                 'approved_by' => null,
             ]);
+            $rule = $blocked->get($timesheet->id);
+            $isOverride = $useOverride && $rule !== null;
             $timesheet->logStatusTransition($fromStatus, 'rejected', $request->user(), $data['reason'], [
                 'source' => 'bulk_reject',
+                'override' => $isOverride ? [
+                    'used' => true,
+                    'reason' => $overrideReason,
+                    'rule_reason' => $rule['reason'] ?? null,
+                    'rule_message' => $rule['message'] ?? null,
+                    'request_id' => $requestId,
+                    'action' => 'reject',
+                ] : null,
             ]);
         }
 
@@ -167,6 +234,7 @@ class AdminTimesheetController extends Controller
             'message' => 'Timesheets rejected',
             'rejected_count' => $eligible->count(),
             'skipped_count' => $timesheets->count() - $eligible->count(),
+            'override_used' => $useOverride,
         ]);
     }
 
@@ -236,12 +304,27 @@ class AdminTimesheetController extends Controller
     {
         $this->authorize('approve', $timesheet);
 
+        $data = $request->validate([
+            'override' => 'sometimes|boolean',
+            'override_reason' => 'nullable|string|max:500',
+        ]);
+        $useOverride = (bool) ($data['override'] ?? false);
+        $overrideReason = $useOverride ? trim((string) ($data['override_reason'] ?? '')) : '';
+
         $rule = $this->rules->evaluateAdminApprove($timesheet);
-        if (!$rule['allowed']) {
+        if (!$rule['allowed'] && !$useOverride) {
             return response()->json([
                 'message' => $rule['message'],
                 'rule' => [
                     'reason' => $rule['reason'],
+                ],
+            ], 422);
+        }
+        if ($useOverride && $overrideReason === '') {
+            return response()->json([
+                'message' => 'Override reason is required',
+                'errors' => [
+                    'override_reason' => ['Override reason is required when override is enabled.'],
                 ],
             ], 422);
         }
@@ -253,11 +336,22 @@ class AdminTimesheetController extends Controller
             'approved_by' => $request->user()->id,
             'rejection_reason' => null,
         ]);
-        $timesheet->logStatusTransition($fromStatus, 'approved', $request->user());
+        $timesheet->logStatusTransition($fromStatus, 'approved', $request->user(), null, [
+            'source' => 'approve',
+            'override' => $useOverride ? [
+                'used' => true,
+                'reason' => $overrideReason,
+                'rule_reason' => $rule['reason'] ?? null,
+                'rule_message' => $rule['message'] ?? null,
+                'request_id' => (string) $request->attributes->get('request_id'),
+                'action' => 'approve',
+            ] : null,
+        ]);
 
         return response()->json([
             'message' => 'Timesheet approved',
             'timesheet' => $timesheet,
+            'override_used' => $useOverride,
         ]);
     }
 
@@ -270,10 +364,14 @@ class AdminTimesheetController extends Controller
 
         $data = $request->validate([
             'reason' => 'required|string|max:500',
+            'override' => 'sometimes|boolean',
+            'override_reason' => 'nullable|string|max:500',
         ]);
+        $useOverride = (bool) ($data['override'] ?? false);
+        $overrideReason = $useOverride ? trim((string) ($data['override_reason'] ?? '')) : '';
 
         $rule = $this->rules->evaluateAdminReject($timesheet);
-        if (!$rule['allowed']) {
+        if (!$rule['allowed'] && !$useOverride) {
             return response()->json([
                 'message' => $rule['message'],
                 'rule' => [
@@ -281,13 +379,11 @@ class AdminTimesheetController extends Controller
                 ],
             ], 422);
         }
-
-        $rule = $this->rules->evaluateAdminUnlock($timesheet);
-        if (!$rule['allowed']) {
+        if ($useOverride && $overrideReason === '') {
             return response()->json([
-                'message' => $rule['message'],
-                'rule' => [
-                    'reason' => $rule['reason'],
+                'message' => 'Override reason is required',
+                'errors' => [
+                    'override_reason' => ['Override reason is required when override is enabled.'],
                 ],
             ], 422);
         }
@@ -299,11 +395,22 @@ class AdminTimesheetController extends Controller
             'approved_at' => null,
             'approved_by' => null,
         ]);
-        $timesheet->logStatusTransition($fromStatus, 'rejected', $request->user(), $data['reason']);
+        $timesheet->logStatusTransition($fromStatus, 'rejected', $request->user(), $data['reason'], [
+            'source' => 'reject',
+            'override' => $useOverride ? [
+                'used' => true,
+                'reason' => $overrideReason,
+                'rule_reason' => $rule['reason'] ?? null,
+                'rule_message' => $rule['message'] ?? null,
+                'request_id' => (string) $request->attributes->get('request_id'),
+                'action' => 'reject',
+            ] : null,
+        ]);
 
         return response()->json([
             'message' => 'Timesheet rejected',
             'timesheet' => $timesheet,
+            'override_used' => $useOverride,
         ]);
     }
 
@@ -315,6 +422,31 @@ class AdminTimesheetController extends Controller
     {
         $this->authorize('unlock', $timesheet);
 
+        $data = $request->validate([
+            'override' => 'sometimes|boolean',
+            'override_reason' => 'nullable|string|max:500',
+        ]);
+        $useOverride = (bool) ($data['override'] ?? false);
+        $overrideReason = $useOverride ? trim((string) ($data['override_reason'] ?? '')) : '';
+
+        $rule = $this->rules->evaluateAdminUnlock($timesheet);
+        if (!$rule['allowed'] && !$useOverride) {
+            return response()->json([
+                'message' => $rule['message'],
+                'rule' => [
+                    'reason' => $rule['reason'],
+                ],
+            ], 422);
+        }
+        if ($useOverride && $overrideReason === '') {
+            return response()->json([
+                'message' => 'Override reason is required',
+                'errors' => [
+                    'override_reason' => ['Override reason is required when override is enabled.'],
+                ],
+            ], 422);
+        }
+
         $fromStatus = $timesheet->status;
         $timesheet->update([
             'status' => 'draft',
@@ -325,10 +457,19 @@ class AdminTimesheetController extends Controller
         ]);
         $timesheet->logStatusTransition($fromStatus, 'draft', $request->user(), null, [
             'source' => 'unlock',
+            'override' => $useOverride ? [
+                'used' => true,
+                'reason' => $overrideReason,
+                'rule_reason' => $rule['reason'] ?? null,
+                'rule_message' => $rule['message'] ?? null,
+                'request_id' => (string) $request->attributes->get('request_id'),
+                'action' => 'unlock',
+            ] : null,
         ]);
 
         return response()->json([
             'message' => 'Timesheet unlocked',
+            'override_used' => $useOverride,
         ]);
     }
 
