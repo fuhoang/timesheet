@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Timesheet;
 use App\Models\TimesheetStatusHistory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
@@ -34,7 +35,11 @@ class ConfigHealthController extends Controller
         $historyPage = max((int) $request->query('history_page', 1), 1);
         $historyPerPage = min(max((int) $request->query('history_per_page', 10), 1), 50);
         $historyActor = trim((string) $request->query('history_actor', ''));
-        $history = $this->fixHistory($historyPage, $historyPerPage, $historyActor);
+        $historyQuery = $this->fixHistoryQuery($historyActor);
+        if ($request->query('history_format') === 'csv') {
+            return $this->fixHistoryCsvResponse($historyQuery);
+        }
+        $history = $this->fixHistory($historyQuery, $historyPage, $historyPerPage);
 
         $checks = [
             $this->check(
@@ -140,6 +145,11 @@ class ConfigHealthController extends Controller
                 'sample_ids' => $sampleIds,
             ]);
         }
+
+        $data = $request->validate([
+            'confirm' => 'required|accepted',
+        ]);
+        unset($data);
 
         $fixed = 0;
         foreach ($rows as $timesheet) {
@@ -249,7 +259,7 @@ class ConfigHealthController extends Controller
         ];
     }
 
-    private function fixHistory(int $page, int $perPage, string $actorFilter): array
+    private function fixHistoryQuery(string $actorFilter): Builder
     {
         $query = TimesheetStatusHistory::query()
             ->with([
@@ -268,6 +278,11 @@ class ConfigHealthController extends Controller
             });
         }
 
+        return $query;
+    }
+
+    private function fixHistory(Builder $query, int $page, int $perPage): array
+    {
         $history = $query->paginate($perPage, ['*'], 'history_page', $page);
 
         return [
@@ -299,5 +314,32 @@ class ConfigHealthController extends Controller
             'per_page' => $history->perPage(),
             'total' => $history->total(),
         ];
+    }
+
+    private function fixHistoryCsvResponse(Builder $query): JsonResponse
+    {
+        $rows = $query->get();
+        $lines = ['When,Admin,Admin Email,Timesheet ID,Work Date,User,User Email,From Status,To Status'];
+
+        foreach ($rows as $row) {
+            $lines[] = sprintf(
+                '"%s","%s","%s","%s","%s","%s","%s","%s","%s"',
+                (string) $row->created_at,
+                $row->actor?->name ?? '',
+                $row->actor?->email ?? '',
+                (string) ($row->timesheet?->id ?? ''),
+                (string) ($row->timesheet?->work_date ?? ''),
+                $row->timesheet?->user?->name ?? '',
+                $row->timesheet?->user?->email ?? '',
+                (string) ($row->from_status ?? ''),
+                (string) $row->to_status
+            );
+        }
+
+        $csv = implode("\n", $lines) . "\n";
+        return response()->json([], 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="in-progress-week-fix-history.csv"',
+        ])->setContent($csv);
     }
 }

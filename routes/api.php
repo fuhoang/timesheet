@@ -53,7 +53,8 @@ Route::middleware(['web'])->group(function () {
     // Admin-only routes
     Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
         Route::get('/config/health', [ConfigHealthController::class, 'index']);
-        Route::post('/config/fix-in-progress-week', [ConfigHealthController::class, 'fixInProgressWeekStatuses']);
+        Route::post('/config/fix-in-progress-week', [ConfigHealthController::class, 'fixInProgressWeekStatuses'])
+            ->middleware('throttle:10,1');
 
         // Projects
         Route::apiResource('projects', AdminProjectController::class)->only(['index', 'store', 'update', 'destroy']);
