@@ -120,6 +120,7 @@ class TimesheetController extends Controller
             'submitted' => $isSubmitted,
             'locked' => $locked,
             'week_complete' => $weekComplete,
+            'submit_available_at' => $end->copy()->endOfDay()->toIso8601String(),
             'can_submit' => $weekComplete && ! $locked,
             'submitted_at' => $weekSheet?->submitted_at,
             'approved_at' => $weekSheet?->approved_at,
@@ -133,9 +134,12 @@ class TimesheetController extends Controller
     public function submitWeek(Request $request)
     {
         $user = $request->user();
+        $data = $request->validate([
+            'week_start' => 'required|date',
+        ]);
 
-        $start = Carbon::parse($request->week_start)->startOfWeek();
-        $end   = Carbon::parse($request->week_start)->endOfWeek();
+        $start = Carbon::parse($data['week_start'])->startOfWeek();
+        $end   = Carbon::parse($data['week_start'])->endOfWeek();
 
         if (now()->lt($end->copy()->endOfDay())) {
             return response()->json([
