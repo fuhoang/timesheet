@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Timesheet;
+use App\Models\TimesheetStatusHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 
 class ConfigHealthController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $appUrl = (string) config('app.url', '');
         $frontendUrl = (string) config('endpoints.frontend_url', '');
@@ -30,6 +31,10 @@ class ConfigHealthController extends Controller
         $hasLoopback = $this->containsHostVariant($corsOrigins, $statefulDomains, [$appUrl, $frontendUrl], '127.0.0.1');
 
         $inProgressIssue = $this->inProgressWeekIssueStats();
+        $historyPage = max((int) $request->query('history_page', 1), 1);
+        $historyPerPage = min(max((int) $request->query('history_per_page', 10), 1), 50);
+        $historyActor = trim((string) $request->query('history_actor', ''));
+        $history = $this->fixHistory($historyPage, $historyPerPage, $historyActor);
 
         $checks = [
             $this->check(
@@ -111,6 +116,7 @@ class ConfigHealthController extends Controller
                 'in_progress_week_status_count' => $inProgressIssue['count'],
                 'in_progress_week_sample_ids' => $inProgressIssue['sample_ids'],
             ],
+            'history' => $history,
         ]);
     }
 
@@ -124,6 +130,16 @@ class ConfigHealthController extends Controller
             ->whereBetween('work_date', [$weekStart, $weekEnd])
             ->whereIn('status', ['submitted', 'approved', 'rejected'])
             ->get();
+        $isDryRun = filter_var($request->query('dry_run', false), FILTER_VALIDATE_BOOL);
+        $sampleIds = $rows->pluck('id')->take(20)->values()->all();
+
+        if ($isDryRun) {
+            return response()->json([
+                'status' => 'dry_run',
+                'affected_count' => $rows->count(),
+                'sample_ids' => $sampleIds,
+            ]);
+        }
 
         $fixed = 0;
         foreach ($rows as $timesheet) {
@@ -144,6 +160,7 @@ class ConfigHealthController extends Controller
         return response()->json([
             'status' => 'ok',
             'fixed_count' => $fixed,
+            'sample_ids' => $sampleIds,
         ]);
     }
 
@@ -229,6 +246,58 @@ class ConfigHealthController extends Controller
         return [
             'count' => (clone $query)->count(),
             'sample_ids' => $query->limit(10)->pluck('id')->all(),
+        ];
+    }
+
+    private function fixHistory(int $page, int $perPage, string $actorFilter): array
+    {
+        $query = TimesheetStatusHistory::query()
+            ->with([
+                'actor:id,name,email',
+                'timesheet:id,user_id,work_date',
+                'timesheet.user:id,name,email',
+            ])
+            ->where('context->source', 'admin_system_fix_in_progress_week')
+            ->orderByDesc('created_at');
+
+        if ($actorFilter !== '') {
+            $query->whereHas('actor', function ($actorQuery) use ($actorFilter) {
+                $actorQuery
+                    ->where('name', 'like', "%{$actorFilter}%")
+                    ->orWhere('email', 'like', "%{$actorFilter}%");
+            });
+        }
+
+        $history = $query->paginate($perPage, ['*'], 'history_page', $page);
+
+        return [
+            'data' => collect($history->items())->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'created_at' => $item->created_at,
+                    'actor' => $item->actor ? [
+                        'id' => $item->actor->id,
+                        'name' => $item->actor->name,
+                        'email' => $item->actor->email,
+                    ] : null,
+                    'timesheet' => $item->timesheet ? [
+                        'id' => $item->timesheet->id,
+                        'work_date' => $item->timesheet->work_date,
+                        'user' => $item->timesheet->user ? [
+                            'id' => $item->timesheet->user->id,
+                            'name' => $item->timesheet->user->name,
+                            'email' => $item->timesheet->user->email,
+                        ] : null,
+                    ] : null,
+                    'from_status' => $item->from_status,
+                    'to_status' => $item->to_status,
+                    'context' => $item->context,
+                ];
+            })->values()->all(),
+            'current_page' => $history->currentPage(),
+            'last_page' => $history->lastPage(),
+            'per_page' => $history->perPage(),
+            'total' => $history->total(),
         ];
     }
 }
