@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Timesheet;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 
 class ConfigHealthController extends Controller
 {
@@ -25,6 +28,8 @@ class ConfigHealthController extends Controller
 
         $hasLocalhost = $this->containsHostVariant($corsOrigins, $statefulDomains, [$appUrl, $frontendUrl], 'localhost');
         $hasLoopback = $this->containsHostVariant($corsOrigins, $statefulDomains, [$appUrl, $frontendUrl], '127.0.0.1');
+
+        $inProgressIssue = $this->inProgressWeekIssueStats();
 
         $checks = [
             $this->check(
@@ -69,6 +74,14 @@ class ConfigHealthController extends Controller
                 !($hasLocalhost && $hasLoopback),
                 'Use one host format consistently across APP_URL, FRONTEND_URL, CORS_ALLOWED_ORIGINS, SANCTUM_STATEFUL_DOMAINS'
             ),
+            $this->check(
+                'in_progress_week_statuses',
+                'In-progress week has no submitted/rejected/approved timesheets',
+                $inProgressIssue['count'] === 0,
+                $inProgressIssue['count'] === 0
+                    ? null
+                    : "Found {$inProgressIssue['count']} row(s). Use the one-click fix to reset them to draft."
+            ),
         ];
 
         $checks = collect($checks)->map(function (array $check) use ($appUrl, $frontendUrl, $appHostPort, $frontendHostPort) {
@@ -95,7 +108,42 @@ class ConfigHealthController extends Controller
                 'frontend_host_port' => $frontendHostPort,
                 'cors_allowed_origins' => $corsOrigins->all(),
                 'sanctum_stateful_domains' => $statefulDomains->all(),
+                'in_progress_week_status_count' => $inProgressIssue['count'],
+                'in_progress_week_sample_ids' => $inProgressIssue['sample_ids'],
             ],
+        ]);
+    }
+
+    public function fixInProgressWeekStatuses(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $weekStart = now()->startOfWeek()->toDateString();
+        $weekEnd = now()->endOfWeek()->toDateString();
+
+        $rows = Timesheet::query()
+            ->whereBetween('work_date', [$weekStart, $weekEnd])
+            ->whereIn('status', ['submitted', 'approved', 'rejected'])
+            ->get();
+
+        $fixed = 0;
+        foreach ($rows as $timesheet) {
+            $fromStatus = $timesheet->status;
+            $timesheet->update([
+                'status' => 'draft',
+                'submitted_at' => null,
+                'approved_at' => null,
+                'approved_by' => null,
+                'rejection_reason' => null,
+            ]);
+            $timesheet->logStatusTransition($fromStatus, 'draft', $user, null, [
+                'source' => 'admin_system_fix_in_progress_week',
+            ]);
+            $fixed++;
+        }
+
+        return response()->json([
+            'status' => 'ok',
+            'fixed_count' => $fixed,
         ]);
     }
 
@@ -164,7 +212,23 @@ class ConfigHealthController extends Controller
             'cors_frontend', 'cors_backend' => "CORS_ALLOWED_ORIGINS={$frontendUrl},{$appUrl}",
             'sanctum_frontend', 'sanctum_backend' => "SANCTUM_STATEFUL_DOMAINS={$frontendHostPort},{$appHostPort}",
             'host_format' => 'Use one host style only (all localhost or all 127.0.0.1) across APP_URL, FRONTEND_URL, CORS_ALLOWED_ORIGINS, SANCTUM_STATEFUL_DOMAINS',
+            'in_progress_week_statuses' => null,
             default => null,
         };
+    }
+
+    private function inProgressWeekIssueStats(): array
+    {
+        $weekStart = Carbon::now()->startOfWeek()->toDateString();
+        $weekEnd = Carbon::now()->endOfWeek()->toDateString();
+
+        $query = Timesheet::query()
+            ->whereBetween('work_date', [$weekStart, $weekEnd])
+            ->whereIn('status', ['submitted', 'approved', 'rejected']);
+
+        return [
+            'count' => (clone $query)->count(),
+            'sample_ids' => $query->limit(10)->pluck('id')->all(),
+        ];
     }
 }

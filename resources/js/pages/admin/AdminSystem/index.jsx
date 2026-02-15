@@ -8,6 +8,8 @@ export default function AdminSystem() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [payload, setPayload] = useState(null);
+    const [fixingWeekStatus, setFixingWeekStatus] = useState(false);
+    const [fixResult, setFixResult] = useState(null);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -39,6 +41,21 @@ export default function AdminSystem() {
         }
     }
 
+    async function fixInProgressWeekStatuses() {
+        setFixingWeekStatus(true);
+        setFixResult(null);
+        setError(null);
+        try {
+            const res = await api({ method: 'post', url: '/api/admin/config/fix-in-progress-week' });
+            setFixResult(`Fixed ${res.fixed_count ?? 0} row(s).`);
+            await load();
+        } catch (err) {
+            setError(getApiErrorDetails(err, 'Unable to fix in-progress week statuses.'));
+        } finally {
+            setFixingWeekStatus(false);
+        }
+    }
+
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow border flex items-start justify-between gap-4">
@@ -62,6 +79,12 @@ export default function AdminSystem() {
                 <InlineAlert requestId={error.requestId}>
                     {error.message}
                 </InlineAlert>
+            )}
+
+            {fixResult && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-800">
+                    {fixResult}
+                </div>
             )}
 
             {!error && (
@@ -149,6 +172,16 @@ export default function AdminSystem() {
                                                     className="px-2 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
                                                 >
                                                     Copy fix
+                                                </button>
+                                            )}
+                                            {check.key === 'in_progress_week_statuses' && !check.ok && (
+                                                <button
+                                                    type="button"
+                                                    onClick={fixInProgressWeekStatuses}
+                                                    disabled={fixingWeekStatus}
+                                                    className="px-2 py-1 rounded border border-amber-300 text-xs text-amber-800 hover:bg-amber-50 disabled:opacity-60"
+                                                >
+                                                    {fixingWeekStatus ? 'Fixing...' : 'Fix now'}
                                                 </button>
                                             )}
                                         </div>
