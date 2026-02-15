@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminSystemOperationLog;
 use App\Models\Timesheet;
 use App\Models\TimesheetStatusHistory;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,6 +41,9 @@ class ConfigHealthController extends Controller
             return $this->fixHistoryCsvResponse($historyQuery);
         }
         $history = $this->fixHistory($historyQuery, $historyPage, $historyPerPage);
+        $operationsPage = max((int) $request->query('operations_page', 1), 1);
+        $operationsPerPage = min(max((int) $request->query('operations_per_page', 10), 1), 50);
+        $operations = $this->operations($operationsPage, $operationsPerPage);
 
         $checks = [
             $this->check(
@@ -122,6 +126,7 @@ class ConfigHealthController extends Controller
                 'in_progress_week_sample_ids' => $inProgressIssue['sample_ids'],
             ],
             'history' => $history,
+            'operations' => $operations,
         ]);
     }
 
@@ -139,6 +144,7 @@ class ConfigHealthController extends Controller
         $sampleIds = $rows->pluck('id')->take(20)->values()->all();
 
         if ($isDryRun) {
+            $this->logOperation($user?->id, true, $rows->count(), $request, $sampleIds);
             return response()->json([
                 'status' => 'dry_run',
                 'affected_count' => $rows->count(),
@@ -166,6 +172,7 @@ class ConfigHealthController extends Controller
             ]);
             $fixed++;
         }
+        $this->logOperation($user?->id, false, $fixed, $request, $sampleIds);
 
         return response()->json([
             'status' => 'ok',
@@ -341,5 +348,50 @@ class ConfigHealthController extends Controller
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="in-progress-week-fix-history.csv"',
         ])->setContent($csv);
+    }
+
+    private function operations(int $page, int $perPage): array
+    {
+        $logs = AdminSystemOperationLog::query()
+            ->with('admin:id,name,email')
+            ->where('action', 'fix_in_progress_week_statuses')
+            ->orderByDesc('created_at')
+            ->paginate($perPage, ['*'], 'operations_page', $page);
+
+        return [
+            'data' => collect($logs->items())->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'created_at' => $log->created_at,
+                    'action' => $log->action,
+                    'affected_count' => $log->affected_count,
+                    'dry_run' => $log->dry_run,
+                    'request_id' => $log->request_id,
+                    'admin' => $log->admin ? [
+                        'id' => $log->admin->id,
+                        'name' => $log->admin->name,
+                        'email' => $log->admin->email,
+                    ] : null,
+                ];
+            })->values()->all(),
+            'current_page' => $logs->currentPage(),
+            'last_page' => $logs->lastPage(),
+            'per_page' => $logs->perPage(),
+            'total' => $logs->total(),
+        ];
+    }
+
+    private function logOperation(?int $adminId, bool $dryRun, int $affectedCount, Request $request, array $sampleIds): void
+    {
+        AdminSystemOperationLog::create([
+            'admin_id' => $adminId,
+            'action' => 'fix_in_progress_week_statuses',
+            'affected_count' => $affectedCount,
+            'dry_run' => $dryRun,
+            'request_id' => (string) $request->attributes->get('request_id'),
+            'context' => [
+                'sample_ids' => $sampleIds,
+            ],
+        ]);
     }
 }

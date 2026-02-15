@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AdminSystemOperationLog;
 use App\Models\Timesheet;
 use App\Models\User;
 use Carbon\Carbon;
@@ -292,5 +293,52 @@ class ConfigHealthEndpointTest extends TestCase
         $this->assertStringContainsString('text/csv', (string) $response->headers->get('Content-Type'));
         $this->assertStringContainsString('Csv Admin', $response->getContent());
         Carbon::setTestNow();
+    }
+
+    public function test_fix_operations_are_logged_for_dry_run_and_apply(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-02-10 10:00:00'));
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+        Sanctum::actingAs($admin);
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->startOfWeek()->toDateString(),
+            'total_minutes' => 45,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        $this->postJson('/api/admin/config/fix-in-progress-week?dry_run=1')
+            ->assertStatus(200);
+        $this->postJson('/api/admin/config/fix-in-progress-week', ['confirm' => true])
+            ->assertStatus(200);
+
+        $logs = AdminSystemOperationLog::query()
+            ->where('action', 'fix_in_progress_week_statuses')
+            ->orderBy('id')
+            ->get();
+
+        $this->assertCount(2, $logs);
+        $this->assertTrue($logs[0]->dry_run);
+        $this->assertFalse($logs[1]->dry_run);
+        $this->assertNotEmpty($logs[0]->request_id);
+        $this->assertNotEmpty($logs[1]->request_id);
+        Carbon::setTestNow();
+    }
+
+    public function test_fix_endpoint_is_rate_limited(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        Sanctum::actingAs($admin);
+
+        for ($i = 0; $i < 10; $i++) {
+            $this->postJson('/api/admin/config/fix-in-progress-week?dry_run=1')
+                ->assertStatus(200);
+        }
+
+        $this->postJson('/api/admin/config/fix-in-progress-week?dry_run=1')
+            ->assertStatus(429);
     }
 }
