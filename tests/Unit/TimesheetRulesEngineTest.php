@@ -58,5 +58,17 @@ class TimesheetRulesEngineTest extends TestCase
         $this->assertFalse($result['allowed']);
         $this->assertSame('approved_locked', $result['reason']);
     }
-}
 
+    public function test_admin_approve_rule_blocks_already_approved(): void
+    {
+        $engine = new TimesheetRulesEngine();
+        $timesheet = new Timesheet([
+            'status' => 'approved',
+        ]);
+
+        $result = $engine->evaluateAdminApprove($timesheet);
+
+        $this->assertFalse($result['allowed']);
+        $this->assertSame('already_approved', $result['reason']);
+    }
+}

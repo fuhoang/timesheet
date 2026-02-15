@@ -363,6 +363,10 @@ class ApiEndpointsTest extends TestCase
         $this->postJson("/api/admin/timesheets/{$timesheet->id}/approve")
             ->assertStatus(200);
 
+        $this->postJson("/api/admin/timesheets/{$timesheet->id}/approve")
+            ->assertStatus(422)
+            ->assertJsonPath('rule.reason', 'already_approved');
+
         $this->getJson("/api/admin/timesheets/{$timesheet->id}/history")
             ->assertStatus(200)
             ->assertJsonPath('0.to_status', 'approved');
@@ -426,6 +430,31 @@ class ApiEndpointsTest extends TestCase
         ])->assertStatus(200);
 
         $this->assertSame('rejected', $c->fresh()->status);
+    }
+
+    public function test_admin_timesheets_index_returns_rules_payload(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        Sanctum::actingAs($admin);
+
+        $ts = Timesheet::create([
+            'user_id' => $admin->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'approved',
+            'submitted_at' => now(),
+            'approved_at' => now(),
+            'approved_by' => $admin->id,
+        ]);
+
+        $response = $this->getJson('/api/admin/timesheets')
+            ->assertStatus(200)
+            ->json();
+
+        $row = collect($response['data'])->firstWhere('id', $ts->id);
+        $this->assertNotNull($row);
+        $this->assertArrayHasKey('rules', $row);
+        $this->assertSame('already_approved', $row['rules']['approve']['reason']);
     }
 
     public function test_admin_notes_endpoints(): void
