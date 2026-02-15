@@ -5,6 +5,7 @@ import AdminSystemStatusCard from './AdminSystemStatusCard';
 import AdminTimesheetsStatusTabs from './AdminTimesheetsStatusTabs';
 import AdminTimesheetsFilters from './AdminTimesheetsFilters';
 import AdminTimesheetsTable from './AdminTimesheetsTable';
+import { getApiErrorDetails } from '../../../utils/apiError';
 
 export default function AdminTimesheets() {
     const { api } = useApi();
@@ -127,10 +128,7 @@ export default function AdminTimesheets() {
                 const retryAfter = Number(err.response?.headers?.['retry-after'] || 60);
                 setBulkRetrySeconds(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : 60);
             }
-            showToast(
-                err.response?.data?.message || 'Bulk approve failed',
-                'error'
-            );
+            showToast(getApiErrorDetails(err, 'Bulk approve failed').fullMessage, 'error');
         } finally {
             setBulkLoading(false);
         }
@@ -159,10 +157,7 @@ export default function AdminTimesheets() {
                 const retryAfter = Number(err.response?.headers?.['retry-after'] || 60);
                 setBulkRetrySeconds(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : 60);
             }
-            showToast(
-                err.response?.data?.message || 'Bulk reject failed',
-                'error'
-            );
+            showToast(getApiErrorDetails(err, 'Bulk reject failed').fullMessage, 'error');
         } finally {
             setBulkLoading(false);
         }
