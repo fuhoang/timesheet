@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\TimeEntry;
 use App\Models\Timesheet;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -16,18 +17,20 @@ class TimesheetFlowTest extends TestCase
 
     public function test_submit_week_sets_status_submitted(): void
     {
+        Carbon::setTestNow(Carbon::parse('2026-02-10 10:00:00'));
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
+        $weekStart = now()->subWeek()->startOfWeek();
         $timesheet = Timesheet::create([
             'user_id' => $user->id,
-            'work_date' => now()->startOfWeek()->toDateString(),
+            'work_date' => $weekStart->toDateString(),
             'total_minutes' => 60,
             'status' => 'draft',
         ]);
 
         $response = $this->postJson('/api/timesheets/submit-week', [
-            'week_start' => now()->startOfWeek()->toDateString(),
+            'week_start' => $weekStart->toDateString(),
         ]);
 
         $response->assertStatus(200);
@@ -35,6 +38,7 @@ class TimesheetFlowTest extends TestCase
         $timesheet->refresh();
         $this->assertSame('submitted', $timesheet->status);
         $this->assertNotNull($timesheet->submitted_at);
+        Carbon::setTestNow();
     }
 
     public function test_rejected_edit_keeps_submitted_at_and_resets_rejection(): void

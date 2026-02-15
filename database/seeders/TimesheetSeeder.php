@@ -24,6 +24,7 @@ class TimesheetSeeder extends Seeder
 
         $startDate = Carbon::now()->subYear()->startOfDay();
         $endDate = Carbon::now()->startOfDay();
+        $lastCompletedWeekEnd = Carbon::now()->startOfWeek()->subDay()->endOfDay();
 
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
             // skip weekends
@@ -69,44 +70,57 @@ class TimesheetSeeder extends Seeder
                     ]);
                 }
 
-                // Set some example statuses in the recent range
-                if ($date->isSameDay($endDate->copy()->subDays(2))) {
-                    $timesheet->update([
-                        'status' => 'submitted',
-                        'submitted_at' => now(),
-                    ]);
-                }
+                // Keep in-progress week as draft-only; only finished weeks get submitted/rejected/approved seed states.
+                if ($date->lte($lastCompletedWeekEnd)) {
+                    if ($date->isSameDay($endDate->copy()->subDays(2))) {
+                        $timesheet->update([
+                            'status' => 'submitted',
+                            'submitted_at' => now(),
+                            'approved_at' => null,
+                            'approved_by' => null,
+                            'rejection_reason' => null,
+                        ]);
+                    }
 
-                if ($date->isSameDay($endDate->copy()->subDays(6))) {
-                    $timesheet->update([
-                        'status' => 'draft',
-                        'submitted_at' => now(),
-                    ]);
-                }
+                    if ($date->isSameDay($endDate->copy()->subDays(6))) {
+                        $timesheet->update([
+                            'status' => 'draft',
+                            'submitted_at' => now(),
+                            'approved_at' => null,
+                            'approved_by' => null,
+                            'rejection_reason' => null,
+                        ]);
+                    }
 
-                if ($date->isSameDay($endDate->copy()->subDays(9))) {
-                    $timesheet->update([
-                        'status' => 'draft',
-                        'submitted_at' => null,
-                    ]);
-                }
+                    if ($date->isSameDay($endDate->copy()->subDays(9))) {
+                        $timesheet->update([
+                            'status' => 'draft',
+                            'submitted_at' => null,
+                            'approved_at' => null,
+                            'approved_by' => null,
+                            'rejection_reason' => null,
+                        ]);
+                    }
 
-                if ($date->isSameDay($endDate->copy()->subDays(10)) || $date->isSameDay($endDate->copy()->subDays(20))) {
-                    $timesheet->update([
-                        'status' => 'rejected',
-                        'submitted_at' => now(),
-                        'rejection_reason' => 'Please clarify description',
-                    ]);
-                }
+                    if ($date->isSameDay($endDate->copy()->subDays(10)) || $date->isSameDay($endDate->copy()->subDays(20))) {
+                        $timesheet->update([
+                            'status' => 'rejected',
+                            'submitted_at' => now(),
+                            'approved_at' => null,
+                            'approved_by' => null,
+                            'rejection_reason' => 'Please clarify description',
+                        ]);
+                    }
 
-                if ($date->isSameDay($endDate->copy()->subDays(15)) && $admin) {
-                    $timesheet->update([
-                        'status' => 'approved',
-                        'submitted_at' => now(),
-                        'approved_at' => now(),
-                        'approved_by' => $admin->id,
-                        'rejection_reason' => null,
-                    ]);
+                    if ($date->isSameDay($endDate->copy()->subDays(15)) && $admin) {
+                        $timesheet->update([
+                            'status' => 'approved',
+                            'submitted_at' => now(),
+                            'approved_at' => now(),
+                            'approved_by' => $admin->id,
+                            'rejection_reason' => null,
+                        ]);
+                    }
                 }
 
                 if (Schema::hasColumn('timesheets', 'admin_note')) {

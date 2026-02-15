@@ -48,6 +48,7 @@ class TimesheetController extends Controller
 
         $start = $baseDate->copy()->startOfWeek();
         $end   = $baseDate->copy()->endOfWeek();
+        $weekComplete = now()->greaterThanOrEqualTo($end->copy()->endOfDay());
 
         $timesheets = Timesheet::where('user_id', $user->id)
             ->whereBetween('work_date', [$start, $end])
@@ -109,7 +110,8 @@ class TimesheetController extends Controller
             'status' => $weekStatus,
             'submitted' => $hasSubmitted,
             'locked' => $locked,
-            'can_submit' => ! $locked,
+            'week_complete' => $weekComplete,
+            'can_submit' => $weekComplete && ! $locked,
             'submitted_at' => $weekSheet?->submitted_at,
             'approved_at' => $weekSheet?->approved_at,
             'rejection_reason' => $weekSheet?->rejection_reason,
@@ -125,6 +127,12 @@ class TimesheetController extends Controller
 
         $start = Carbon::parse($request->week_start)->startOfWeek();
         $end   = Carbon::parse($request->week_start)->endOfWeek();
+
+        if (now()->lt($end->copy()->endOfDay())) {
+            return response()->json([
+                'message' => 'Week is still in progress and cannot be submitted yet.',
+            ], 422);
+        }
 
         /* ----------------------------------------
            AUTO-STOP RUNNING TIMER

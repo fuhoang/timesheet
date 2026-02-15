@@ -131,10 +131,35 @@ class ApiEndpointsTest extends TestCase
 
     public function test_submit_week_sets_status_and_submitted_at(): void
     {
+        Carbon::setTestNow(Carbon::parse('2026-02-10 10:00:00'));
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
+        $weekStart = now()->subWeek()->startOfWeek();
         $timesheet = Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => $weekStart->toDateString(),
+            'total_minutes' => 60,
+            'status' => 'draft',
+        ]);
+
+        $this->postJson('/api/timesheets/submit-week', [
+            'week_start' => $weekStart->toDateString(),
+        ])->assertStatus(200);
+
+        $timesheet->refresh();
+        $this->assertSame('submitted', $timesheet->status);
+        $this->assertNotNull($timesheet->submitted_at);
+        Carbon::setTestNow();
+    }
+
+    public function test_submit_week_rejects_current_incomplete_week(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-02-10 10:00:00'));
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        Timesheet::create([
             'user_id' => $user->id,
             'work_date' => now()->startOfWeek()->toDateString(),
             'total_minutes' => 60,
@@ -143,11 +168,8 @@ class ApiEndpointsTest extends TestCase
 
         $this->postJson('/api/timesheets/submit-week', [
             'week_start' => now()->startOfWeek()->toDateString(),
-        ])->assertStatus(200);
-
-        $timesheet->refresh();
-        $this->assertSame('submitted', $timesheet->status);
-        $this->assertNotNull($timesheet->submitted_at);
+        ])->assertStatus(422);
+        Carbon::setTestNow();
     }
 
     public function test_time_entry_start_stop_running_and_update(): void
