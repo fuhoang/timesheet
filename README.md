@@ -113,6 +113,15 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
   - Use `/api/admin/config/health` (admin-only) to verify APP/FRONTEND/CORS/SANCTUM alignment.
   - Admin UI: open `/admin/system` for detailed diagnostics and fix hints.
 
+## Recent Changes
+
+- Timer behavior update:
+  - Starting a timer on a `submitted` or `rejected` day now reopens that day to `draft`.
+  - `approved` days remain locked and timer start is blocked.
+- Project visibility update:
+  - On user routes (`/`, `/timesheets`, `/reports`), users only see projects assigned to them.
+  - Admin routes continue to show the full admin project set.
+
 ### Test Config Health Validator
 
 1. Login as admin and open `http://127.0.0.1:8000/admin/timesheets`.

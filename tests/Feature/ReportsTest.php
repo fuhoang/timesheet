@@ -7,12 +7,26 @@ use App\Models\TimeEntry;
 use App\Models\Timesheet;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class ReportsTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::flush();
+    }
+
+    private function reportsUrl(string $extraQuery = ''): string
+    {
+        $base = '/api/reports?start=2000-01-01&end=2100-01-01';
+
+        return $extraQuery === '' ? $base : "{$base}&{$extraQuery}";
+    }
 
     public function test_reports_restricts_non_admin_to_self(): void
     {
@@ -67,7 +81,7 @@ class ReportsTest extends TestCase
 
         Sanctum::actingAs($user);
 
-        $response = $this->getJson('/api/reports')
+        $response = $this->getJson($this->reportsUrl())
             ->assertStatus(200)
             ->json();
 
@@ -128,7 +142,7 @@ class ReportsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/reports?status=approved&project_id=' . $projectA->id . '&user_id=' . $user->id)
+        $response = $this->getJson($this->reportsUrl('status=approved&project_id=' . $projectA->id . '&user_id=' . $user->id))
             ->assertStatus(200)
             ->json();
 
@@ -153,7 +167,7 @@ class ReportsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/reports')
+        $response = $this->getJson($this->reportsUrl())
             ->assertStatus(200)
             ->json();
 
@@ -175,7 +189,7 @@ class ReportsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/reports')
+        $response = $this->getJson($this->reportsUrl())
             ->assertStatus(200)
             ->json();
 
@@ -197,7 +211,7 @@ class ReportsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/reports?include_drafts=1')
+        $response = $this->getJson($this->reportsUrl('include_drafts=1'))
             ->assertStatus(200)
             ->json();
 
@@ -221,7 +235,7 @@ class ReportsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/reports?status=approved&include_drafts=1')
+        $response = $this->getJson($this->reportsUrl('status=approved&include_drafts=1'))
             ->assertStatus(200)
             ->json();
 
@@ -253,7 +267,7 @@ class ReportsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/reports?status=all')
+        $response = $this->getJson($this->reportsUrl('status=all'))
             ->assertStatus(200)
             ->json();
 
@@ -275,7 +289,7 @@ class ReportsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/reports?status=all&include_drafts=0')
+        $response = $this->getJson($this->reportsUrl('status=all&include_drafts=0'))
             ->assertStatus(200)
             ->json();
 
@@ -298,7 +312,7 @@ class ReportsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/reports')
+        $response = $this->getJson($this->reportsUrl())
             ->assertStatus(200)
             ->json();
 
@@ -320,7 +334,7 @@ class ReportsTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/reports?profile=1')
+        $response = $this->getJson($this->reportsUrl('profile=1'))
             ->assertStatus(200)
             ->json();
 
