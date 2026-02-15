@@ -5,10 +5,15 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Timesheet;
 use App\Models\TimeEntry;
+use App\Services\TimesheetRulesEngine;
 use Illuminate\Http\Request;
 
 class AdminTimesheetController extends Controller
 {
+    public function __construct(private TimesheetRulesEngine $rules)
+    {
+    }
+
     /**
      * List submitted timesheets for admin review
      */
@@ -50,6 +55,19 @@ class AdminTimesheetController extends Controller
         }
 
         $timesheets = $query->paginate(20);
+        $timesheets->setCollection(
+            $timesheets->getCollection()->map(function ($timesheet) {
+                $approveRule = $this->rules->evaluateAdminApprove($timesheet);
+                $rejectRule = $this->rules->evaluateAdminReject($timesheet);
+                $unlockRule = $this->rules->evaluateAdminUnlock($timesheet);
+                $timesheet->setAttribute('rules', [
+                    'approve' => $approveRule,
+                    'reject' => $rejectRule,
+                    'unlock' => $unlockRule,
+                ]);
+                return $timesheet;
+            })
+        );
 
         return response()->json($timesheets);
     }
@@ -70,11 +88,14 @@ class AdminTimesheetController extends Controller
 
         $timesheets = Timesheet::whereIn('id', $ids)->get();
 
-        $eligible = $timesheets->filter(fn ($t) => $t->approved_at === null && $t->submitted_at !== null);
+        $eligible = $timesheets->filter(fn ($t) => $this->rules->evaluateAdminApprove($t)['allowed']);
 
         if ($eligible->isEmpty()) {
             return response()->json([
                 'message' => 'No submitted timesheets to approve',
+                'rule' => [
+                    'reason' => 'not_submitted_or_already_approved',
+                ],
             ], 422);
         }
 
@@ -118,11 +139,14 @@ class AdminTimesheetController extends Controller
 
         $timesheets = Timesheet::whereIn('id', $ids)->get();
 
-        $eligible = $timesheets->filter(fn ($t) => $t->approved_at === null && $t->submitted_at !== null);
+        $eligible = $timesheets->filter(fn ($t) => $this->rules->evaluateAdminReject($t)['allowed']);
 
         if ($eligible->isEmpty()) {
             return response()->json([
                 'message' => 'No submitted timesheets to reject',
+                'rule' => [
+                    'reason' => 'not_submitted_or_already_approved',
+                ],
             ], 422);
         }
 
@@ -212,9 +236,13 @@ class AdminTimesheetController extends Controller
     {
         $this->authorize('approve', $timesheet);
 
-        if ($timesheet->approved_at) {
+        $rule = $this->rules->evaluateAdminApprove($timesheet);
+        if (!$rule['allowed']) {
             return response()->json([
-                'message' => 'Timesheet already approved',
+                'message' => $rule['message'],
+                'rule' => [
+                    'reason' => $rule['reason'],
+                ],
             ], 422);
         }
 
@@ -244,9 +272,23 @@ class AdminTimesheetController extends Controller
             'reason' => 'required|string|max:500',
         ]);
 
-        if ($timesheet->approved_at) {
+        $rule = $this->rules->evaluateAdminReject($timesheet);
+        if (!$rule['allowed']) {
             return response()->json([
-                'message' => 'Approved timesheets cannot be rejected',
+                'message' => $rule['message'],
+                'rule' => [
+                    'reason' => $rule['reason'],
+                ],
+            ], 422);
+        }
+
+        $rule = $this->rules->evaluateAdminUnlock($timesheet);
+        if (!$rule['allowed']) {
+            return response()->json([
+                'message' => $rule['message'],
+                'rule' => [
+                    'reason' => $rule['reason'],
+                ],
             ], 422);
         }
 

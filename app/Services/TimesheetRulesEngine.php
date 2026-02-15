@@ -68,5 +68,77 @@ class TimesheetRulesEngine
             'can_reopen' => in_array($timesheet->status, ['submitted', 'rejected'], true),
         ];
     }
-}
 
+    public function evaluateAdminApprove(Timesheet $timesheet): array
+    {
+        if ($this->hasRawAttributeValue($timesheet, 'approved_at') || $timesheet->status === 'approved') {
+            return [
+                'allowed' => false,
+                'reason' => 'already_approved',
+                'message' => 'Timesheet already approved',
+            ];
+        }
+
+        if (!$this->hasRawAttributeValue($timesheet, 'submitted_at')) {
+            return [
+                'allowed' => false,
+                'reason' => 'not_submitted',
+                'message' => 'Timesheet is not submitted',
+            ];
+        }
+
+        return [
+            'allowed' => true,
+            'reason' => null,
+            'message' => null,
+        ];
+    }
+
+    public function evaluateAdminReject(Timesheet $timesheet): array
+    {
+        if ($this->hasRawAttributeValue($timesheet, 'approved_at') || $timesheet->status === 'approved') {
+            return [
+                'allowed' => false,
+                'reason' => 'already_approved',
+                'message' => 'Approved timesheets cannot be rejected',
+            ];
+        }
+
+        if (!$this->hasRawAttributeValue($timesheet, 'submitted_at')) {
+            return [
+                'allowed' => false,
+                'reason' => 'not_submitted',
+                'message' => 'Timesheet is not submitted',
+            ];
+        }
+
+        return [
+            'allowed' => true,
+            'reason' => null,
+            'message' => null,
+        ];
+    }
+
+    public function evaluateAdminUnlock(Timesheet $timesheet): array
+    {
+        if (!$this->hasRawAttributeValue($timesheet, 'submitted_at') && $timesheet->status === 'draft') {
+            return [
+                'allowed' => false,
+                'reason' => 'already_unlocked',
+                'message' => 'Timesheet is already unlocked',
+            ];
+        }
+
+        return [
+            'allowed' => true,
+            'reason' => null,
+            'message' => null,
+        ];
+    }
+
+    private function hasRawAttributeValue(Timesheet $timesheet, string $key): bool
+    {
+        $attributes = $timesheet->getAttributes();
+        return !empty($attributes[$key]);
+    }
+}
