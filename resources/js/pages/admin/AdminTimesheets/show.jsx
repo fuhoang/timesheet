@@ -24,6 +24,7 @@ export default function AdminTimesheetShow() {
     const [savingEntryId, setSavingEntryId] = useState(null);
     const [entryNotes, setEntryNotes] = useState({});
     const [statusHistory, setStatusHistory] = useState([]);
+    const [historyFilter, setHistoryFilter] = useState('all');
 
     /* ---------------- Load timesheet ---------------- */
 
@@ -179,6 +180,10 @@ export default function AdminTimesheetShow() {
         );
     }
 
+    const filteredHistory = historyFilter === 'all'
+        ? statusHistory
+        : statusHistory.filter(item => item.to_status === historyFilter);
+
     return (
         <div className="space-y-6">
 
@@ -301,10 +306,21 @@ export default function AdminTimesheetShow() {
             </div>
 
             <div className="bg-white rounded-2xl shadow border overflow-hidden">
-                <div className="p-4 font-semibold border-b">
-                    Status History
+                <div className="p-4 border-b flex items-center justify-between gap-3">
+                    <div className="font-semibold">Status History</div>
+                    <select
+                        value={historyFilter}
+                        onChange={e => setHistoryFilter(e.target.value)}
+                        className="border rounded-lg px-2 py-1 text-xs"
+                    >
+                        <option value="all">All transitions</option>
+                        <option value="draft">To draft</option>
+                        <option value="submitted">To submitted</option>
+                        <option value="approved">To approved</option>
+                        <option value="rejected">To rejected</option>
+                    </select>
                 </div>
-                {statusHistory.length === 0 ? (
+                {filteredHistory.length === 0 ? (
                     <div className="p-4 text-sm text-gray-500">No status transitions logged yet.</div>
                 ) : (
                     <table className="w-full text-sm">
@@ -314,11 +330,12 @@ export default function AdminTimesheetShow() {
                                 <th className="px-4 py-3 text-left">From</th>
                                 <th className="px-4 py-3 text-left">To</th>
                                 <th className="px-4 py-3 text-left">By</th>
+                                <th className="px-4 py-3 text-left">Source</th>
                                 <th className="px-4 py-3 text-left">Reason</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
-                            {statusHistory.map(item => (
+                            {filteredHistory.map(item => (
                                 <tr key={item.id}>
                                     <td className="px-4 py-3 text-gray-600">
                                         {new Date(item.created_at).toLocaleString()}
@@ -326,7 +343,25 @@ export default function AdminTimesheetShow() {
                                     <td className="px-4 py-3">{item.from_status || '—'}</td>
                                     <td className="px-4 py-3 font-medium">{item.to_status}</td>
                                     <td className="px-4 py-3 text-gray-600">
-                                        {item.actor?.name || item.actor_role || 'system'}
+                                        <div className="flex items-center gap-2">
+                                            <span>{item.actor?.name || item.actor_role || 'system'}</span>
+                                            {item.actor_role && (
+                                                <span
+                                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                                                        item.actor_role === 'admin'
+                                                            ? 'bg-blue-100 text-blue-700'
+                                                            : 'bg-gray-100 text-gray-700'
+                                                    }`}
+                                                >
+                                                    {item.actor_role}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3 text-gray-600">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-700">
+                                            {item.context?.source || 'manual'}
+                                        </span>
                                     </td>
                                     <td className="px-4 py-3 text-gray-600">{item.reason || '—'}</td>
                                 </tr>

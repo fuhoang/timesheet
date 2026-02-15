@@ -26,6 +26,16 @@ export default function AdminSystem() {
 
     const checks = payload?.checks ?? [];
     const failed = checks.filter(check => !check.ok);
+    const values = payload?.values ?? {};
+
+    async function copyText(value) {
+        if (!value) return;
+        try {
+            await navigator.clipboard.writeText(value);
+        } catch {
+            // No-op fallback; user can still copy from text.
+        }
+    }
 
     return (
         <div className="space-y-6">
@@ -68,6 +78,28 @@ export default function AdminSystem() {
                 </div>
             )}
 
+            {!error && (
+                <div className="bg-white p-4 rounded-2xl shadow border">
+                    <div className="text-sm font-semibold text-gray-900">Parsed Config Values</div>
+                    <div className="mt-3 grid gap-2 text-xs">
+                        <ValueRow label="APP_URL" value={values.app_url} onCopy={copyText} />
+                        <ValueRow label="FRONTEND_URL" value={values.frontend_url} onCopy={copyText} />
+                        <ValueRow label="APP host:port" value={values.app_host_port} onCopy={copyText} />
+                        <ValueRow label="FRONTEND host:port" value={values.frontend_host_port} onCopy={copyText} />
+                        <ValueRow
+                            label="CORS_ALLOWED_ORIGINS"
+                            value={(values.cors_allowed_origins || []).join(',')}
+                            onCopy={copyText}
+                        />
+                        <ValueRow
+                            label="SANCTUM_STATEFUL_DOMAINS"
+                            value={(values.sanctum_stateful_domains || []).join(',')}
+                            onCopy={copyText}
+                        />
+                    </div>
+                </div>
+            )}
+
             <div className="bg-white rounded-2xl shadow border overflow-hidden">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b">
@@ -103,7 +135,22 @@ export default function AdminSystem() {
                                     </span>
                                 </td>
                                 <td className="px-4 py-3 text-gray-600">
-                                    {check.ok ? '—' : (check.hint || 'Check configuration values.')}
+                                    {check.ok ? (
+                                        '—'
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <div>{check.hint || 'Check configuration values.'}</div>
+                                            {check.copy_fix && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => copyText(check.copy_fix)}
+                                                    className="px-2 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
+                                                >
+                                                    Copy fix
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                 </td>
                             </tr>
                         ))}
@@ -122,6 +169,26 @@ export default function AdminSystem() {
                         ))}
                     </div>
                 </div>
+            )}
+        </div>
+    );
+}
+
+function ValueRow({ label, value, onCopy }) {
+    return (
+        <div className="rounded-lg border border-gray-200 px-3 py-2 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+                <div className="text-gray-500">{label}</div>
+                <div className="font-mono text-gray-800 truncate">{value || '—'}</div>
+            </div>
+            {value && (
+                <button
+                    type="button"
+                    onClick={() => onCopy(value)}
+                    className="px-2 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
+                >
+                    Copy
+                </button>
             )}
         </div>
     );

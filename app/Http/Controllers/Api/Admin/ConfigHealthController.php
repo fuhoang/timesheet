@@ -71,12 +71,31 @@ class ConfigHealthController extends Controller
             ),
         ];
 
-        $failed = collect($checks)->where('ok', false)->values();
+        $checks = collect($checks)->map(function (array $check) use ($appUrl, $frontendUrl, $appHostPort, $frontendHostPort) {
+            $check['copy_fix'] = $this->copyFixForCheck(
+                $check['key'],
+                $appUrl,
+                $frontendUrl,
+                $appHostPort,
+                $frontendHostPort
+            );
+            return $check;
+        })->values();
+
+        $failed = $checks->where('ok', false)->values();
 
         return response()->json([
             'ok' => $failed->isEmpty(),
             'failed_count' => $failed->count(),
             'checks' => $checks,
+            'values' => [
+                'app_url' => $appUrl,
+                'frontend_url' => $frontendUrl,
+                'app_host_port' => $appHostPort,
+                'frontend_host_port' => $frontendHostPort,
+                'cors_allowed_origins' => $corsOrigins->all(),
+                'sanctum_stateful_domains' => $statefulDomains->all(),
+            ],
         ]);
     }
 
@@ -130,5 +149,22 @@ class ConfigHealthController extends Controller
         }
 
         return $statefulDomains->contains(fn ($domain) => str_contains((string) $domain, $needle));
+    }
+
+    private function copyFixForCheck(
+        string $key,
+        string $appUrl,
+        string $frontendUrl,
+        ?string $appHostPort,
+        ?string $frontendHostPort
+    ): ?string {
+        return match ($key) {
+            'app_url' => "APP_URL={$appUrl}",
+            'frontend_url' => "FRONTEND_URL={$frontendUrl}",
+            'cors_frontend', 'cors_backend' => "CORS_ALLOWED_ORIGINS={$frontendUrl},{$appUrl}",
+            'sanctum_frontend', 'sanctum_backend' => "SANCTUM_STATEFUL_DOMAINS={$frontendHostPort},{$appHostPort}",
+            'host_format' => 'Use one host style only (all localhost or all 127.0.0.1) across APP_URL, FRONTEND_URL, CORS_ALLOWED_ORIGINS, SANCTUM_STATEFUL_DOMAINS',
+            default => null,
+        };
     }
 }

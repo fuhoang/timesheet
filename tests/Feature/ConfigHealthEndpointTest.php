@@ -35,6 +35,8 @@ class ConfigHealthEndpointTest extends TestCase
 
         $this->assertTrue($response['ok']);
         $this->assertSame(0, $response['failed_count']);
+        $this->assertArrayHasKey('values', $response);
+        $this->assertArrayHasKey('app_url', $response['values']);
     }
 
     public function test_admin_config_health_reports_issues_for_mismatched_hosts(): void
@@ -68,6 +70,8 @@ class ConfigHealthEndpointTest extends TestCase
         $this->assertContains('cors_frontend', $failedKeys);
         $this->assertContains('sanctum_frontend', $failedKeys);
         $this->assertContains('host_format', $failedKeys);
+        $firstFailed = collect($response['checks'])->first(fn ($check) => !$check['ok']);
+        $this->assertNotEmpty($firstFailed['copy_fix'] ?? null);
     }
 
     public function test_non_admin_cannot_access_admin_config_health(): void
