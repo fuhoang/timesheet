@@ -257,3 +257,47 @@ textarea:focus-visible {
     background: var(--app-danger-bg);
     color: var(--app-danger-text) !important;
 }
+
+.reports-page .reports-filters {
+    background: color-mix(in oklab, var(--app-surface) 92%, transparent);
+    border-color: var(--app-border);
+    box-shadow: var(--app-shadow);
+}
+
+.dark .reports-page .reports-filters {
+    background: color-mix(in oklab, var(--app-surface) 88%, #020617 12%);
+}
+
+.reports-page .reports-row {
+    border-color: color-mix(in oklab, var(--app-border) 90%, var(--app-accent) 10%);
+}
+
+.reports-day {
+    border-color: var(--app-border) !important;
+    background: var(--app-surface-2) !important;
+}
+
+.reports-day .text-sm,
+.reports-day .text-xs {
+    color: var(--app-text) !important;
+}
+
+.reports-day-rejected {
+    border-color: color-mix(in oklab, var(--app-danger-text) 35%, var(--app-border)) !important;
+    background: color-mix(in oklab, var(--app-danger-bg) 80%, var(--app-surface)) !important;
+}
+
+.reports-day-draft {
+    border-color: color-mix(in oklab, var(--app-warning-text) 35%, var(--app-border)) !important;
+    background: color-mix(in oklab, var(--app-warning-bg) 76%, var(--app-surface)) !important;
+}
+
+.reports-day-submitted {
+    border-color: color-mix(in oklab, var(--app-info-text) 35%, var(--app-border)) !important;
+    background: color-mix(in oklab, var(--app-info-bg) 76%, var(--app-surface)) !important;
+}
+
+.reports-day-approved {
+    border-color: color-mix(in oklab, var(--app-success-text) 35%, var(--app-border)) !important;
+    background: color-mix(in oklab, var(--app-success-bg) 76%, var(--app-surface)) !important;
+}
