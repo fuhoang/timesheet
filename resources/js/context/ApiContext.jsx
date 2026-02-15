@@ -9,6 +9,9 @@ export function ApiProvider({ children }) {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [lastSuccessAt, setLastSuccessAt] = useState(null);
+    const [lastRequestId, setLastRequestId] = useState(null);
+    const [lastErrorRequestId, setLastErrorRequestId] = useState(null);
     const authLoadingRef = useRef(authLoading);
 
     useEffect(() => {
@@ -36,6 +39,9 @@ export function ApiProvider({ children }) {
             setError(null);
 
             const res = await axios(config);
+            setLastSuccessAt(new Date().toISOString());
+            setLastRequestId(res?.headers?.['x-request-id'] || res?.data?.request_id || null);
+            setLastErrorRequestId(null);
             return res.data;
 
         } catch (err) {
@@ -48,6 +54,8 @@ export function ApiProvider({ children }) {
             }
 
             setError(err);
+            const errorRequestId = err?.response?.headers?.['x-request-id'] || err?.response?.data?.request_id || null;
+            setLastErrorRequestId(errorRequestId);
             throw err;
 
         } finally {
@@ -59,7 +67,10 @@ export function ApiProvider({ children }) {
         api,
         apiLoading: loading,
         apiError: error,
-    }), [api, loading, error]);
+        apiLastSuccessAt: lastSuccessAt,
+        apiLastRequestId: lastRequestId,
+        apiLastErrorRequestId: lastErrorRequestId,
+    }), [api, loading, error, lastSuccessAt, lastRequestId, lastErrorRequestId]);
 
     return (
         <ApiContext.Provider value={value}>

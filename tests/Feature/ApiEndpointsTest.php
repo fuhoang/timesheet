@@ -243,6 +243,10 @@ class ApiEndpointsTest extends TestCase
         $this->postJson("/api/admin/timesheets/{$timesheet->id}/approve")
             ->assertStatus(200);
 
+        $this->getJson("/api/admin/timesheets/{$timesheet->id}/history")
+            ->assertStatus(200)
+            ->assertJsonPath('0.to_status', 'approved');
+
         $rejected = Timesheet::create([
             'user_id' => $user->id,
             'work_date' => now()->addDay()->toDateString(),
@@ -362,5 +366,30 @@ class ApiEndpointsTest extends TestCase
         $this->postJson('/api/admin/timesheets/bulk-approve', [
             'ids' => [$timesheet->id],
         ])->assertStatus(403);
+    }
+
+    public function test_admin_bulk_actions_are_rate_limited(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+        Sanctum::actingAs($admin);
+
+        $timesheet = Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        for ($i = 0; $i < 15; $i++) {
+            $this->postJson('/api/admin/timesheets/bulk-approve', [
+                'ids' => [$timesheet->id],
+            ]);
+        }
+
+        $this->postJson('/api/admin/timesheets/bulk-approve', [
+            'ids' => [$timesheet->id],
+        ])->assertStatus(429);
     }
 }
