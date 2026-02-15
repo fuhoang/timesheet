@@ -31,6 +31,7 @@ export default function AdminUsers() {
     const [bulkSaving, setBulkSaving] = useState(false);
     const [assignmentLogs, setAssignmentLogs] = useState([]);
     const [perPage, setPerPage] = useState(10);
+    const [assignedOnly, setAssignedOnly] = useState(false);
 
     useEffect(() => {
         loadUsers();
@@ -284,10 +285,12 @@ export default function AdminUsers() {
                         userQuery={userQuery}
                         roleFilter={roleFilter}
                         projectQuery={projectQuery}
+                        assignedOnly={assignedOnly}
                         perPage={perPage}
                         onUserQueryChange={setUserQuery}
                         onRoleFilterChange={setRoleFilter}
                         onProjectQueryChange={setProjectQuery}
+                        onAssignedOnlyChange={setAssignedOnly}
                         onPerPageChange={value => setPerPage(value)}
                         onSelectFilteredUsers={() => selectAllFilteredUsers(filteredUsers)}
                         selectedCount={bulkUsers.size}
@@ -311,6 +314,7 @@ export default function AdminUsers() {
                         users={filteredUsers}
                         projects={filteredProjects}
                         selected={selected}
+                        assignedOnly={assignedOnly}
                         bulkUsers={bulkUsers}
                         savingUserId={savingUserId}
                         onToggleBulkUser={toggleBulkUser}

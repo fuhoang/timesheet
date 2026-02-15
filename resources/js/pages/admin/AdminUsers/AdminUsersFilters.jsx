@@ -5,10 +5,12 @@ export default function AdminUsersFilters({
     userQuery,
     roleFilter,
     projectQuery,
+    assignedOnly,
     perPage,
     onUserQueryChange,
     onRoleFilterChange,
     onProjectQueryChange,
+    onAssignedOnlyChange,
     onPerPageChange,
     onSelectFilteredUsers,
     selectedCount,
@@ -58,6 +60,14 @@ export default function AdminUsersFilters({
                             placeholder="Search projects"
                             className="w-full md:w-64 rounded-lg border border-gray-200 px-3 py-2 text-sm"
                         />
+                        <label className="flex items-center gap-2 text-xs text-gray-600">
+                            <input
+                                type="checkbox"
+                                checked={assignedOnly}
+                                onChange={event => onAssignedOnlyChange(event.target.checked)}
+                            />
+                            Show assigned only (per user)
+                        </label>
                         <Button
                             variant="secondary"
                             size="sm"

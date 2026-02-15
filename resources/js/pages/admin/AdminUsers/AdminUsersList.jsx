@@ -5,6 +5,7 @@ export default function AdminUsersList({
     users,
     projects,
     selected,
+    assignedOnly,
     bulkUsers,
     savingUserId,
     onToggleBulkUser,
@@ -15,7 +16,12 @@ export default function AdminUsersList({
 }) {
     return (
         <div className="space-y-4">
-            {users.map(user => (
+            {users.map(user => {
+                const visibleProjects = assignedOnly
+                    ? projects.filter(project => selected[user.id]?.has(project.id))
+                    : projects;
+
+                return (
                 <div key={user.id} className="bg-white rounded-2xl shadow border p-4 space-y-3">
                     <div className="flex items-center justify-between">
                         <div>
@@ -63,7 +69,7 @@ export default function AdminUsersList({
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {projects.map(project => {
+                        {visibleProjects.map(project => {
                             const checked = selected[user.id]?.has(project.id);
                             return (
                                 <label
@@ -79,9 +85,12 @@ export default function AdminUsersList({
                                 </label>
                             );
                         })}
+                        {assignedOnly && visibleProjects.length === 0 && (
+                            <div className="text-xs text-gray-500">No assigned projects for this user.</div>
+                        )}
                     </div>
                 </div>
-            ))}
+            )})}
         </div>
     );
 }
