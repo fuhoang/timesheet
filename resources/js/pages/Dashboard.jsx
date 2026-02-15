@@ -22,7 +22,7 @@ export default function Dashboard() {
     const [lastUpdated, setLastUpdated] = useState(null);
     const [resumeProjectId, setResumeProjectId] = useState(null);
     const [timesheetError, setTimesheetError] = useState('');
-    const isTimerDisabled = ['submitted', 'approved'].includes(timesheet?.status);
+    const isTimerDisabled = timesheet?.status === 'approved';
 
     useEffect(() => {
         if (!selectedProject && projects.length > 0) {

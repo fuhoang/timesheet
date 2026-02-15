@@ -14,25 +14,51 @@ class TimeEntryController extends Controller
      */
     public function start(Request $request)
     {
+        $user = $request->user();
+
         $data = $request->validate([
             'project_id' => 'required|exists:projects,id',
             'task_id' => 'nullable|exists:tasks,id',
             'description' => 'nullable|string',
         ]);
 
-        if (!$request->user()->projects()->whereKey($data['project_id'])->exists()) {
+        if (!$user->projects()->whereKey($data['project_id'])->exists()) {
             return response()->json([
                 'message' => 'Project is not assigned to this user',
             ], 403);
         }
 
-        $timesheet = $request->user()
+        $workDate = now()->toDateString();
+        $timesheet = $user
             ->timesheets()
-            ->firstOrCreate([
-                'work_date' => now()->toDateString(),
-            ], [
+            ->whereDate('work_date', $workDate)
+            ->first();
+
+        if (!$timesheet) {
+            $timesheet = $user->timesheets()->create([
+                'work_date' => $workDate,
                 'status' => 'draft',
             ]);
+        }
+
+        if ($timesheet->status === 'approved') {
+            return response()->json([
+                'message' => 'Approved timesheets cannot be edited',
+            ], 403);
+        }
+
+        if (in_array($timesheet->status, ['submitted', 'rejected'], true)) {
+            $fromStatus = $timesheet->status;
+            $timesheet->update([
+                'status' => 'draft',
+                'rejection_reason' => null,
+                'approved_at' => null,
+                'approved_by' => null,
+            ]);
+            $timesheet->logStatusTransition($fromStatus, 'draft', $user, null, [
+                'source' => 'timer_start_reopen',
+            ]);
+        }
 
         // // 🔐 POLICY ENFORCEMENT
         // $this->authorize('edit', $timesheet);
@@ -49,7 +75,7 @@ class TimeEntryController extends Controller
         }
 
         $entry = $timesheet->entries()->create([
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
             'project_id' => $data['project_id'],
             'task_id' => $data['task_id'] ?? null,
             'started_at' => now(),
