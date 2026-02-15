@@ -32,7 +32,7 @@ export default function ReportsFilters({
     onResetFilters,
 }) {
     return (
-        <div className="sticky top-4 z-10 bg-gray-50/80 dark:bg-slate-900/70 backdrop-blur">
+        <div className="sticky top-4 z-10 backdrop-blur">
             <div className="bg-white border rounded-xl p-4 space-y-4 reports-filters">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
