@@ -27,9 +27,16 @@ export default function WeekHeader({
                         {submitting ? 'Submitting…' : 'Submit week'}
                     </Button>
                 ) : (
-                    <span className="px-3 py-2 rounded-lg bg-gray-200 text-gray-900 dark:bg-white/70 dark:text-black mt-2 inline-block">
-                        {week.week_complete ? 'Submitted' : 'Week in progress'}
-                    </span>
+                    <div className="mt-2 space-y-1">
+                        <span className="px-3 py-2 rounded-lg bg-gray-200 text-gray-900 dark:bg-white/70 dark:text-black inline-block">
+                            {week.week_complete ? 'Submitted' : 'Week in progress'}
+                        </span>
+                        {!week.week_complete && week.submit_available_at && (
+                            <div className="text-xs text-gray-500">
+                                You can submit after {new Date(week.submit_available_at).toLocaleString()}.
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
 

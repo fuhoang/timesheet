@@ -197,6 +197,16 @@ class ApiEndpointsTest extends TestCase
         Carbon::setTestNow();
     }
 
+    public function test_submit_week_requires_week_start(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/timesheets/submit-week', [])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['week_start']);
+    }
+
     public function test_time_entry_start_stop_running_and_update(): void
     {
         $now = Carbon::parse('2026-02-03 10:00:00');
