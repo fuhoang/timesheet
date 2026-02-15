@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Timesheet;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -100,5 +102,67 @@ class ConfigHealthEndpointTest extends TestCase
             ->json();
 
         $this->assertFalse($response['ok']);
+    }
+
+    public function test_admin_config_health_detects_in_progress_week_status_issues(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-02-10 10:00:00'));
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+        Sanctum::actingAs($admin);
+
+        Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->startOfWeek()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        $response = $this->getJson('/api/admin/config/health')
+            ->assertStatus(200)
+            ->json();
+
+        $issueCheck = collect($response['checks'])->firstWhere('key', 'in_progress_week_statuses');
+        $this->assertNotNull($issueCheck);
+        $this->assertFalse($issueCheck['ok']);
+        $this->assertGreaterThan(0, $response['values']['in_progress_week_status_count']);
+        Carbon::setTestNow();
+    }
+
+    public function test_admin_can_fix_in_progress_week_status_issues(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-02-10 10:00:00'));
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+        Sanctum::actingAs($admin);
+
+        $timesheet = Timesheet::create([
+            'user_id' => $user->id,
+            'work_date' => now()->startOfWeek()->toDateString(),
+            'total_minutes' => 30,
+            'status' => 'rejected',
+            'submitted_at' => now(),
+            'rejection_reason' => 'Needs update',
+        ]);
+
+        $this->postJson('/api/admin/config/fix-in-progress-week')
+            ->assertStatus(200)
+            ->assertJson(['status' => 'ok', 'fixed_count' => 1]);
+
+        $timesheet->refresh();
+        $this->assertSame('draft', $timesheet->status);
+        $this->assertNull($timesheet->submitted_at);
+        $this->assertNull($timesheet->rejection_reason);
+        Carbon::setTestNow();
+    }
+
+    public function test_non_admin_cannot_fix_in_progress_week_status_issues(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/admin/config/fix-in-progress-week')
+            ->assertStatus(403);
     }
 }
