@@ -151,6 +151,7 @@ class ApiEndpointsTest extends TestCase
         $this->assertFalse($res['locked']);
         $this->assertFalse($res['can_submit']);
         $this->assertSame('draft', $res['status']);
+        $this->assertSame('week_in_progress', $res['submit_blocked_reason']);
         Carbon::setTestNow();
     }
 
@@ -193,7 +194,9 @@ class ApiEndpointsTest extends TestCase
 
         $this->postJson('/api/timesheets/submit-week', [
             'week_start' => now()->startOfWeek()->toDateString(),
-        ])->assertStatus(422);
+        ])->assertStatus(422)
+            ->assertJsonPath('rule.reason', 'week_in_progress')
+            ->assertJsonPath('rule.week_complete', false);
         Carbon::setTestNow();
     }
 
@@ -331,7 +334,8 @@ class ApiEndpointsTest extends TestCase
         $this->postJson('/api/time-entries/start', [
             'project_id' => $project->id,
             'description' => 'Work',
-        ])->assertStatus(403);
+        ])->assertStatus(403)
+            ->assertJsonPath('rule.reason', 'approved_locked');
     }
 
     public function test_admin_timesheet_actions(): void
