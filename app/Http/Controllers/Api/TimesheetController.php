@@ -64,16 +64,25 @@ class TimesheetController extends Controller
         $hasSubmitted = $timesheets->contains('status', 'submitted');
         $hasApproved = $timesheets->contains('status', 'approved');
         $hasRejected = $timesheets->contains('status', 'rejected');
-        $locked = $hasSubmitted || $hasApproved || $hasRejected;
 
-        if ($hasApproved) {
-            $weekStatus = 'approved';
-        } elseif ($hasSubmitted) {
-            $weekStatus = 'submitted';
-        } elseif ($hasRejected) {
-            $weekStatus = 'rejected';
-        } else {
+        if (!$weekComplete) {
+            // In-progress week stays editable even if legacy seeded/submitted rows exist.
+            $locked = false;
             $weekStatus = 'draft';
+            $isSubmitted = false;
+        } else {
+            $locked = $hasSubmitted || $hasApproved || $hasRejected;
+            $isSubmitted = $hasSubmitted;
+
+            if ($hasApproved) {
+                $weekStatus = 'approved';
+            } elseif ($hasSubmitted) {
+                $weekStatus = 'submitted';
+            } elseif ($hasRejected) {
+                $weekStatus = 'rejected';
+            } else {
+                $weekStatus = 'draft';
+            }
         }
 
         $weekSheet = $timesheets->first(fn ($t) => $t->submitted_at !== null);
@@ -108,7 +117,7 @@ class TimesheetController extends Controller
 
             // 🔑 REQUIRED BY UI
             'status' => $weekStatus,
-            'submitted' => $hasSubmitted,
+            'submitted' => $isSubmitted,
             'locked' => $locked,
             'week_complete' => $weekComplete,
             'can_submit' => $weekComplete && ! $locked,
