@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
 import InlineAlert from '../../../components/ui/InlineAlert';
+import { getApiErrorDetails } from '../../../utils/apiError';
 import AdminUsersAuditLog from './AdminUsersAuditLog';
 import AdminUsersBulkProjects from './AdminUsersBulkProjects';
 import AdminUsersFilters from './AdminUsersFilters';
@@ -12,7 +13,7 @@ export default function AdminUsers() {
     const [users, setUsers] = useState([]);
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [error, setError] = useState(null);
     const [savingUserId, setSavingUserId] = useState(null);
     const [selected, setSelected] = useState({});
     const [pagination, setPagination] = useState({
@@ -41,7 +42,7 @@ export default function AdminUsers() {
 
     async function loadUsers(page = 1) {
         setLoading(true);
-        setError('');
+        setError(null);
         try {
             const res = await api({
                 method: 'get',
@@ -71,7 +72,7 @@ export default function AdminUsers() {
             setSelected(initial);
             setBulkUsers(new Set());
         } catch (err) {
-            setError('Unable to load users');
+            setError(getApiErrorDetails(err, 'Unable to load users'));
         } finally {
             setLoading(false);
         }
@@ -262,7 +263,7 @@ export default function AdminUsers() {
                 </p>
             </div>
 
-            {error && <InlineAlert>{error}</InlineAlert>}
+            {error && <InlineAlert requestId={error.requestId}>{error.message}</InlineAlert>}
 
             {loading ? (
                 <div className="p-6 text-gray-500">Loading users…</div>

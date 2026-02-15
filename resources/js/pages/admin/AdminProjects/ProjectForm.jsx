@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../../../components/ui/Button';
+import { getApiErrorDetails } from '../../../utils/apiError';
 
 export default function ProjectForm({ api, reloadProjects, editingProject, setEditingProject, showToast }) {
     const [name, setName] = useState('');
@@ -49,7 +50,7 @@ export default function ProjectForm({ api, reloadProjects, editingProject, setEd
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
             } else {
-                showToast('Failed to save project', 'error');
+                showToast(getApiErrorDetails(err, 'Failed to save project').fullMessage, 'error');
             }
         } finally {
             setSaving(false);

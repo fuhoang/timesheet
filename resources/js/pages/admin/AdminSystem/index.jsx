@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
+import InlineAlert from '../../../components/ui/InlineAlert';
+import { getApiErrorDetails } from '../../../utils/apiError';
 
 export default function AdminSystem() {
     const { api } = useApi();
@@ -14,7 +16,7 @@ export default function AdminSystem() {
             const res = await api({ method: 'get', url: '/api/admin/config/health' });
             setPayload(res);
         } catch (err) {
-            setError(err?.response?.data?.message || 'Unable to load system diagnostics.');
+            setError(getApiErrorDetails(err, 'Unable to load system diagnostics.'));
         } finally {
             setLoading(false);
         }
@@ -57,9 +59,9 @@ export default function AdminSystem() {
             </div>
 
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
-                    {error}
-                </div>
+                <InlineAlert requestId={error.requestId}>
+                    {error.message}
+                </InlineAlert>
             )}
 
             {!error && (

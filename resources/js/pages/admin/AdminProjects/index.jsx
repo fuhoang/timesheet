@@ -7,6 +7,7 @@ import ProjectEditModal from './ProjectEditModal';
 import ProjectForm from './ProjectForm';
 import ProjectTable from './ProjectTable';
 import Toast from '../../../components/ui/Toast';
+import { getApiErrorDetails } from '../../../utils/apiError';
 
 export default function AdminProjects() {
     const { api } = useApi();
@@ -32,7 +33,7 @@ export default function AdminProjects() {
         if (err.response?.status === 422) {
         setErrors(err.response.data.errors || {});
         } else {
-        showToast('Failed to update project', 'error');
+        showToast(getApiErrorDetails(err, 'Failed to update project').fullMessage, 'error');
         }
     } finally {
         setSavingEdit(false);

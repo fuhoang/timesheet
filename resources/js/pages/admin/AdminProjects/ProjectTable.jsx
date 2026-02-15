@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from '../../../components/ui/Button';
+import { getApiErrorDetails } from '../../../utils/apiError';
 
 export default function ProjectTable({ projects, api, reloadProjects, setEditingProject, showToast }) {
     async function deleteProject(id) {
@@ -10,7 +11,7 @@ export default function ProjectTable({ projects, api, reloadProjects, setEditing
             await reloadProjects();
             showToast('Project deleted');
         } catch (err) {
-            showToast('Failed to delete project', 'error');
+            showToast(getApiErrorDetails(err, 'Failed to delete project').fullMessage, 'error');
         }
     }
 
