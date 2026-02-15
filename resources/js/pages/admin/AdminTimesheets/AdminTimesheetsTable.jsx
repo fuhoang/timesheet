@@ -101,12 +101,16 @@ export default function AdminTimesheetsTable({
                     </tr>
                 </thead>
                 <tbody className="divide-y">
-                    {timesheets.map(ts => (
+                    {timesheets.map(ts => {
+                        const canReview = !!(ts?.rules?.approve?.allowed || ts?.rules?.reject?.allowed);
+                        const disabledReason = ts?.rules?.approve?.message || ts?.rules?.reject?.message || 'Not reviewable';
+                        return (
                         <tr key={ts.id}>
                             <td className="px-4 py-3">
                                 <input
                                     type="checkbox"
-                                    disabled={!ts.submitted_at || ts.status === 'approved'}
+                                    disabled={!canReview}
+                                    title={!canReview ? disabledReason : ''}
                                     checked={selectedIds.includes(ts.id)}
                                     onChange={() => onToggleSelectOne(ts.id)}
                                 />
@@ -129,7 +133,7 @@ export default function AdminTimesheetsTable({
                                 </Link>
                             </td>
                         </tr>
-                    ))}
+                    )})}
                 </tbody>
             </table>
 

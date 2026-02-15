@@ -75,7 +75,7 @@ export default function AdminTimesheets() {
     }
 
     const reviewableIds = timesheets
-        .filter(ts => ts.submitted_at && ts.status !== 'approved')
+        .filter(ts => ts?.rules?.approve?.allowed || ts?.rules?.reject?.allowed)
         .map(ts => ts.id);
 
     const allSubmittedSelected =
