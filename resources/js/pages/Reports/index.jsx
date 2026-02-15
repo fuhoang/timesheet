@@ -6,6 +6,7 @@ import ReportsRow from './ReportsRow';
 import ReportsPagination from './ReportsPagination';
 
 const REPORT_LAST_REFRESH_KEY = 'reportsLastRefreshAt';
+const REPORT_LAST_FILTERS_KEY = 'reportsLastFilters';
 
 function formatDate(date) {
     return date.toISOString().slice(0, 10);
@@ -24,19 +25,42 @@ function getWeekRange(reference = new Date()) {
 export default function Reports() {
     const { api, apiLoading } = useApi();
     const [{ start, end }] = useState(() => getWeekRange());
+    const [initialFilters] = useState(() => {
+        const { start: defaultStart, end: defaultEnd } = getWeekRange();
+        const fallback = {
+            startDate: formatDate(defaultStart),
+            endDate: formatDate(defaultEnd),
+            status: '',
+            includeDrafts: false,
+            projectId: '',
+            userId: '',
+            sort: 'total_minutes',
+            direction: 'desc',
+            page: 1,
+            perPage: 10,
+        };
+
+        try {
+            const raw = window.localStorage.getItem(REPORT_LAST_FILTERS_KEY);
+            if (!raw) return fallback;
+            return { ...fallback, ...JSON.parse(raw) };
+        } catch {
+            return fallback;
+        }
+    });
     const [report, setReport] = useState(null);
     const [error, setError] = useState(null);
     const [exporting, setExporting] = useState(false);
-    const [startDate, setStartDate] = useState(() => formatDate(start));
-    const [endDate, setEndDate] = useState(() => formatDate(end));
-    const [status, setStatus] = useState('');
-    const [includeDrafts, setIncludeDrafts] = useState(false);
-    const [projectId, setProjectId] = useState('');
-    const [userId, setUserId] = useState('');
-    const [sort, setSort] = useState('total_minutes');
-    const [direction, setDirection] = useState('desc');
-    const [page, setPage] = useState(1);
-    const [perPage, setPerPage] = useState(10);
+    const [startDate, setStartDate] = useState(initialFilters.startDate || formatDate(start));
+    const [endDate, setEndDate] = useState(initialFilters.endDate || formatDate(end));
+    const [status, setStatus] = useState(initialFilters.status || '');
+    const [includeDrafts, setIncludeDrafts] = useState(!!initialFilters.includeDrafts);
+    const [projectId, setProjectId] = useState(initialFilters.projectId || '');
+    const [userId, setUserId] = useState(initialFilters.userId || '');
+    const [sort, setSort] = useState(initialFilters.sort || 'total_minutes');
+    const [direction, setDirection] = useState(initialFilters.direction || 'desc');
+    const [page, setPage] = useState(Number(initialFilters.page || 1));
+    const [perPage, setPerPage] = useState(Number(initialFilters.perPage || 10));
     const [presetName, setPresetName] = useState('');
     const [presets, setPresets] = useState(() => {
         try {
@@ -69,6 +93,21 @@ export default function Reports() {
         page,
         per_page: perPage,
     }), [startDate, endDate, status, includeDrafts, projectId, userId, sort, direction, page, perPage]);
+
+    useEffect(() => {
+        window.localStorage.setItem(REPORT_LAST_FILTERS_KEY, JSON.stringify({
+            startDate,
+            endDate,
+            status,
+            includeDrafts,
+            projectId,
+            userId,
+            sort,
+            direction,
+            page,
+            perPage,
+        }));
+    }, [startDate, endDate, status, includeDrafts, projectId, userId, sort, direction, page, perPage]);
 
     useEffect(() => {
         let mounted = true;
@@ -185,6 +224,47 @@ export default function Reports() {
         window.localStorage.setItem('reportsPresets', JSON.stringify(next));
     }
 
+    function resetFilters() {
+        const { start: weekStart, end: weekEnd } = getWeekRange();
+        setStartDate(formatDate(weekStart));
+        setEndDate(formatDate(weekEnd));
+        setStatus('');
+        setIncludeDrafts(false);
+        setProjectId('');
+        setUserId('');
+        setSort('total_minutes');
+        setDirection('desc');
+        setPage(1);
+        setPerPage(10);
+    }
+
+    function applyDatePreset(type) {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        let nextStart = today;
+        let nextEnd = today;
+
+        if (type === 'this_week') {
+            const range = getWeekRange(today);
+            nextStart = range.start;
+            nextEnd = range.end;
+        } else if (type === 'last_week') {
+            const reference = new Date(today);
+            reference.setDate(reference.getDate() - 7);
+            const range = getWeekRange(reference);
+            nextStart = range.start;
+            nextEnd = range.end;
+        } else if (type === 'last_30_days') {
+            nextEnd = today;
+            nextStart = new Date(today);
+            nextStart.setDate(nextStart.getDate() - 29);
+        }
+
+        setStartDate(formatDate(nextStart));
+        setEndDate(formatDate(nextEnd));
+        setPage(1);
+    }
+
     const showSkeleton = apiLoading && !report;
 
     return (
@@ -262,6 +342,8 @@ export default function Reports() {
                 }}
                 onPresetSave={savePreset}
                 onPresetRemove={deletePreset}
+                onApplyDatePreset={applyDatePreset}
+                onResetFilters={resetFilters}
             />
 
             {apiLoading && (

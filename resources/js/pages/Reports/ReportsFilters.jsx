@@ -28,6 +28,8 @@ export default function ReportsFilters({
     onPresetSelect,
     onPresetSave,
     onPresetRemove,
+    onApplyDatePreset,
+    onResetFilters,
 }) {
     return (
         <div className="sticky top-4 z-10 bg-gray-50/80 backdrop-blur">
@@ -81,6 +83,37 @@ export default function ReportsFilters({
                             ))}
                         </select>
                     </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => onApplyDatePreset('this_week')}
+                        className="px-3 py-1 rounded-full border text-xs uppercase border-gray-200 text-gray-600 hover:border-gray-300"
+                    >
+                        This week
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onApplyDatePreset('last_week')}
+                        className="px-3 py-1 rounded-full border text-xs uppercase border-gray-200 text-gray-600 hover:border-gray-300"
+                    >
+                        Last week
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onApplyDatePreset('last_30_days')}
+                        className="px-3 py-1 rounded-full border text-xs uppercase border-gray-200 text-gray-600 hover:border-gray-300"
+                    >
+                        Last 30 days
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onResetFilters}
+                        className="px-3 py-1 rounded-full border text-xs uppercase border-gray-900 text-gray-900 hover:bg-gray-50"
+                    >
+                        Reset
+                    </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

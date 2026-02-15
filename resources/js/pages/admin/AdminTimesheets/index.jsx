@@ -13,6 +13,7 @@ export default function AdminTimesheets() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [bulkLoading, setBulkLoading] = useState(false);
     const [toast, setToast] = useState(null);
+    const [bulkRetrySeconds, setBulkRetrySeconds] = useState(0);
     const [pagination, setPagination] = useState({
         current_page: 1,
         last_page: 1,
@@ -37,6 +38,14 @@ export default function AdminTimesheets() {
     useEffect(() => {
         loadTimesheets();
     }, []);
+
+    useEffect(() => {
+        if (bulkRetrySeconds <= 0) return undefined;
+        const timer = window.setInterval(() => {
+            setBulkRetrySeconds(prev => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+        return () => window.clearInterval(timer);
+    }, [bulkRetrySeconds]);
 
     async function loadTimesheets(page = 1, nextFilters = filters, nextPerPage = perPage) {
         setLoading(true);
@@ -99,7 +108,7 @@ export default function AdminTimesheets() {
     }
 
     async function bulkApprove() {
-        if (selectedIds.length === 0 || bulkLoading) return;
+        if (selectedIds.length === 0 || bulkLoading || bulkRetrySeconds > 0) return;
         if (!confirm(`Approve ${selectedIds.length} timesheet(s)?`)) return;
 
         setBulkLoading(true);
@@ -109,9 +118,15 @@ export default function AdminTimesheets() {
                 url: '/api/admin/timesheets/bulk-approve',
                 data: { ids: selectedIds },
             });
-            showToast(res.message || 'Timesheets approved');
+            showToast(
+                `${res.message || 'Timesheets approved'} (${res.approved_count ?? 0} approved, ${res.skipped_count ?? 0} skipped)`
+            );
             await loadTimesheets();
         } catch (err) {
+            if (err.response?.status === 429) {
+                const retryAfter = Number(err.response?.headers?.['retry-after'] || 60);
+                setBulkRetrySeconds(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : 60);
+            }
             showToast(
                 err.response?.data?.message || 'Bulk approve failed',
                 'error'
@@ -122,7 +137,7 @@ export default function AdminTimesheets() {
     }
 
     async function bulkReject() {
-        if (selectedIds.length === 0 || bulkLoading) return;
+        if (selectedIds.length === 0 || bulkLoading || bulkRetrySeconds > 0) return;
         const reason = window.prompt('Rejection reason (required):');
         if (!reason || !reason.trim()) return;
 
@@ -135,9 +150,15 @@ export default function AdminTimesheets() {
                 url: '/api/admin/timesheets/bulk-reject',
                 data: { ids: selectedIds, reason: reason.trim() },
             });
-            showToast(res.message || 'Timesheets rejected');
+            showToast(
+                `${res.message || 'Timesheets rejected'} (${res.rejected_count ?? 0} rejected, ${res.skipped_count ?? 0} skipped)`
+            );
             await loadTimesheets();
         } catch (err) {
+            if (err.response?.status === 429) {
+                const retryAfter = Number(err.response?.headers?.['retry-after'] || 60);
+                setBulkRetrySeconds(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : 60);
+            }
             showToast(
                 err.response?.data?.message || 'Bulk reject failed',
                 'error'
@@ -203,13 +224,19 @@ export default function AdminTimesheets() {
 
             {toast && <Toast message={toast.message} type={toast.type} />}
 
+            {bulkRetrySeconds > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    Bulk actions are temporarily rate-limited. Try again in {bulkRetrySeconds}s.
+                </div>
+            )}
+
             <AdminTimesheetsTable
                 loading={loading}
                 timesheets={timesheets}
                 hasActiveFilters={hasActiveFilters}
                 onClearFilters={clearFilters}
                 selectedIds={selectedIds}
-                bulkLoading={bulkLoading}
+                bulkLoading={bulkLoading || bulkRetrySeconds > 0}
                 onBulkApprove={bulkApprove}
                 onBulkReject={bulkReject}
                 pagination={pagination}
