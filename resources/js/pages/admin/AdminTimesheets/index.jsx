@@ -6,6 +6,7 @@ import AdminTimesheetsStatusTabs from './AdminTimesheetsStatusTabs';
 import AdminTimesheetsFilters from './AdminTimesheetsFilters';
 import AdminTimesheetsTable from './AdminTimesheetsTable';
 import { getApiErrorDetails } from '../../../utils/apiError';
+import ConfirmActionModal from '../../../components/ui/ConfirmActionModal';
 
 export default function AdminTimesheets() {
     const { api } = useApi();
@@ -13,6 +14,8 @@ export default function AdminTimesheets() {
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState([]);
     const [bulkLoading, setBulkLoading] = useState(false);
+    const [actionModal, setActionModal] = useState({ open: false, type: null });
+    const [actionError, setActionError] = useState(null);
     const [toast, setToast] = useState(null);
     const [bulkRetrySeconds, setBulkRetrySeconds] = useState(0);
     const [pagination, setPagination] = useState({
@@ -108,10 +111,13 @@ export default function AdminTimesheets() {
         setTimeout(() => setToast(null), 3000);
     }
 
-    async function bulkApprove() {
+    function requestBulkApprove() {
         if (selectedIds.length === 0 || bulkLoading || bulkRetrySeconds > 0) return;
-        if (!confirm(`Approve ${selectedIds.length} timesheet(s)?`)) return;
+        setActionError(null);
+        setActionModal({ open: true, type: 'approve' });
+    }
 
+    async function bulkApprove() {
         setBulkLoading(true);
         try {
             const res = await api({
@@ -123,24 +129,27 @@ export default function AdminTimesheets() {
                 `${res.message || 'Timesheets approved'} (${res.approved_count ?? 0} approved, ${res.skipped_count ?? 0} skipped)`
             );
             await loadTimesheets();
+            return true;
         } catch (err) {
             if (err.response?.status === 429) {
                 const retryAfter = Number(err.response?.headers?.['retry-after'] || 60);
                 setBulkRetrySeconds(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : 60);
             }
-            showToast(getApiErrorDetails(err, 'Bulk approve failed').fullMessage, 'error');
+            const details = getApiErrorDetails(err, 'Bulk approve failed');
+            setActionError(details.fullMessage);
+            return false;
         } finally {
             setBulkLoading(false);
         }
     }
 
-    async function bulkReject() {
+    function requestBulkReject() {
         if (selectedIds.length === 0 || bulkLoading || bulkRetrySeconds > 0) return;
-        const reason = window.prompt('Rejection reason (required):');
-        if (!reason || !reason.trim()) return;
+        setActionError(null);
+        setActionModal({ open: true, type: 'reject' });
+    }
 
-        if (!confirm(`Reject ${selectedIds.length} timesheet(s)?`)) return;
-
+    async function bulkReject(reason) {
         setBulkLoading(true);
         try {
             const res = await api({
@@ -152,14 +161,33 @@ export default function AdminTimesheets() {
                 `${res.message || 'Timesheets rejected'} (${res.rejected_count ?? 0} rejected, ${res.skipped_count ?? 0} skipped)`
             );
             await loadTimesheets();
+            return true;
         } catch (err) {
             if (err.response?.status === 429) {
                 const retryAfter = Number(err.response?.headers?.['retry-after'] || 60);
                 setBulkRetrySeconds(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : 60);
             }
-            showToast(getApiErrorDetails(err, 'Bulk reject failed').fullMessage, 'error');
+            const details = getApiErrorDetails(err, 'Bulk reject failed');
+            setActionError(details.fullMessage);
+            return false;
         } finally {
             setBulkLoading(false);
+        }
+    }
+
+    async function confirmAction(reason = '') {
+        if (actionModal.type === 'approve') {
+            const ok = await bulkApprove();
+            if (ok) {
+                setActionModal({ open: false, type: null });
+            }
+            return;
+        }
+        if (actionModal.type === 'reject') {
+            const ok = await bulkReject(reason);
+            if (ok) {
+                setActionModal({ open: false, type: null });
+            }
         }
     }
 
@@ -232,13 +260,31 @@ export default function AdminTimesheets() {
                 onClearFilters={clearFilters}
                 selectedIds={selectedIds}
                 bulkLoading={bulkLoading || bulkRetrySeconds > 0}
-                onBulkApprove={bulkApprove}
-                onBulkReject={bulkReject}
+                onBulkApprove={requestBulkApprove}
+                onBulkReject={requestBulkReject}
                 pagination={pagination}
                 allSubmittedSelected={allSubmittedSelected}
                 onToggleSelectAll={toggleSelectAllSubmitted}
                 onToggleSelectOne={toggleSelectOne}
                 onGoToPage={goToPage}
+            />
+
+            <ConfirmActionModal
+                open={actionModal.open}
+                title={actionModal.type === 'approve'
+                    ? `Approve ${selectedIds.length} timesheet(s)`
+                    : `Reject ${selectedIds.length} timesheet(s)`}
+                message={actionModal.type === 'approve'
+                    ? 'This will mark selected timesheets as approved.'
+                    : 'This will mark selected timesheets as rejected.'}
+                confirmText={actionModal.type === 'approve' ? 'Approve' : 'Reject'}
+                requireReason={actionModal.type === 'reject'}
+                reasonLabel="Rejection reason"
+                reasonPlaceholder="Required rejection reason..."
+                loading={bulkLoading}
+                error={actionError}
+                onClose={() => setActionModal({ open: false, type: null })}
+                onConfirm={confirmAction}
             />
         </div>
     );
