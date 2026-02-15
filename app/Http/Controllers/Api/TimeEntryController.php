@@ -132,11 +132,15 @@ class TimeEntryController extends Controller
          * The week stays locked until all rejected days are edited.
          */
         if ($timesheet->status === 'rejected') {
+            $fromStatus = $timesheet->status;
             $timesheet->update([
                 'status' => 'draft',
                 'rejection_reason' => null,
                 'approved_at' => null,
                 'approved_by' => null,
+            ]);
+            $timesheet->logStatusTransition($fromStatus, 'draft', $request->user(), null, [
+                'source' => 'entry_update_after_reject',
             ]);
         }
 

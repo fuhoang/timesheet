@@ -23,6 +23,7 @@ export default function AdminTimesheetShow() {
     const [savingDayNote, setSavingDayNote] = useState(false);
     const [savingEntryId, setSavingEntryId] = useState(null);
     const [entryNotes, setEntryNotes] = useState({});
+    const [statusHistory, setStatusHistory] = useState([]);
 
     /* ---------------- Load timesheet ---------------- */
 
@@ -44,6 +45,11 @@ export default function AdminTimesheetShow() {
                 notes[entry.id] = entry.admin_note || '';
             });
             setEntryNotes(notes);
+            const history = await api({
+                method: 'get',
+                url: `/api/admin/timesheets/${id}/history`,
+            });
+            setStatusHistory(history);
         } catch (err) {
             navigate('/admin/timesheets');
         } finally {
@@ -292,6 +298,42 @@ export default function AdminTimesheetShow() {
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow border overflow-hidden">
+                <div className="p-4 font-semibold border-b">
+                    Status History
+                </div>
+                {statusHistory.length === 0 ? (
+                    <div className="p-4 text-sm text-gray-500">No status transitions logged yet.</div>
+                ) : (
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-50 border-b">
+                            <tr>
+                                <th className="px-4 py-3 text-left">When</th>
+                                <th className="px-4 py-3 text-left">From</th>
+                                <th className="px-4 py-3 text-left">To</th>
+                                <th className="px-4 py-3 text-left">By</th>
+                                <th className="px-4 py-3 text-left">Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                            {statusHistory.map(item => (
+                                <tr key={item.id}>
+                                    <td className="px-4 py-3 text-gray-600">
+                                        {new Date(item.created_at).toLocaleString()}
+                                    </td>
+                                    <td className="px-4 py-3">{item.from_status || '—'}</td>
+                                    <td className="px-4 py-3 font-medium">{item.to_status}</td>
+                                    <td className="px-4 py-3 text-gray-600">
+                                        {item.actor?.name || item.actor_role || 'system'}
+                                    </td>
+                                    <td className="px-4 py-3 text-gray-600">{item.reason || '—'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
 
             {/* Reject Modal */}

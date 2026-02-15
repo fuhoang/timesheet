@@ -145,12 +145,21 @@ class TimesheetController extends Controller
             ]);
         }
 
-        Timesheet::where('user_id', $user->id)
+        $timesheets = Timesheet::where('user_id', $user->id)
             ->whereBetween('work_date', [$start, $end])
-            ->update([
+            ->get();
+
+        $submittedAt = now();
+        foreach ($timesheets as $timesheet) {
+            $fromStatus = $timesheet->status;
+            $timesheet->update([
                 'status' => 'submitted',
-                'submitted_at' => now(),
+                'submitted_at' => $submittedAt,
             ]);
+            $timesheet->logStatusTransition($fromStatus, 'submitted', $user, null, [
+                'source' => 'submit_week',
+            ]);
+        }
 
         return response()->json([
             'status' => 'submitted',

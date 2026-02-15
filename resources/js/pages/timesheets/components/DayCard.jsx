@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
 import { formatMinutes } from '../utils/time';
 import Button from '../../../components/ui/Button';
@@ -9,9 +9,18 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
     const [description, setDescription] = useState('');
     const [minutes, setMinutes] = useState('');
     const [projectId, setProjectId] = useState('');
+    const [entries, setEntries] = useState(day.entries || []);
 
     const isRejected = day.status === 'rejected';
 
+    useEffect(() => {
+        setEntries(day.entries || []);
+    }, [day.entries]);
+
+    const displayedTotalMinutes = useMemo(
+        () => entries.reduce((sum, entry) => sum + (entry.duration_minutes || 0), 0),
+        [entries]
+    );
 
     function startEdit(entry) {
         setProjectId(entry.project_id);
@@ -21,20 +30,34 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
     }
 
     async function saveEdit(entryId) {
-        await api({
-            method: 'patch',
-            url: `/api/time-entries/${entryId}`,
-            data: {
-                project_id: projectId,
-                description,
-                duration_minutes: Number(minutes),
-            },
-        });
+        const previousEntries = entries;
+        const nextDuration = Number(minutes);
+
+        setEntries(prev => prev.map(entry => (
+            entry.id === entryId
+                ? { ...entry, project_id: projectId, description, duration_minutes: nextDuration }
+                : entry
+        )));
 
         setEditingId(null);
 
-        if (onUpdated) {
-            await onUpdated();
+        try {
+            await api({
+                method: 'patch',
+                url: `/api/time-entries/${entryId}`,
+                data: {
+                    project_id: projectId,
+                    description,
+                    duration_minutes: nextDuration,
+                },
+            });
+
+            if (onUpdated) {
+                await onUpdated();
+            }
+        } catch (error) {
+            setEntries(previousEntries);
+            alert(error?.response?.data?.message || 'Unable to save entry');
         }
     }
 
@@ -67,7 +90,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
                 </div>
 
                 <div className="font-semibold">
-                    {formatMinutes(day.total_minutes)}
+                    {formatMinutes(displayedTotalMinutes)}
                 </div>
             </div>
 
@@ -79,13 +102,13 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
             )}
 
             {/* Entries */}
-            {day.entries.length === 0 ? (
+            {entries.length === 0 ? (
                 <div className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                     No entries yet
                 </div>
             ) : (
                 <div className="divide-y">
-                    {day.entries.map(entry => (
+                    {entries.map(entry => (
                         <div
                             key={entry.id}
                             className={`

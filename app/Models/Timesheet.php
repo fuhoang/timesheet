@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Carbon\Carbon;
+use App\Models\User;
 
 class Timesheet extends Model
 {
@@ -55,6 +56,11 @@ class Timesheet extends Model
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function statusHistory()
+    {
+        return $this->hasMany(TimesheetStatusHistory::class)->orderByDesc('created_at');
     }
 
     /* ---------------------------------------------
@@ -156,6 +162,27 @@ class Timesheet extends Model
     {
         $this->update([
             'total_minutes' => $this->entries()->sum('duration_minutes'),
+        ]);
+    }
+
+    public function logStatusTransition(
+        ?string $fromStatus,
+        string $toStatus,
+        ?User $actor = null,
+        ?string $reason = null,
+        array $context = []
+    ): void {
+        if ($fromStatus === $toStatus && $reason === null && empty($context)) {
+            return;
+        }
+
+        $this->statusHistory()->create([
+            'from_status' => $fromStatus,
+            'to_status' => $toStatus,
+            'actor_id' => $actor?->id,
+            'actor_role' => $actor?->is_admin ? 'admin' : 'user',
+            'reason' => $reason,
+            'context' => empty($context) ? null : $context,
         ]);
     }
 }
