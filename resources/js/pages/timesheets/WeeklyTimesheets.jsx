@@ -92,6 +92,13 @@ export default function WeeklyTimesheet() {
 
     const isApproved = week.status === 'approved';
     const isRejected = week.status === 'rejected';
+    const submitDisabledReason = !week.can_submit
+        ? (!week.week_complete
+            ? 'This week is still in progress. You can submit after the week ends.'
+            : (week.status === 'approved'
+                ? 'This week is approved and locked.'
+                : 'This week has already been submitted for review.'))
+        : null;
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
@@ -99,6 +106,13 @@ export default function WeeklyTimesheet() {
 
             {error && (
                 <InlineAlert>{error}</InlineAlert>
+            )}
+
+            {submitDisabledReason && (
+                <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
+                    <div className="font-semibold text-amber-800">Submit disabled</div>
+                    <div className="text-sm text-amber-700 mt-1">{submitDisabledReason}</div>
+                </div>
             )}
 
             {isDev && (
