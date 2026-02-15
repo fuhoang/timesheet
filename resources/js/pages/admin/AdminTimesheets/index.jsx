@@ -38,16 +38,16 @@ export default function AdminTimesheets() {
         loadTimesheets();
     }, []);
 
-    async function loadTimesheets(page = 1) {
+    async function loadTimesheets(page = 1, nextFilters = filters, nextPerPage = perPage) {
         setLoading(true);
         try {
             const res = await api({
                 method: 'get',
                 url: '/api/admin/timesheets',
                 params: {
-                    ...filters,
+                    ...nextFilters,
                     page,
-                    per_page: perPage,
+                    per_page: nextPerPage,
                 },
             });
             setTimesheets(res.data);
@@ -153,17 +153,19 @@ export default function AdminTimesheets() {
 
     function applyFilters(e) {
         e?.preventDefault();
-        loadTimesheets(1);
+        loadTimesheets(1, filters, perPage);
     }
 
     function clearFilters() {
-        setFilters({ status: '', q: '', date_from: '', date_to: '' });
-        loadTimesheets(1);
+        const cleared = { status: '', q: '', date_from: '', date_to: '' };
+        setFilters(cleared);
+        loadTimesheets(1, cleared, perPage);
     }
 
     function setStatusTab(status) {
-        setFilters(prev => ({ ...prev, status }));
-        setTimeout(() => loadTimesheets(1), 0);
+        const updated = { ...filters, status };
+        setFilters(updated);
+        loadTimesheets(1, updated, perPage);
     }
 
     function goToPage(page) {
@@ -193,7 +195,7 @@ export default function AdminTimesheets() {
                 onUpdateFilter={updateFilter}
                 onPerPageChange={value => {
                     setPerPage(value);
-                    loadTimesheets(1);
+                    loadTimesheets(1, filters, value);
                 }}
                 onApply={applyFilters}
                 onClear={clearFilters}
