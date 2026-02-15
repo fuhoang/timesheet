@@ -66,8 +66,8 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
             id={`day-${day.date}`}
             className={`
                 relative rounded-2xl shadow border
-                ${isToday && !isRejected ? 'bg-blue-50 border-blue-400' : 'bg-white'}
-                ${isRejected ? 'border-red-300 border-l-4 border-l-red-600 dark:border-red-500 dark:border-l-red-400' : ''}
+                ${isToday && !isRejected ? 'bg-blue-50 border-blue-400 dark:bg-blue-900/30 dark:border-blue-500' : 'bg-white'}
+                ${isRejected ? 'app-highlight-rejected border-l-4 border-l-red-600 dark:border-l-red-400' : ''}
             `}
         >
 
@@ -96,7 +96,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
 
             {/* Rejection reason */}
             {isRejected && day.rejection_reason && (
-                <div className="px-6 py-3 text-sm bg-red-100 text-red-800 border-b">
+                <div className="px-6 py-3 text-sm bg-red-100 text-red-800 border-b dark:bg-red-950/40 dark:text-red-200">
                     <strong>Reason:</strong> {day.rejection_reason}
                 </div>
             )}
@@ -116,7 +116,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
                                 transition-colors
                                 ${
                                     editingId === entry.id
-                                        ? 'bg-yellow-50 dark:bg-transparent dark:border dark:border-yellow-400'
+                                        ? 'app-highlight-editing dark:border'
                                         : ''
                                 }
                             `}
@@ -129,7 +129,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
 
                                 {editingId === entry.id ? (
                                     <input
-                                        className="mt-1 w-full border rounded px-2 py-1"
+                                        className="mt-1 w-full border rounded px-2 py-1 bg-white dark:bg-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         value={description}
                                         onChange={e => setDescription(e.target.value)}
                                     />
@@ -146,7 +146,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
                                     <>
                                         <input
                                             type="number"
-                                            className="w-20 border rounded px-2 py-1"
+                                            className="w-20 border rounded px-2 py-1 bg-white dark:bg-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             value={minutes}
                                             onChange={e => setMinutes(e.target.value)}
                                         />
@@ -193,7 +193,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
 
             {/* Lock overlay */}
             {locked && !isRejected && (
-                <div className="absolute inset-0 bg-white/40 dark:bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center font-semibold text-gray-900 dark:text-black pointer-events-none">
+                <div className="absolute inset-0 app-lock-overlay rounded-2xl flex items-center justify-center font-semibold pointer-events-none">
                     Timesheet locked
                 </div>
             )}

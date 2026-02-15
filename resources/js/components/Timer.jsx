@@ -167,7 +167,7 @@ export default function Timer({
             <div className="flex items-center gap-4">
                 {runningEntry ? (
                     <>
-                        <span className="text-green-600 font-medium">Running</span>
+                        <span className="text-green-600 dark:text-green-300 font-medium">Running</span>
                         <Button
                             onClick={stop}
                             disabled={loading || disabled}
