@@ -153,6 +153,17 @@ Reusable UI class variants for page/component consistency are in:
   npm run build
   ```
 
+## Release Ops
+
+- UAT script:
+  - `/docs/release/UAT-v1.0.md`
+- Release checklist:
+  - `/docs/release/Release-Checklist-v1.0.md`
+- Release notes template/content:
+  - `/docs/release/RELEASE_NOTES_v1.0.0.md`
+- Post-release backlog:
+  - `/docs/release/Post-Release-Backlog.md`
+
 ### Test Config Health Validator
 
 1. Login as admin and open `http://127.0.0.1:8000/admin/timesheets`.
