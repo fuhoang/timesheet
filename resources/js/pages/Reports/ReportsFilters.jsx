@@ -1,4 +1,5 @@
 import React from 'react';
+import { ui } from '../../components/ui/themeClasses';
 
 export default function ReportsFilters({
     startDate,
@@ -33,7 +34,7 @@ export default function ReportsFilters({
 }) {
     return (
         <div className="sticky top-4 z-10 backdrop-blur">
-            <div className="bg-white border rounded-xl p-4 space-y-4 reports-filters">
+            <div className={`${ui.panelSoft} p-4 space-y-4 reports-filters`}>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label className="text-xs uppercase text-gray-500 dark:text-gray-300">Start</label>
@@ -41,7 +42,7 @@ export default function ReportsFilters({
                             type="date"
                             value={startDate}
                             onChange={event => onStartDateChange(event.target.value)}
-                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100"
+                            className={`mt-1 w-full ${ui.input}`}
                         />
                     </div>
                     <div>
@@ -50,7 +51,7 @@ export default function ReportsFilters({
                             type="date"
                             value={endDate}
                             onChange={event => onEndDateChange(event.target.value)}
-                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100"
+                            className={`mt-1 w-full ${ui.input}`}
                         />
                     </div>
                     <div>
@@ -58,7 +59,7 @@ export default function ReportsFilters({
                         <select
                             value={status}
                             onChange={event => onStatusChange(event.target.value)}
-                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100"
+                            className={`mt-1 w-full ${ui.input}`}
                         >
                             <option value="">Default (no drafts)</option>
                             <option value="all">All statuses</option>
@@ -73,7 +74,7 @@ export default function ReportsFilters({
                         <select
                             value={projectId}
                             onChange={event => onProjectChange(event.target.value)}
-                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100"
+                            className={`mt-1 w-full ${ui.input}`}
                         >
                             <option value="">All projects</option>
                             {projects.map(project => (
@@ -89,28 +90,28 @@ export default function ReportsFilters({
                     <button
                         type="button"
                         onClick={() => onApplyDatePreset('this_week')}
-                        className="px-3 py-1 rounded-full border text-xs uppercase border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+                        className={`${ui.chip} border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700`}
                     >
                         This week
                     </button>
                     <button
                         type="button"
                         onClick={() => onApplyDatePreset('last_week')}
-                        className="px-3 py-1 rounded-full border text-xs uppercase border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+                        className={`${ui.chip} border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700`}
                     >
                         Last week
                     </button>
                     <button
                         type="button"
                         onClick={() => onApplyDatePreset('last_30_days')}
-                        className="px-3 py-1 rounded-full border text-xs uppercase border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+                        className={`${ui.chip} border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700`}
                     >
                         Last 30 days
                     </button>
                     <button
                         type="button"
                         onClick={onResetFilters}
-                        className="px-3 py-1 rounded-full border text-xs uppercase border-gray-900 text-gray-900 hover:bg-gray-50 dark:border-slate-400 dark:text-slate-100 dark:hover:bg-slate-700"
+                        className={`${ui.chip} border-gray-900 text-gray-900 hover:bg-gray-50 dark:border-slate-400 dark:text-slate-100 dark:hover:bg-slate-700`}
                     >
                         Reset
                     </button>
@@ -123,7 +124,7 @@ export default function ReportsFilters({
                             <select
                                 value={userId}
                                 onChange={event => onUserChange(event.target.value)}
-                                className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100"
+                                className={`mt-1 w-full ${ui.input}`}
                             >
                                 <option value="">All users</option>
                                 {users.map(user => (
@@ -141,7 +142,7 @@ export default function ReportsFilters({
                         <select
                             value={sort}
                             onChange={event => onSortChange(event.target.value)}
-                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100"
+                            className={`mt-1 w-full ${ui.input}`}
                         >
                             <option value="total_minutes">Total minutes</option>
                             <option value="name">User name</option>
@@ -152,7 +153,7 @@ export default function ReportsFilters({
                         <select
                             value={direction}
                             onChange={event => onDirectionChange(event.target.value)}
-                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100"
+                            className={`mt-1 w-full ${ui.input}`}
                         >
                             <option value="desc">Descending</option>
                             <option value="asc">Ascending</option>
@@ -163,7 +164,7 @@ export default function ReportsFilters({
                         <select
                             value={perPage}
                             onChange={event => onPerPageChange(Number(event.target.value))}
-                            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100"
+                            className={`mt-1 w-full ${ui.input}`}
                         >
                             <option value={10}>10</option>
                             <option value={20}>20</option>
@@ -181,7 +182,7 @@ export default function ReportsFilters({
                                 key={`status-chip-${label}`}
                                 type="button"
                                 onClick={() => onStatusChange(value)}
-                                className={`px-3 py-1 rounded-full border text-xs uppercase ${
+                                className={`${ui.chip} ${
                                     active
                                         ? 'border-gray-900 bg-gray-900 text-white dark:border-blue-400 dark:bg-blue-500'
                                         : 'border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700'
@@ -213,7 +214,7 @@ export default function ReportsFilters({
                     <select
                         value=""
                         onChange={event => onPresetSelect(event.target.value)}
-                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100"
+                        className={ui.input}
                     >
                         <option value="">Select preset</option>
                         {presets.map(preset => (
@@ -227,12 +228,12 @@ export default function ReportsFilters({
                         value={presetName}
                         onChange={event => onPresetNameChange(event.target.value)}
                         placeholder="Preset name"
-                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100"
+                        className={ui.input}
                     />
                     <button
                         type="button"
                         onClick={onPresetSave}
-                        className="px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 dark:border-slate-500 dark:text-gray-100 dark:hover:bg-slate-700"
+                        className={ui.buttonSecondary}
                     >
                         Save preset
                     </button>
