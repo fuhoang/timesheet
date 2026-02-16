@@ -1,4 +1,5 @@
 import React from 'react';
+import { ui } from '../../components/ui/themeClasses';
 
 export default function ReportsRow({ row, formatMinutes, formatHours }) {
     function dayStatusClass(status) {
@@ -10,7 +11,7 @@ export default function ReportsRow({ row, formatMinutes, formatHours }) {
     }
 
     return (
-        <div className="bg-white border rounded-xl p-5 shadow-sm space-y-4 reports-row">
+        <div className={`${ui.panel} p-5 space-y-4 reports-row`}>
             <div className="flex items-center justify-between">
                 <div>
                     <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">

@@ -92,6 +92,25 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
 - `php artisan demo:seed` runs migrations and seeds demo data
 - `php artisan demo:seed --fresh` drops all tables, then migrates and seeds
 
+## Theme System
+
+Design tokens are centralized in `/resources/css/app.css`.
+
+- Surface
+  - `--app-bg`, `--app-surface`, `--app-surface-2`
+- Typography
+  - `--app-text`, `--app-muted`, `--app-muted-2`
+- Borders and focus
+  - `--app-border`, `--app-focus`
+- Semantic states
+  - `--app-success-*`, `--app-warning-*`, `--app-danger-*`, `--app-info-*`
+- Effects
+  - `--app-shadow`, `--app-shadow-lg`, `--app-overlay`
+
+Reusable UI class variants for page/component consistency are in:
+
+- `/resources/js/components/ui/themeClasses.js`
+
 ## Troubleshooting
 
 - `401 Unauthenticated` on API:
@@ -121,6 +140,18 @@ Timesheet is a simple internal time-tracking app for teams. Employees can start/
 - Project visibility update:
   - On user routes (`/`, `/timesheets`, `/reports`), users only see projects assigned to them.
   - Admin routes continue to show the full admin project set.
+
+## Theme QA
+
+- Theme QA checklist and screenshot plan:
+  - `/docs/theme-qa-checklist.md`
+- Visual regression snapshots for Reports theme states:
+  - `/resources/js/pages/Reports/__tests__/themeVisualRegression.test.jsx`
+- Run theme regression checks:
+  ```bash
+  npm test
+  npm run build
+  ```
 
 ### Test Config Health Validator
 
