@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useApi } from '../context/ApiContext';
 import Button from './ui/Button';
+import InlineAlert from './ui/InlineAlert';
 
 export default function Timer({
     projectId,
@@ -16,6 +17,7 @@ export default function Timer({
     const [runningEntry, setRunningEntry] = useState(null);
     const [seconds, setSeconds] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const intervalRef = useRef(null);
 
     useEffect(() => {
@@ -77,10 +79,11 @@ export default function Timer({
 
     async function start() {
         if (!projectId) {
-            alert('Please select a project');
+            setError('Please select a project');
             return;
         }
 
+        setError('');
         await startWithProject(projectId);
     }
 
@@ -114,7 +117,7 @@ export default function Timer({
             onChange?.();
             if (isAuto) onAutoStartComplete?.(startProjectId);
         } catch (err) {
-            alert(err.response?.data?.message ?? 'Unable to start timer');
+            setError(err.response?.data?.message ?? 'Unable to start timer');
             stopTicking();
             setRunningEntry(null);
             setSeconds(0);
@@ -151,7 +154,7 @@ export default function Timer({
                 startTicking();
                 onOptimisticStart?.(previousEntry);
             }
-            alert(err.response?.data?.message ?? 'Unable to stop timer');
+            setError(err.response?.data?.message ?? 'Unable to stop timer');
         } finally {
             setLoading(false);
         }
@@ -159,6 +162,7 @@ export default function Timer({
 
     return (
         <div className="space-y-4">
+            {error && <InlineAlert>{error}</InlineAlert>}
 
             <div className="text-3xl font-mono font-semibold">
                 {formatSeconds(seconds)}

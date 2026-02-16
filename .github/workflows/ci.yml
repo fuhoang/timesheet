@@ -111,6 +111,14 @@ jobs:
         env:
           LARAVEL_BYPASS_ENV_CHECK: 1
 
+      - name: Run UI snapshot and keyboard smoke tests
+        run: |
+          npm test -- resources/js/pages/Reports/__tests__/themeVisualRegression.test.jsx
+          npm test -- resources/js/pages/__tests__/themeVisualRegression.core.test.jsx
+          npm test -- resources/js/components/ui/__tests__/ConfirmActionModal.keyboard.test.jsx
+        env:
+          LARAVEL_BYPASS_ENV_CHECK: 1
+
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:

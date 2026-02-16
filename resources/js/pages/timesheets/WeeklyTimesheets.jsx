@@ -4,6 +4,7 @@ import { PageSkeleton } from '../../components/skeletons/PageSkeleton';
 import Toast from '../../components/ui/Toast';
 import InlineAlert from '../../components/ui/InlineAlert';
 import Button from '../../components/ui/Button';
+import ConfirmActionModal from '../../components/ui/ConfirmActionModal';
 
 import WeekHeader from './components/WeekHeader';
 import DayCard from './components/DayCard';
@@ -16,6 +17,7 @@ export default function WeeklyTimesheet() {
     const [offset, setOffset] = useState(0);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
     const [toast, setToast] = useState(null);
     const [error, setError] = useState('');
 
@@ -59,8 +61,6 @@ export default function WeeklyTimesheet() {
     }
 
     async function submitWeek() {
-        if (!confirm('Submit this week for approval?')) return;
-
         try {
             setSubmitting(true);
 
@@ -75,6 +75,7 @@ export default function WeeklyTimesheet() {
             setToast({ message: 'Timesheet submitted for approval', type: 'success' });
             setTimeout(() => setToast(null), 3000);
             await loadWeek();
+            setShowSubmitConfirm(false);
         } catch (err) {
             console.error('Failed to submit week', err);
             setError('Unable to submit the week. Please try again.');
@@ -160,7 +161,7 @@ export default function WeeklyTimesheet() {
                 week={week}
                 offset={offset}
                 setOffset={setOffset}
-                submitWeek={submitWeek}
+                submitWeek={() => setShowSubmitConfirm(true)}
                 submitting={submitting}
                 disabled={isApproved}
             />
@@ -177,6 +178,16 @@ export default function WeeklyTimesheet() {
                     />
                 ))}
             </div>
+
+            <ConfirmActionModal
+                open={showSubmitConfirm}
+                title="Submit week for approval"
+                message="After submission, this week goes to admin review."
+                confirmText="Submit week"
+                loading={submitting}
+                onClose={() => setShowSubmitConfirm(false)}
+                onConfirm={submitWeek}
+            />
         </div>
     );
 }
