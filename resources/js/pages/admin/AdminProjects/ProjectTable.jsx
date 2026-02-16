@@ -1,19 +1,6 @@
 import React from 'react';
 import Button from '../../../components/ui/Button';
-import { getApiErrorDetails } from '../../../utils/apiError';
-
-export default function ProjectTable({ projects, api, reloadProjects, setEditingProject, showToast }) {
-    async function deleteProject(id) {
-        if (!confirm('Delete this project?')) return;
-
-        try {
-            await api({ method: 'delete', url: `/api/admin/projects/${id}` });
-            await reloadProjects();
-            showToast('Project deleted');
-        } catch (err) {
-            showToast(getApiErrorDetails(err, 'Failed to delete project').fullMessage, 'error');
-        }
-    }
+export default function ProjectTable({ projects, setEditingProject, onRequestDelete }) {
 
     if (!projects || projects.length === 0) {
         return (
@@ -53,7 +40,7 @@ export default function ProjectTable({ projects, api, reloadProjects, setEditing
                                     Edit
                                 </Button>
                                 <Button
-                                    onClick={() => deleteProject(project.id)}
+                                    onClick={() => onRequestDelete(project)}
                                     variant="link-danger"
                                     size="xs"
                                 >

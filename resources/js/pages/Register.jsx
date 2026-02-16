@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GuestLayout from '../layouts/GuestLayout';
 import Button from '../components/ui/Button';
+import InlineAlert from '../components/ui/InlineAlert';
 
 export default function Register() {
     const { register } = useAuth();
@@ -15,6 +16,7 @@ export default function Register() {
         password_confirmation: '',
     });
     const [errors, setErrors] = useState({});
+    const [submitError, setSubmitError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleChange = (e) =>
@@ -23,6 +25,7 @@ export default function Register() {
     const submit = async (e) => {
         e.preventDefault();
         setErrors({});
+        setSubmitError('');
         setLoading(true);
 
         try {
@@ -32,7 +35,7 @@ export default function Register() {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
             } else {
-                alert('Registration failed');
+                setSubmitError('Registration failed');
             }
         } finally {
             setLoading(false);
@@ -44,6 +47,12 @@ export default function Register() {
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md">
                     <h1 className="text-3xl font-bold text-center mb-6">Register</h1>
+
+                    {submitError && (
+                        <div className="mb-4">
+                            <InlineAlert>{submitError}</InlineAlert>
+                        </div>
+                    )}
 
                     <form onSubmit={submit} className="space-y-5">
 
