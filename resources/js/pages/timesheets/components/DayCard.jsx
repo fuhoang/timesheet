@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useApi } from '../../../context/ApiContext';
 import { formatMinutes } from '../utils/time';
 import Button from '../../../components/ui/Button';
+import InlineAlert from '../../../components/ui/InlineAlert';
 
 export default function DayCard({ day, isToday, locked, onUpdated }) {
     const { api } = useApi();
@@ -10,6 +11,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
     const [minutes, setMinutes] = useState('');
     const [projectId, setProjectId] = useState('');
     const [entries, setEntries] = useState(day.entries || []);
+    const [entryError, setEntryError] = useState('');
 
     const isRejected = day.status === 'rejected';
 
@@ -23,6 +25,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
     );
 
     function startEdit(entry) {
+        setEntryError('');
         setProjectId(entry.project_id);
         setEditingId(entry.id);
         setDescription(entry.description || '');
@@ -57,7 +60,7 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
             }
         } catch (error) {
             setEntries(previousEntries);
-            alert(error?.response?.data?.message || 'Unable to save entry');
+            setEntryError(error?.response?.data?.message || 'Unable to save entry');
         }
     }
 
@@ -98,6 +101,12 @@ export default function DayCard({ day, isToday, locked, onUpdated }) {
             {isRejected && day.rejection_reason && (
                 <div className="px-6 py-3 text-sm bg-red-100 text-red-800 border-b dark:bg-red-950/40 dark:text-red-200">
                     <strong>Reason:</strong> {day.rejection_reason}
+                </div>
+            )}
+
+            {entryError && (
+                <div className="px-6 py-3 border-b">
+                    <InlineAlert>{entryError}</InlineAlert>
                 </div>
             )}
 

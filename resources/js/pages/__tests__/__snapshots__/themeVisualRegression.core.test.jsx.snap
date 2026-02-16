@@ -1,0 +1,429 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Core pages visual regression > AdminTimesheetsTable snapshot in dark mode 1`] = `
+<div
+  class="bg-white rounded-2xl shadow border overflow-hidden"
+>
+  <div
+    class="px-4 py-3 border-b flex items-center justify-between"
+  >
+    <div
+      class="text-sm text-gray-600"
+    >
+      0
+       selected
+      <span
+        class="ml-3 text-xs text-gray-400"
+      >
+        Showing 
+        1
+        -
+        1
+         of 
+        1
+      </span>
+    </div>
+    <div
+      class="flex items-center gap-2"
+    >
+      <button
+        class="inline-flex items-center justify-center gap-2 rounded-lg font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60 text-sm px-3 py-1.5 bg-green-600 text-white hover:bg-green-700 "
+        disabled=""
+        type="button"
+      >
+        Bulk approve
+      </button>
+      <button
+        class="inline-flex items-center justify-center gap-2 rounded-lg font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60 text-sm px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 "
+        disabled=""
+        type="button"
+      >
+        Bulk reject
+      </button>
+    </div>
+  </div>
+  <table
+    class="w-full text-sm"
+  >
+    <thead
+      class="bg-gray-50 border-b"
+    >
+      <tr>
+        <th
+          class="px-4 py-3 text-left w-10"
+        >
+          <input
+            type="checkbox"
+          />
+        </th>
+        <th
+          class="px-4 py-3 text-left"
+        >
+          User
+        </th>
+        <th
+          class="px-4 py-3 text-left"
+        >
+          Week
+        </th>
+        <th
+          class="px-4 py-3 text-left"
+        >
+          Status
+        </th>
+        <th
+          class="px-4 py-3 text-right"
+        >
+          Actions
+        </th>
+      </tr>
+    </thead>
+    <tbody
+      class="divide-y"
+    >
+      <tr>
+        <td
+          class="px-4 py-3"
+        >
+          <input
+            title=""
+            type="checkbox"
+          />
+        </td>
+        <td
+          class="px-4 py-3 font-medium"
+        >
+          Admin User
+        </td>
+        <td
+          class="px-4 py-3"
+        >
+          Feb 10, 2026
+        </td>
+        <td
+          class="px-4 py-3"
+        >
+          <span
+            class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200 "
+          >
+            submitted
+          </span>
+        </td>
+        <td
+          class="px-4 py-3 text-right"
+        >
+          <a
+            class="text-indigo-600 hover:underline"
+            data-discover="true"
+            href="/admin/timesheets/9"
+          >
+            Review
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div
+    class="px-4 py-3 border-t flex items-center justify-between"
+  >
+    <div
+      class="text-sm text-gray-500"
+    >
+      Page 
+      1
+       of 
+      1
+      <span
+        class="ml-2 text-xs text-gray-400"
+      >
+        (
+        1
+        -
+        1
+         of 
+        1
+        )
+      </span>
+    </div>
+    <div
+      class="flex items-center gap-2"
+    >
+      <button
+        class="inline-flex items-center justify-center gap-2 rounded-lg font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60 text-sm px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 "
+        disabled=""
+        type="button"
+      >
+        First
+      </button>
+      <button
+        class="inline-flex items-center justify-center gap-2 rounded-lg font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60 text-sm px-3 py-1.5 border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700 "
+        disabled=""
+        type="button"
+      >
+        Previous
+      </button>
+      <button
+        class="inline-flex items-center justify-center gap-2 rounded-lg font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60 text-sm px-3 py-1.5 border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700 "
+        disabled=""
+        type="button"
+      >
+        Next
+      </button>
+      <button
+        class="inline-flex items-center justify-center gap-2 rounded-lg font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60 text-sm px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 "
+        disabled=""
+        type="button"
+      >
+        Last
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Core pages visual regression > DayCard snapshot in light mode (rejected) 1`] = `
+<div
+  class="
+                relative rounded-2xl shadow border
+                bg-white
+                app-highlight-rejected border-l-4 border-l-red-600 dark:border-l-red-400
+            "
+  id="day-2026-02-10"
+>
+  <div
+    class="px-6 py-4 border-b flex justify-between items-center"
+  >
+    <div
+      class="font-medium flex items-center gap-2"
+    >
+      Mon, Feb 10
+      <span
+        class="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full"
+      >
+        Rejected
+      </span>
+    </div>
+    <div
+      class="font-semibold"
+    >
+      0h 45m
+    </div>
+  </div>
+  <div
+    class="px-6 py-3 text-sm bg-red-100 text-red-800 border-b dark:bg-red-950/40 dark:text-red-200"
+  >
+    <strong>
+      Reason:
+    </strong>
+     
+    Fix details
+  </div>
+  <div
+    class="divide-y"
+  >
+    <div
+      class="
+                                px-6 py-4 text-sm flex justify-between gap-4
+                                transition-colors
+                                
+                            "
+    >
+      <div
+        class="flex-1"
+      >
+        <div
+          class="font-medium"
+        >
+          Internal
+        </div>
+        <div
+          class="text-gray-600 dark:text-gray-300"
+        >
+          Refactor
+        </div>
+      </div>
+      <div
+        class="text-right min-w-140"
+      >
+        <div
+          class="font-semibold"
+        >
+          0h 45m
+        </div>
+        <button
+          class="inline-flex items-center justify-center gap-2 rounded-lg font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60 text-xs px-2 py-1 text-indigo-600 hover:text-indigo-700 dark:text-blue-300 dark:hover:text-blue-200 p-0 mt-1"
+          type="button"
+        >
+          Edit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Core pages visual regression > Sidebar snapshot in dark mode 1`] = `
+<aside
+  class="w-64 bg-white border-r"
+>
+  <div
+    class="p-6 font-bold text-xl"
+  >
+    Timesheet
+  </div>
+  <nav
+    class="px-4 space-y-1"
+  >
+    <a
+      class="nav-link app-nav-link block px-4 py-2 rounded-lg transition text-gray-700 hover:bg-gray-200"
+      data-discover="true"
+      href="/"
+    >
+      Dashboard
+    </a>
+    <a
+      class="nav-link app-nav-link block px-4 py-2 rounded-lg transition text-gray-700 hover:bg-gray-200"
+      data-discover="true"
+      href="/timesheets"
+    >
+      Timesheets
+    </a>
+    <a
+      class="nav-link app-nav-link block px-4 py-2 rounded-lg transition text-gray-700 hover:bg-gray-200"
+      data-discover="true"
+      href="/reports"
+    >
+      Reports
+    </a>
+    <div
+      class="mt-6 px-4 text-xs uppercase text-gray-400"
+    >
+      Admin
+    </div>
+    <a
+      class="nav-link app-nav-link block px-4 py-2 rounded-lg transition text-gray-700 hover:bg-gray-200"
+      data-discover="true"
+      href="/admin/projects"
+    >
+      Projects
+    </a>
+    <a
+      aria-current="page"
+      class="nav-link app-nav-link block px-4 py-2 rounded-lg transition app-nav-link-active"
+      data-discover="true"
+      href="/admin/timesheets"
+    >
+      Timesheets
+    </a>
+  </nav>
+</aside>
+`;
+
+exports[`Core pages visual regression > Sidebar snapshot in light mode 1`] = `
+<aside
+  class="w-64 bg-white border-r"
+>
+  <div
+    class="p-6 font-bold text-xl"
+  >
+    Timesheet
+  </div>
+  <nav
+    class="px-4 space-y-1"
+  >
+    <a
+      aria-current="page"
+      class="nav-link app-nav-link block px-4 py-2 rounded-lg transition app-nav-link-active"
+      data-discover="true"
+      href="/"
+    >
+      Dashboard
+    </a>
+    <a
+      class="nav-link app-nav-link block px-4 py-2 rounded-lg transition text-gray-700 hover:bg-gray-200"
+      data-discover="true"
+      href="/timesheets"
+    >
+      Timesheets
+    </a>
+    <a
+      class="nav-link app-nav-link block px-4 py-2 rounded-lg transition text-gray-700 hover:bg-gray-200"
+      data-discover="true"
+      href="/reports"
+    >
+      Reports
+    </a>
+    <div
+      class="mt-6 px-4 text-xs uppercase text-gray-400"
+    >
+      Admin
+    </div>
+    <a
+      class="nav-link app-nav-link block px-4 py-2 rounded-lg transition text-gray-700 hover:bg-gray-200"
+      data-discover="true"
+      href="/admin/projects"
+    >
+      Projects
+    </a>
+    <a
+      class="nav-link app-nav-link block px-4 py-2 rounded-lg transition text-gray-700 hover:bg-gray-200"
+      data-discover="true"
+      href="/admin/timesheets"
+    >
+      Timesheets
+    </a>
+  </nav>
+</aside>
+`;
+
+exports[`Core pages visual regression > WeekHeader snapshot in dark mode 1`] = `
+<div
+  class="bg-white p-6 rounded-2xl shadow border flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+>
+  <div>
+    <h1
+      class="text-2xl font-semibold text-gray-900"
+    >
+      Weekly timesheet
+    </h1>
+    <p
+      class="text-sm text-gray-600 mt-1"
+    >
+      2026-02-10
+       → 
+      2026-02-16
+    </p>
+    <div
+      class="mt-2 space-y-1"
+    >
+      <span
+        class="px-3 py-2 rounded-lg bg-gray-200 text-gray-900 dark:bg-slate-700 dark:text-slate-100 inline-block"
+      >
+        Submitted
+      </span>
+    </div>
+  </div>
+  <div
+    class="flex flex-wrap gap-2"
+  >
+    <button
+      class="inline-flex items-center justify-center gap-2 rounded-lg font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60 text-sm px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700 "
+      type="button"
+    >
+      ← Prev
+    </button>
+    <button
+      class="inline-flex items-center justify-center gap-2 rounded-lg font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60 text-sm px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700 "
+      type="button"
+    >
+      This week
+    </button>
+    <button
+      class="inline-flex items-center justify-center gap-2 rounded-lg font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-60 text-sm px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700 "
+      type="button"
+    >
+      Next →
+    </button>
+  </div>
+</div>
+`;

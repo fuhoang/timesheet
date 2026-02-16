@@ -194,3 +194,19 @@ Use a shared `dev` branch for day-to-day work, and merge into `main` when ready 
 
 3. When ready to release, open a PR from `dev` → `main`
    - Optionally add a short test plan and run `php artisan test`
+
+## Branch Protection (Recommended)
+
+Protect both `main` and `dev` in GitHub settings.
+
+1. Open `Settings` → `Branches` → `Add branch protection rule`
+2. Create one rule for `main`, one rule for `dev`
+3. Enable:
+   - Require a pull request before merging
+   - Require status checks to pass before merging
+4. Select required checks:
+   - `php-tests`
+   - `js-tests`
+5. Optional but recommended:
+   - Require up-to-date branch before merging
+   - Include administrators

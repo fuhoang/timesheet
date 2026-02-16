@@ -8,6 +8,7 @@ import ProjectForm from './ProjectForm';
 import ProjectTable from './ProjectTable';
 import Toast from '../../../components/ui/Toast';
 import { getApiErrorDetails } from '../../../utils/apiError';
+import ConfirmActionModal from '../../../components/ui/ConfirmActionModal';
 
 export default function AdminProjects() {
     const { api } = useApi();
@@ -15,6 +16,8 @@ export default function AdminProjects() {
 
     const [editingProject, setEditingProject] = useState(null);
     const [savingEdit, setSavingEdit] = useState(false);
+    const [deletingProject, setDeletingProject] = useState(null);
+    const [deleting, setDeleting] = useState(false);
 
     const [toast, setToast] = useState(null);
 
@@ -48,6 +51,21 @@ export default function AdminProjects() {
         setTimeout(() => setToast(null), 3000);
     }
 
+    const handleDeleteProject = async () => {
+        if (!deletingProject) return;
+        setDeleting(true);
+        try {
+            await api({ method: 'delete', url: `/api/admin/projects/${deletingProject.id}` });
+            await reloadProjects();
+            showToast('Project deleted');
+            setDeletingProject(null);
+        } catch (err) {
+            showToast(getApiErrorDetails(err, 'Failed to delete project').fullMessage, 'error');
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     return (
         <div className="space-y-6 relative">
             {/* Toast */}
@@ -74,10 +92,8 @@ export default function AdminProjects() {
             ) : (
                 <ProjectTable
                     projects={projects}
-                    api={api}
-                    reloadProjects={reloadProjects}
                     setEditingProject={setEditingProject}
-                    showToast={showToast}
+                    onRequestDelete={setDeletingProject}
                 />
             )}
 
@@ -87,6 +103,16 @@ export default function AdminProjects() {
             onClose={() => setEditingProject(null)}
             onSave={handleSaveEdit}
             saving={savingEdit}
+            />
+
+            <ConfirmActionModal
+                open={!!deletingProject}
+                title="Delete project"
+                message={deletingProject ? `Delete "${deletingProject.name}"? This cannot be undone.` : ''}
+                confirmText="Delete"
+                loading={deleting}
+                onClose={() => setDeletingProject(null)}
+                onConfirm={handleDeleteProject}
             />
 
         </div>

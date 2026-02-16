@@ -31,8 +31,27 @@ export default function ConfirmActionModal({
         await onConfirm(value);
     }
 
+    function handleKeyDown(event) {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            if (!loading) onClose();
+            return;
+        }
+
+        if (event.key === 'Enter' && !event.shiftKey) {
+            const isTextarea = event.target instanceof HTMLElement && event.target.tagName === 'TEXTAREA';
+            if (isTextarea && !event.metaKey && !event.ctrlKey) {
+                return;
+            }
+            event.preventDefault();
+            if (!loading) {
+                submit();
+            }
+        }
+    }
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onKeyDown={handleKeyDown}>
             <div className="w-full max-w-md rounded-2xl border bg-white p-6 shadow-lg">
                 <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
                 {message && (
@@ -75,4 +94,3 @@ export default function ConfirmActionModal({
         </div>
     );
 }
-
