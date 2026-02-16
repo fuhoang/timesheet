@@ -4,6 +4,7 @@ import { useApi } from '../../context/ApiContext';
 import ReportsFilters from './ReportsFilters';
 import ReportsRow from './ReportsRow';
 import ReportsPagination from './ReportsPagination';
+import { ui } from '../../components/ui/themeClasses';
 
 const REPORT_LAST_REFRESH_KEY = 'reportsLastRefreshAt';
 const REPORT_LAST_FILTERS_KEY = 'reportsLastFilters';
@@ -281,7 +282,7 @@ export default function Reports() {
                     type="button"
                     onClick={handleExport}
                     disabled={exporting}
-                    className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-gray-800 dark:bg-blue-600 dark:hover:bg-blue-500 disabled:opacity-60"
+                    className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-gray-800 dark:bg-blue-600 dark:hover:bg-blue-500 disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                 >
                     {exporting ? 'Exporting...' : 'Export CSV'}
                 </button>
@@ -367,7 +368,7 @@ export default function Reports() {
             {showSkeleton && (
                 <div className="space-y-4">
                     {[1, 2, 3].map(item => (
-                        <div key={item} className="bg-white border rounded-xl p-5 shadow-sm space-y-4">
+                        <div key={item} className={`${ui.panel} p-5 space-y-4`}>
                             <div className="flex items-center justify-between">
                                 <div className="space-y-2">
                                     <div className="h-4 w-40 bg-gray-200 rounded animate-pulse" />
@@ -413,7 +414,7 @@ export default function Reports() {
             ))}
 
             {report?.rows?.length > 0 && (
-                <div className="bg-white border rounded-xl p-5 shadow-sm flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+                <div className={`${ui.panel} p-5 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300`}>
                     <div className="font-medium text-gray-900 dark:text-gray-100">Page total</div>
                     <div className="font-semibold text-gray-900 dark:text-gray-100">
                         {formatMinutes(overallMinutes)}

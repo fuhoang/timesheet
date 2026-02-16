@@ -1,0 +1,947 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Reports visual theme regression > filters snapshot in dark mode 1`] = `
+<div
+  class="sticky top-4 z-10 backdrop-blur"
+>
+  <div
+    class="bg-white border rounded-xl p-4 space-y-4 reports-filters"
+  >
+    <div
+      class="grid grid-cols-1 md:grid-cols-4 gap-4"
+    >
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Start
+        </label>
+        <input
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          type="date"
+          value="2026-02-10"
+        />
+      </div>
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          End
+        </label>
+        <input
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          type="date"
+          value="2026-02-16"
+        />
+      </div>
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Status
+        </label>
+        <select
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        >
+          <option
+            value=""
+          >
+            Default (no drafts)
+          </option>
+          <option
+            value="all"
+          >
+            All statuses
+          </option>
+          <option
+            value="draft"
+          >
+            Draft
+          </option>
+          <option
+            value="submitted"
+          >
+            Submitted
+          </option>
+          <option
+            value="approved"
+          >
+            Approved
+          </option>
+          <option
+            value="rejected"
+          >
+            Rejected
+          </option>
+        </select>
+      </div>
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Project
+        </label>
+        <select
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        >
+          <option
+            value=""
+          >
+            All projects
+          </option>
+          <option
+            value="1"
+          >
+            Internal
+          </option>
+        </select>
+      </div>
+    </div>
+    <div
+      class="flex flex-wrap items-center gap-2"
+    >
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        This week
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        Last week
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        Last 30 days
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-900 text-gray-900 hover:bg-gray-50 dark:border-slate-400 dark:text-slate-100 dark:hover:bg-slate-700"
+        type="button"
+      >
+        Reset
+      </button>
+    </div>
+    <div
+      class="grid grid-cols-1 md:grid-cols-4 gap-4"
+    >
+      <div />
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Sort
+        </label>
+        <select
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        >
+          <option
+            value="total_minutes"
+          >
+            Total minutes
+          </option>
+          <option
+            value="name"
+          >
+            User name
+          </option>
+        </select>
+      </div>
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Direction
+        </label>
+        <select
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        >
+          <option
+            value="desc"
+          >
+            Descending
+          </option>
+          <option
+            value="asc"
+          >
+            Ascending
+          </option>
+        </select>
+      </div>
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Per page
+        </label>
+        <select
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        >
+          <option
+            value="10"
+          >
+            10
+          </option>
+          <option
+            value="20"
+          >
+            20
+          </option>
+          <option
+            value="50"
+          >
+            50
+          </option>
+        </select>
+      </div>
+    </div>
+    <div
+      class="flex flex-wrap items-center gap-2"
+    >
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-900 bg-gray-900 text-white dark:border-blue-400 dark:bg-blue-500"
+        type="button"
+      >
+        default
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        all
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        submitted
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        approved
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        rejected
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        draft
+      </button>
+    </div>
+    <div
+      class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-200"
+    >
+      <label
+        class="flex items-center gap-2"
+      >
+        <input
+          class="accent-blue-600"
+          type="checkbox"
+        />
+        Include drafts
+      </label>
+      <span
+        class="text-xs text-gray-400 dark:text-gray-500"
+      >
+        Drafts excluded.
+      </span>
+    </div>
+    <div
+      class="flex flex-wrap items-center gap-3"
+    >
+      <div
+        class="text-xs uppercase text-gray-500 dark:text-gray-300"
+      >
+        Presets
+      </div>
+      <select
+        class="rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+      >
+        <option
+          value=""
+        >
+          Select preset
+        </option>
+      </select>
+      <input
+        class="rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        placeholder="Preset name"
+        type="text"
+        value=""
+      />
+      <button
+        class="px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 dark:border-slate-500 dark:text-gray-100 dark:hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        type="button"
+      >
+        Save preset
+      </button>
+      <div
+        class="text-sm text-gray-600 dark:text-gray-300"
+      >
+        1
+         users total
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Reports visual theme regression > filters snapshot in light mode 1`] = `
+<div
+  class="sticky top-4 z-10 backdrop-blur"
+>
+  <div
+    class="bg-white border rounded-xl p-4 space-y-4 reports-filters"
+  >
+    <div
+      class="grid grid-cols-1 md:grid-cols-4 gap-4"
+    >
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Start
+        </label>
+        <input
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          type="date"
+          value="2026-02-10"
+        />
+      </div>
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          End
+        </label>
+        <input
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          type="date"
+          value="2026-02-16"
+        />
+      </div>
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Status
+        </label>
+        <select
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        >
+          <option
+            value=""
+          >
+            Default (no drafts)
+          </option>
+          <option
+            value="all"
+          >
+            All statuses
+          </option>
+          <option
+            value="draft"
+          >
+            Draft
+          </option>
+          <option
+            value="submitted"
+          >
+            Submitted
+          </option>
+          <option
+            value="approved"
+          >
+            Approved
+          </option>
+          <option
+            value="rejected"
+          >
+            Rejected
+          </option>
+        </select>
+      </div>
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Project
+        </label>
+        <select
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        >
+          <option
+            value=""
+          >
+            All projects
+          </option>
+          <option
+            value="1"
+          >
+            Internal
+          </option>
+        </select>
+      </div>
+    </div>
+    <div
+      class="flex flex-wrap items-center gap-2"
+    >
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        This week
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        Last week
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-600 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        Last 30 days
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-900 text-gray-900 hover:bg-gray-50 dark:border-slate-400 dark:text-slate-100 dark:hover:bg-slate-700"
+        type="button"
+      >
+        Reset
+      </button>
+    </div>
+    <div
+      class="grid grid-cols-1 md:grid-cols-4 gap-4"
+    >
+      <div />
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Sort
+        </label>
+        <select
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        >
+          <option
+            value="total_minutes"
+          >
+            Total minutes
+          </option>
+          <option
+            value="name"
+          >
+            User name
+          </option>
+        </select>
+      </div>
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Direction
+        </label>
+        <select
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        >
+          <option
+            value="desc"
+          >
+            Descending
+          </option>
+          <option
+            value="asc"
+          >
+            Ascending
+          </option>
+        </select>
+      </div>
+      <div>
+        <label
+          class="text-xs uppercase text-gray-500 dark:text-gray-300"
+        >
+          Per page
+        </label>
+        <select
+          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        >
+          <option
+            value="10"
+          >
+            10
+          </option>
+          <option
+            value="20"
+          >
+            20
+          </option>
+          <option
+            value="50"
+          >
+            50
+          </option>
+        </select>
+      </div>
+    </div>
+    <div
+      class="flex flex-wrap items-center gap-2"
+    >
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-900 bg-gray-900 text-white dark:border-blue-400 dark:bg-blue-500"
+        type="button"
+      >
+        default
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        all
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        submitted
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        approved
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        rejected
+      </button>
+      <button
+        class="px-3 py-1 rounded-full border text-xs uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 border-gray-200 text-gray-500 hover:border-gray-300 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700"
+        type="button"
+      >
+        draft
+      </button>
+    </div>
+    <div
+      class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-200"
+    >
+      <label
+        class="flex items-center gap-2"
+      >
+        <input
+          class="accent-blue-600"
+          type="checkbox"
+        />
+        Include drafts
+      </label>
+      <span
+        class="text-xs text-gray-400 dark:text-gray-500"
+      >
+        Drafts excluded.
+      </span>
+    </div>
+    <div
+      class="flex flex-wrap items-center gap-3"
+    >
+      <div
+        class="text-xs uppercase text-gray-500 dark:text-gray-300"
+      >
+        Presets
+      </div>
+      <select
+        class="rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+      >
+        <option
+          value=""
+        >
+          Select preset
+        </option>
+      </select>
+      <input
+        class="rounded-lg border border-gray-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        placeholder="Preset name"
+        type="text"
+        value=""
+      />
+      <button
+        class="px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 dark:border-slate-500 dark:text-gray-100 dark:hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+        type="button"
+      >
+        Save preset
+      </button>
+      <div
+        class="text-sm text-gray-600 dark:text-gray-300"
+      >
+        1
+         users total
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Reports visual theme regression > row snapshot in dark mode 1`] = `
+<div
+  class="bg-white border rounded-xl shadow-sm p-5 space-y-4 reports-row"
+>
+  <div
+    class="flex items-center justify-between"
+  >
+    <div>
+      <div
+        class="text-lg font-semibold text-gray-900 dark:text-gray-100"
+      >
+        Admin User
+      </div>
+      <div
+        class="text-sm text-gray-500 dark:text-gray-300"
+      >
+        admin@test.com
+      </div>
+    </div>
+    <div
+      class="text-right"
+    >
+      <div
+        class="text-xs uppercase text-gray-400 dark:text-gray-500"
+      >
+        Total
+      </div>
+      <div
+        class="text-lg font-semibold text-gray-900 dark:text-gray-100"
+      >
+        120m
+        <span
+          class="text-sm text-gray-400 dark:text-gray-500"
+        >
+           (
+          2.00h
+          )
+        </span>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div
+      class="text-xs uppercase text-gray-400 dark:text-gray-500 mb-2"
+    >
+      Project totals
+    </div>
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+    >
+      <div
+        class="rounded-lg border border-gray-100 bg-white px-4 py-3 flex items-center justify-between dark:border-slate-600 dark:bg-slate-800"
+      >
+        <div
+          class="text-sm font-medium text-gray-700 dark:text-gray-200"
+        >
+          Internal
+        </div>
+        <div
+          class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+        >
+          120m
+          <span
+            class="text-xs text-gray-400 dark:text-gray-500"
+          >
+             (
+            2.00h
+            )
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+  >
+    <div
+      class="rounded-lg border px-4 py-3 flex items-center justify-between reports-day reports-day-draft"
+    >
+      <div
+        class="text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        2026-02-10
+        <span
+          class="ml-2 text-[11px] uppercase text-gray-400 dark:text-gray-500"
+        >
+          draft
+        </span>
+      </div>
+      <div
+        class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >
+        30m
+      </div>
+    </div>
+    <div
+      class="rounded-lg border px-4 py-3 flex items-center justify-between reports-day reports-day-submitted"
+    >
+      <div
+        class="text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        2026-02-11
+        <span
+          class="ml-2 text-[11px] uppercase text-gray-400 dark:text-gray-500"
+        >
+          submitted
+        </span>
+      </div>
+      <div
+        class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >
+        20m
+      </div>
+    </div>
+    <div
+      class="rounded-lg border px-4 py-3 flex items-center justify-between reports-day reports-day-approved"
+    >
+      <div
+        class="text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        2026-02-12
+        <span
+          class="ml-2 text-[11px] uppercase text-gray-400 dark:text-gray-500"
+        >
+          approved
+        </span>
+      </div>
+      <div
+        class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >
+        40m
+      </div>
+    </div>
+    <div
+      class="rounded-lg border px-4 py-3 flex items-center justify-between reports-day reports-day-rejected"
+    >
+      <div
+        class="text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        2026-02-13
+        <span
+          class="ml-2 text-[11px] uppercase text-gray-400 dark:text-gray-500"
+        >
+          rejected
+        </span>
+      </div>
+      <div
+        class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >
+        30m
+      </div>
+    </div>
+    <div
+      class="rounded-lg border border-gray-200 bg-white px-4 py-3 flex items-center justify-between dark:border-slate-600 dark:bg-slate-800"
+    >
+      <div
+        class="text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        Total
+      </div>
+      <div
+        class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >
+        120m
+        <span
+          class="text-xs text-gray-400 dark:text-gray-500"
+        >
+           (
+          2.00h
+          )
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Reports visual theme regression > row snapshot in light mode 1`] = `
+<div
+  class="bg-white border rounded-xl shadow-sm p-5 space-y-4 reports-row"
+>
+  <div
+    class="flex items-center justify-between"
+  >
+    <div>
+      <div
+        class="text-lg font-semibold text-gray-900 dark:text-gray-100"
+      >
+        Admin User
+      </div>
+      <div
+        class="text-sm text-gray-500 dark:text-gray-300"
+      >
+        admin@test.com
+      </div>
+    </div>
+    <div
+      class="text-right"
+    >
+      <div
+        class="text-xs uppercase text-gray-400 dark:text-gray-500"
+      >
+        Total
+      </div>
+      <div
+        class="text-lg font-semibold text-gray-900 dark:text-gray-100"
+      >
+        120m
+        <span
+          class="text-sm text-gray-400 dark:text-gray-500"
+        >
+           (
+          2.00h
+          )
+        </span>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div
+      class="text-xs uppercase text-gray-400 dark:text-gray-500 mb-2"
+    >
+      Project totals
+    </div>
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+    >
+      <div
+        class="rounded-lg border border-gray-100 bg-white px-4 py-3 flex items-center justify-between dark:border-slate-600 dark:bg-slate-800"
+      >
+        <div
+          class="text-sm font-medium text-gray-700 dark:text-gray-200"
+        >
+          Internal
+        </div>
+        <div
+          class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+        >
+          120m
+          <span
+            class="text-xs text-gray-400 dark:text-gray-500"
+          >
+             (
+            2.00h
+            )
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+  >
+    <div
+      class="rounded-lg border px-4 py-3 flex items-center justify-between reports-day reports-day-draft"
+    >
+      <div
+        class="text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        2026-02-10
+        <span
+          class="ml-2 text-[11px] uppercase text-gray-400 dark:text-gray-500"
+        >
+          draft
+        </span>
+      </div>
+      <div
+        class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >
+        30m
+      </div>
+    </div>
+    <div
+      class="rounded-lg border px-4 py-3 flex items-center justify-between reports-day reports-day-submitted"
+    >
+      <div
+        class="text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        2026-02-11
+        <span
+          class="ml-2 text-[11px] uppercase text-gray-400 dark:text-gray-500"
+        >
+          submitted
+        </span>
+      </div>
+      <div
+        class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >
+        20m
+      </div>
+    </div>
+    <div
+      class="rounded-lg border px-4 py-3 flex items-center justify-between reports-day reports-day-approved"
+    >
+      <div
+        class="text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        2026-02-12
+        <span
+          class="ml-2 text-[11px] uppercase text-gray-400 dark:text-gray-500"
+        >
+          approved
+        </span>
+      </div>
+      <div
+        class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >
+        40m
+      </div>
+    </div>
+    <div
+      class="rounded-lg border px-4 py-3 flex items-center justify-between reports-day reports-day-rejected"
+    >
+      <div
+        class="text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        2026-02-13
+        <span
+          class="ml-2 text-[11px] uppercase text-gray-400 dark:text-gray-500"
+        >
+          rejected
+        </span>
+      </div>
+      <div
+        class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >
+        30m
+      </div>
+    </div>
+    <div
+      class="rounded-lg border border-gray-200 bg-white px-4 py-3 flex items-center justify-between dark:border-slate-600 dark:bg-slate-800"
+    >
+      <div
+        class="text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        Total
+      </div>
+      <div
+        class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+      >
+        120m
+        <span
+          class="text-xs text-gray-400 dark:text-gray-500"
+        >
+           (
+          2.00h
+          )
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
